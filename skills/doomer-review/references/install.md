@@ -14,12 +14,14 @@ read logins, or change files. Location alone is not proof of ownership. Inspect
 the JSON result:
 
 - `ready`: the installed bytes match a managed record for this pin. Reuse it.
-- `update_available`: consult the shared session decision in SKILL.md. A previous
-  decline or finished attempt suppresses another offer. If the older binary cannot
-  run the current skill, continue the coding task without Doomer instead of asking
-  again. A prior approval covers this managed update. Otherwise ask once and record
-  the answer in that same decision. After approval, run
-  `self-update --version 2026.11.3.4` using the verified absolute path.
+- `update_available`: follow SKILL.md's shared update decision and combined offer.
+  If `not_asked`, offer the update even when the older CLI is incompatible.
+  If `approved`, update to the selected skill pin without another question; for
+  the current pin run `self-update --version 2026.11.3.4` using the verified
+  absolute path. A known skill update goes first, as defined in SKILL.md.
+  If `declined` or `finished`, do not offer another update. Reuse the retained
+  CLI if it supports the required workflow; otherwise follow SKILL.md's
+  user-choice rule for continuing without reviews. Do not unilaterally skip.
 - `missing`: follow the verified bootstrap below.
 - `unmanaged`, `modified`, or `symlink`: explain that the file is not a matching
   managed installation. Offer **“Replace the private CLI at ~/.local/bin/doomer
@@ -30,11 +32,15 @@ the JSON result:
   adoption automatically. Only after that approval, use a verified bootstrap
   executable below with `self-update --version 2026.11.3.4 --adopt`.
 - `newer_installed`: never downgrade it to this older pin. Consult the shared
-  update decision before offering a skill update; never repeat a declined offer.
-  Retain the binary and probe its required commands before onboarding. If command
-  or output compatibility cannot be established, stop Doomer setup for this session
-  and continue coding without it. Do not overwrite other skill copies or claim
-  this older pin was installed.
+  decision before offering a known skill update; never repeat a declined offer.
+  Retain the binary. Probe `onboard --help` at its absolute path for the flags
+  used by this skill (`--repo`, `--agent`, `--session`, `--task-stdin`, plus
+  `--restart` for Codex or `--check-hooks` for Claude). If present, proceed with
+  the documented onboarding/activation flow and interpret its actual result.
+  Do not require hypothetical output-compatibility tests. Missing required flags
+  or an actual unsupported result is a concrete incompatibility: explain it and
+  follow SKILL.md's user-choice rule. Never overwrite other skill copies or
+  claim this older pin was installed.
 - An unexpected file type or status error: stop installation and explain it.
 
 The updater verifies its immutable release archive, keeps a uniquely named

@@ -17,6 +17,10 @@ Once this skill is invoked for a coding task, complete missing Doomer onboarding
 before editing application code. Task size, expected review value, installation
 effort, and a required restart are not reasons to skip onboarding. Only the user
 may choose to continue without Doomer; respect any such choice immediately.
+An update refusal is not automatically a refusal of Doomer. If the retained
+CLI cannot support this skill, explain the concrete incompatibility and ask
+whether to continue without reviews. Reuse an existing explicit skip decision;
+do not repeat the update offer or invent a compatibility requirement.
 
 Request installation permissions and repository upload consent through the
 normal approval flow. Never approve them yourself. If setup needs user action,
@@ -28,7 +32,13 @@ prevents setup, report it accurately and follow the failure guidance below.
 Share `updateCheckAttempted` and `updateDecision` (`not_asked`, `approved`,
 `declined`, or `finished`) between this section and the installation reference.
 Retain them in the conversation's durable task summary with the active skill
-path and pin. Mark the check attempted before starting it. A decline or completed
+path and pin. This section owns the decision for both update paths. The same
+combined offer below is used whichever path detects an update first; approval
+covers this active skill and its matching managed CLI in either order. It never
+covers adopting an unmanaged binary or updating independent skill copies. Keep
+`approved` until the whole requested update attempt completes, then record
+`finished`; do not finish the decision after only the first half.
+Mark the check attempted before starting it. A decline or completed
 update attempt suppresses both update offers for the rest of this session. If an earlier decision cannot
 be recovered after compaction, keep the installed pair and do not prompt again
 unless the user explicitly asks to update. Do not add a state file or scan other
@@ -46,7 +56,9 @@ For a global installation use `--global` instead of `--project`; determine scope
 from this installed skill's canonical path. Do not combine the flags. Apply the
 coding agent's normal command/network approvals. If the package is not cached,
 Node is incompatible, the subcommand is unsupported, a permission is declined,
-or the check fails, finish this optional check and retain the current pin.
+or the check fails, set only `updateCheckAttempted: true` and retain the current
+pin. Leave `updateDecision` unchanged (`not_asked` if no update was offered);
+`finished` is reserved for a completed update attempt, not a check.
 A failed or unchanged check still permits the one CLI update offer below if
 no update question has been asked.
 Never install Node, fetch another checker, retry interactively, or claim the
@@ -55,10 +67,16 @@ Missing, truncated, ambiguous, or unmatched output means **unknown**, even with
 exit status zero. Only a positive result for this exact skill establishes its
 update status. Do not update other skills.
 
-If a newer version is available and no update decision has been made, ask:
+When either check identifies an update and `updateDecision` is `not_asked`, ask:
 **“A Doomer update is available. Update the skill and its matching managed CLI
 now?”** No answer is not approval. If declined, record `declined` and retain the
-current pair. If approved, record `approved` and run the scoped update:
+current pair. If approved, record `approved`. When a newer skill is known,
+run the scoped skill update below and reread it before selecting the CLI pin.
+If the skill check was unavailable or found no update, update only the CLI to
+the current pin. An existing `approved` decision needs no second question for
+the remaining half; never infer approval from `not_asked` or a failed check.
+
+For a known skill update:
 
 ```sh
 npm exec --yes --package=skills@1.7.6 -- skills update doomer-review --project --yes
@@ -69,15 +87,16 @@ pinned checker; its `--yes` flags cover only package execution/scope selection,
 never Doomer upload consent. If local edits conflict, the update is partial,
 or the skill was skipped, stop **both** halves of this update; preserve the
 existing files and binary and explain the conflict. Do not silently merge or
-switch pins. Only a successful skill update permits the matching binary step.
+switch pins. When a skill update was requested, only its success permits the
+matching binary step.
 
 After success, use file-read tools to read the newly installed `SKILL.md` and
 `references/install.md` from this skill's canonical on-disk directory, once.
 Use only the newly read pin and instructions afterward, not remembered text.
-The approval also covers updating a matching managed binary; do not ask again.
+Continue the approved update using this newly read pin; do not ask again.
 Unknown, manually replaced, or Homebrew-linked binaries require the explicit
 adoption choice in the installation reference. Record `finished` after the
-attempt; update permission never grants upload consent.
+whole requested attempt; update permission never grants upload consent.
 
 The binary is shared, but updating this skill does not authorize rewriting other
 repositories' or agents' independent skill copies. Shared aliases of the same
@@ -123,7 +142,12 @@ do not pass the literal placeholder or borrow a Codex session ID.
 After replacing a CLI, discard old capability results and run `onboard --help`
 on the newly installed absolute executable. For an already-configured repository
 with a running managed watcher, run a separate `onboard --repo REPO --refresh`
-if supported. This refresh preserves consent, hooks, and saved task state; never
+if supported. REPO identifies the approved checkout/working directory; it does
+not change the watcher's original selection. Existing loaded/trusted hook
+commands do not need reactivation merely because the executable was replaced.
+Refresh does not establish trust: missing/changed/unloaded hooks still need
+normal onboarding and the agent activation flow. This refresh preserves consent,
+hooks, and saved task state; never
 combine it with `--restart`, `--task-stdin`, or `--check-hooks`. A `not_running`
 result is a no-op, not proof of a started watcher. A refresh error is not success:
 report it without changing pause/consent or pretending the new watcher is active.
