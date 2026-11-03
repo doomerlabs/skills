@@ -14,11 +14,9 @@ Then open Codex and start a coding task. You can explicitly invoke `$doomer-revi
 
 ## doomer-review
 
-The first version supports Codex on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.3.1**, sets up Codex hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
+The first version supports Codex on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.3.2**, sets up Codex hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
 
 The CLI owns onboarding and saved task context. Trusted hooks deliver assessments, including zero-finding results, and review links; the skill does not poll internal state or require Python helpers.
-
-**Release gate for this branch:** update the installer pin to a published CLI containing `doomer onboard` before merging. The currently published 2026.11.3.1 does not contain that command.
 
 Before uploading code, Doomer opens a browser consent page for that repository. Installing the skill alone does not authorize uploads. You may also need to restart Codex and trust the installed hooks; the skill provides the steps. Declining leaves you free to continue coding without Doomer.
 

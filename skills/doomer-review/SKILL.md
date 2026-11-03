@@ -17,8 +17,7 @@ Resolve the Git root. If this conversation already confirms Doomer setup for
 this repository, continue the task without repeating setup or status checks.
 
 Install or verify the CLI following [installation](references/install.md).
-The installation reference currently pins 2026.11.3.1; **this branch must not be
-published until that pin is updated to a release containing `doomer onboard`.**
+Use stable CLI **2026.11.3.2**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
