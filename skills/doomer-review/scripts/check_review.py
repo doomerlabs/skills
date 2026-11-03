@@ -84,7 +84,7 @@ def main():
     parser.add_argument("--review-link", action="store_true", help="Return the complete latest review URL for this session, including private access tokens")
     parser.add_argument("--wait", type=int, default=0, choices=range(61), metavar="0..60")
     args = parser.parse_args()
-    repo = Path(subprocess.check_output(["git", "-C", args.repo, "rev-parse", "--show-toplevel"], text=True)).resolve()
+    repo = Path(subprocess.check_output(["git", "-C", args.repo, "rev-parse", "--show-toplevel"], text=True).rstrip("\r\n")).resolve()
     root = config_root() / "watch" / key(API + "\0" + PROFILE)
     if args.review_link:
         print(json.dumps(review_link(root, repo, args.session)))

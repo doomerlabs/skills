@@ -1,4 +1,7 @@
 import json
+import os
+import subprocess
+import sys
 from pathlib import Path
 import tempfile
 import unittest
@@ -73,6 +76,31 @@ class ReviewTests(unittest.TestCase):
             path.write_text(json.dumps(feed))
             self.assertEqual(review_link(root, repo, 'original')['url'], url)
             self.assertTrue(review_link(root, repo, 'original')['requires_sign_in'])
+
+    def test_command_strips_git_line_ending_for_status_and_share_link(self):
+        from check_consent import API, PROFILE
+        with tempfile.TemporaryDirectory() as directory:
+            base = Path(directory).resolve()
+            repo = base / 'repository with spaces'
+            repo.mkdir()
+            subprocess.run(['git', 'init', '--quiet', str(repo)], check=True)
+            root = base / 'config' / 'watch' / key(API + '\0' + PROFILE)
+            owner = {'session': 'session', 'turn': 'turn'}
+            url = 'https://doomer.ai/look-closer/org/repo/' + 'a' * 64 + '#review=' + 'A' * 43
+            for folder, name, value in [
+                ('turns', 'session', {'Owner': owner, 'Prompt': 'Original request'}),
+                ('repositories', str(repo), {'Owner': owner, 'Fingerprint': 'digest'}),
+                ('reviews', str(repo), {'Owner': owner, 'Fingerprint': 'digest', 'AssessmentStatus': 'ready', 'ReviewID': 'review', 'Anonymous': True, 'URL': url, 'Leads': []}),
+            ]:
+                path = root / folder / (key(name) + '.json')
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(json.dumps(value))
+            command = [sys.executable, str(Path(__file__).with_name('check_review.py')), '--repo', str(repo), '--session', 'session']
+            env = dict(os.environ, DOOMER_CONFIG_DIR=str(base / 'config'))
+            status = json.loads(subprocess.check_output(command + ['--turn', 'turn'], env=env, text=True))
+            self.assertEqual(status['status'], 'assessment_ready')
+            link = json.loads(subprocess.check_output(command + ['--review-link'], env=env, text=True))
+            self.assertEqual(link['url'], url)
 
 
 if __name__ == '__main__':
