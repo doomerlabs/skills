@@ -1,6 +1,6 @@
 ---
 name: doomer-review
-description: Review application code after edits in Codex or Claude Code using Doomer's coding-agent hooks. Use on coding tasks that add features, change code, fix bugs, or refactor, even when the user does not explicitly ask for a review. Set up missing integration before editing, then let hooks deliver reviews and links. Not for discussion-only requests.
+description: Review application code after edits in Codex or Claude Code using Doomer's coding-agent hooks. Use when asked to set up Doomer, or on coding tasks that add features, change code, fix bugs, or refactor, even when the user does not explicitly ask for a review. Set up missing integration before editing, then let hooks deliver reviews and links. Not for discussion-only requests.
 ---
 
 # Doomer review
@@ -11,7 +11,39 @@ and record the agent's responses. Use profile `default` and
 `https://doomer.ai/api`. No account is required. Do not start a paid Deep review.
 Skip setup for requests solely discussing or editing this skill.
 
-## Required when invoked for coding
+## Setup-only requests
+
+Treat `set up $doomer-review` (or an equivalent request to enable Doomer) as
+setup-only when the user has not also supplied a coding task. This is an
+onboarding request, not a discussion-only request. Use the same installation,
+repository consent, watcher, and hook activation flow below, but do not invent
+a coding task or start editing application code.
+
+For setup-only onboarding, use the setup-only command for the active agent
+below. Do not create a task file or save the setup request as a coding-task
+handoff. Still add `--restart` for Codex when required.
+
+Keep configuration and activation separate in the conversation summary:
+repository, active agent/session when known, consent outcome, required restart,
+and pending or verified hook activation. Successful installation alone is not
+readiness. For Claude, only a `ready` result for the current repository/session
+confirms live activation. For Codex, complete any required restart and user hook
+trust before describing setup as ready; do not claim end-to-end review delivery
+until a hook actually delivers a result.
+
+When ready, say: **“Doomer is set up for this repo. Send your coding task whenever
+you’re ready.”** Otherwise report the actual pending step or unverified state.
+Then stop. Do not invent a coding task. This also overrides installation
+reference instructions to “continue the coding task” when no task was supplied.
+A refusal or failure ends setup-only onboarding with an accurate outcome.
+
+A repeated setup-only request must report remaining activation steps, not
+reinstall or repeat consent. The no-status-check shortcut below applies only to
+confirmed activation, not configured-but-unverified state. Use the bounded
+Claude check/recovery below when its activation is pending; for Codex, handle
+any outstanding restart/trust step. Preserve this state across compaction.
+
+## Required during setup and coding
 
 Once this skill is invoked for a coding task, complete missing Doomer onboarding
 before editing application code. Task size, expected review value, installation
@@ -25,8 +57,10 @@ prevents setup, report it accurately and follow the failure guidance below.
 
 ## Set up once
 
-Resolve the Git root. If this conversation already confirms Doomer setup for
-this repository, continue the task without repeating setup or status checks.
+Resolve the Git root. If this conversation confirms configuration and completed
+activation for this repository, continue coding without repeated setup/status
+checks, or acknowledge a repeated setup-only request and stop. A configured but
+unverified record does not qualify: follow the pending activation path below.
 
 Install or verify the CLI following [installation](references/install.md).
 Use stable CLI **2026.11.3.4**, which provides the consolidated onboarding command.
@@ -34,21 +68,35 @@ Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
 
-Use the verified executable's absolute path. Preserve the original user request
-and relevant corrections verbatim in a private temporary file, excluding
+Use the verified executable's absolute path. For a coding task, preserve the
+original user request and relevant corrections verbatim in a private temporary file, excluding
 unrelated conversation. Do not search other chats. Choose the active coding
 agent, not another agent merely installed on the machine. Run one onboarding
 command for that agent.
 
-**Codex:** use its current `CODEX_THREAD_ID`:
+**Codex:** use its current `CODEX_THREAD_ID`. For setup-only:
 
 ```sh
+# If the CLI was installed or replaced this turn, append --restart to this command.
+"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID"
+```
+
+With a coding task:
+
+```sh
+# If the CLI was installed or replaced this turn, append --restart to this command.
 "$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID" --task-stdin < "$task_request_file"
 ```
 
 **Claude Code:** the current skill session is `${CLAUDE_SESSION_ID}`. This is
 Claude's skill substitution, not a shell environment variable. Use its expanded
-value as the session argument:
+value as the session argument. For setup-only:
+
+```sh
+"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent claude --session '${CLAUDE_SESSION_ID}'
+```
+
+With a coding task:
 
 ```sh
 "$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent claude --session '${CLAUDE_SESSION_ID}' --task-stdin < "$task_request_file"
@@ -61,8 +109,13 @@ For Codex, add `--restart` if the CLI was installed or replaced during this turn
 because the prompt may have arrived before its hooks could run. Claude uses the
 live-hook check below instead of an automatic restart. Remove the temporary
 input file after successful onboarding. If the session ID is unavailable, do
-not guess it: omit `--session` and `--task-stdin`, and retain the original task
-in this conversation for resumption.
+not guess it: omit `--session` and `--task-stdin` (including its redirection),
+and retain a coding task in this conversation if one exists. For Claude, no
+session means no live check: skip `--check-hooks`, report configured but
+unverified, and retain session resolution as a pending step. Never print the
+ready message or invent a session argument. Resolve it on the next invocation;
+if still unavailable, report the limitation and let the user choose whether to
+continue without verified reviews.
 
 Onboarding owns repository consent, matching hooks, the background watcher,
 the marked Doomer instructions in `AGENTS.md` for Codex or `CLAUDE.md` for Claude
@@ -79,17 +132,23 @@ successful review; explain the concrete error briefly.
 
 ## Claude: verify live hooks before asking for a restart
 
-Claude can reload hooks during a running session. After Claude onboarding
-returns, run its printed `onboard --agent claude --session … --check-hooks`
+Claude can reload hooks during a running session. With a valid current session,
+after Claude onboarding returns, run its printed `onboard --agent claude --session … --check-hooks`
 command. This checks real hook callbacks and task capture in this session; it
 neither installs hooks again nor starts another review.
 
-- `ready`: continue the original task immediately. Do not ask the user to
-  restart or accept a separate hook-trust prompt.
+- `ready`: finish setup-only onboarding, or continue the original coding task
+  immediately. Do not ask the user to restart or accept a separate hook-trust prompt.
 - `waiting_for_hooks`: retry the same check once after the tool result. The
   check's own tool events can finish activation. Do not poll beyond that retry.
-- Still unconfirmed, or `setup_unavailable`: report that live delivery could not
-  be verified. Ask the user to inspect `/hooks` and any workspace trust prompt
+- For setup-only onboarding, `waiting_for_hooks` after the retry does not identify
+  a cause. It may reflect no captured prompt, unloaded hooks, pending trust, or
+  policy restrictions. Report configuration with live activation unverified;
+  ask the user to inspect `/hooks` and any workspace trust prompt. Do not infer
+  either working hooks or missing trust, fabricate a task, or require restart
+  solely from this status. Retain activation as pending for the next prompt.
+- Still unconfirmed during coding, or `setup_unavailable`: report that live
+  delivery could not be verified. Ask the user to inspect `/hooks` and any workspace trust prompt
   or managed-policy restriction. A restart is only a fallback if the hook
   definitions have not loaded; do not claim missing evidence proves missing
   trust. The user may choose to continue without Doomer.
@@ -98,6 +157,24 @@ If the user confirms the definitions have not loaded and chooses to restart,
 show the Claude resume command below. Otherwise do not interrupt their session
 with restart instructions. Keep the original task in context. Never write or
 accept trust settings on their behalf.
+
+### Complete pending Claude activation
+
+On a repeated setup-only request or the first coding prompt after unverified
+setup, do not take the setup-once shortcut. Resolve the current session and run
+the same `--check-hooks` command once, with one retry for `waiting_for_hooks`.
+Use only statuses actually returned; this CLI does not return a diagnostic
+reason for `waiting_for_hooks`.
+
+If still unconfirmed on that first coding prompt, run normal onboarding once
+with this real coding request as `--task-stdin` and the current session, then
+use the bounded check above. This renews the short-lived activation receipt
+and binds the actual task, reusing existing consent and configuration. Do not
+save the old setup request or loop through onboarding. If activation remains
+unconfirmed, surface the `/hooks`/trust/policy checks and let the user decide
+whether to proceed without verified reviews. Do not silently start coding.
+For a setup-only repeat, stop with the unverified outcome rather than inventing
+a task to renew activation. A missing session follows the limitation above.
 
 ## A required restart
 
@@ -119,13 +196,21 @@ Keep the CLI's actual command and correctly quoted repository path:
 Explain that fallback commands select the most recent session. Do not embed the
 original task in the command or use Codex commands in Claude Code.
 
-After restart, the trusted UserPromptSubmit hook supplies the saved original
-task once. Resume that task and its constraints. **Do not call onboarding or a
-breadcrumb-consumption command again.** If hook trust is still pending, ask the
+After a setup-only restart there is no saved coding task to replay. Retain the
+setup-only intent, handle any pending hook trust, then report the activation state and wait
+for a coding prompt. Do not treat “Resume after doomer.ai setup” as a coding task
+or ask the user to repeat an original task that was never supplied.
+
+For onboarding with a coding task, the trusted UserPromptSubmit hook supplies
+the saved original task once after restart. Resume that task and its constraints.
+For either mode, **do not repeat onboarding merely because of restart or run a
+breadcrumb-consumption command.** The bounded pending-Claude-activation recovery
+above is the exception when a later real coding prompt needs a fresh receipt.
+If hook trust is still pending, ask the
 user to review Doomer hooks in that agent's `/hooks` interface and complete any
 workspace trust prompt themselves; never select trust for them.
-If no saved context is supplied, use the original request already in this chat;
-ask for it only if neither is available. Unknown trust alone must not trigger
+For a coding task, if no saved context is supplied, use the original request
+already in this chat; ask for it only if neither is available. Unknown trust alone must not trigger
 repeated onboarding. The user may choose to continue without reviews.
 
 ## While coding
@@ -160,6 +245,7 @@ distinguish it from a completed earlier revision. Do not claim every bug was
 ruled out. If no result arrives, say it was not confirmed; do not fabricate a
 review link or call a pending result clean.
 
-Only troubleshoot when requested or when the hook reports a concrete error.
+Complete pending activation as described above. Otherwise, only troubleshoot
+when requested or when the hook reports a concrete error.
 Use the CLI's `watch status --json` for operational diagnosis, not as a normal
 per-edit or final-answer step. Never replace hook delivery with manual reviews.
