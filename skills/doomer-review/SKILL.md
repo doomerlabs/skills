@@ -196,24 +196,45 @@ editing application code, or running the remaining task checks. Newly installed
 hooks may not appear in the current Codex process. End the turn with a clear
 restart handoff, not a suggestion to open `/hooks` in that same process.
 
-Tell the user:
+Preserve the actual coding request before this handoff. Use the original user
+message and relevant corrections verbatim, not an agent-written summary, and
+exclude unrelated conversation. Do not replace it with "continue" or a hook
+setup instruction. Retain this original request in the conversation too.
 
-> Doomer is installed. Quit Codex to return to your terminal, then run the commands
-> below to reload the hooks and resume this conversation. Review and trust the
-> named Doomer hooks when Codex opens (or open `/hooks` after restarting), then
-> reply **done**. To continue without Doomer reviews, reply **skip** instead.
-
-Show a copyable shell block containing `cd` to the actual absolute Git root,
-properly shell-quoted, followed by:
+After all repository setup writes are complete, check whether the installed CLI
+supports `watch task --help`. If supported, save the original request on stdin:
 
 ```sh
-codex resume --last
+"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api watch task --repo "$doomer_repo_root" --session "$CODEX_THREAD_ID" < "$task_request_file"
 ```
 
-If the current session ID is explicitly available, use `codex resume <session-id>`
-instead so another recent session cannot be selected. Do not guess an ID or
-search unrelated session histories. Explain that `--last` resumes the most
-recent session for that working directory.
+Use a private temporary file with the exact request (at most 3000 characters),
+then remove it. Do not invent a session ID, use another conversation, or include
+unrelated transcript history. This only saves local context for the first
+editing turn after restart; it grants no consent and uploads nothing. If the
+installed release lacks this command, omit it and use the context-bearing
+resume prompt below. Do not invoke an unsupported command or claim the context
+was saved. If task preservation fails, report that instead of silently losing
+it. Do not edit repository files after saving this handoff.
+
+Tell the user to quit Codex and run a copyable command that reloads hooks and
+submits the continuation prompt automatically. Use the exact known session ID
+when available; otherwise use `--last` and explain it selects the latest session
+in this directory. The command should have this shape:
+
+```sh
+cd '<actual absolute Git root>'
+codex resume <actual-session-id> '<continuation prompt>'
+```
+
+Construct the continuation prompt as:
+"Resume the original coding task after Doomer setup. Original request: [exact
+original request and relevant corrections]. Check whether Doomer hook trust is
+complete; if it is still pending, ask me to trust the hooks before continuing."
+Properly shell-quote the complete prompt and path (including apostrophes and
+newlines); never interpolate raw user text into executable shell syntax. Do
+not assert that restarting grants trust. The user still reviews and trusts the
+named Doomer hooks in Codex. Offer **skip** to continue without Doomer.
 
 Do not present “I trusted the hooks” as an action before this restart. Do not
 continue coding after the handoff. Restarting reloads the definitions; only the
