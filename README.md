@@ -50,3 +50,9 @@ npx skills update
 ## License
 
 [Apache 2.0](LICENSE).
+
+The skill checks for its own updates once per coding session and asks before
+updating itself and its matching managed CLI. It preserves the current pin when
+you decline. Updater-equipped CLI releases verify ownership by path and checksum,
+keep a backup, and never overwrite a Homebrew symlink target or silently downgrade
+a newer managed installation. Older releases use the verified bootstrap flow.
