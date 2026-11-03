@@ -1,0 +1,21 @@
+skills/doomer-review/scripts/check_review.py
+  s_c5a06ffaad29b7::t_94ccdcf35816d0 87
+skills/doomer-review/scripts/test_check_review.py
+  s_c5a06ffaad29b7::t_f1ac3bbce651f5 2-4,80-104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "064a432883e3423d04f9e263d30c7d9e6b3faccf",
+  "prompts": {},
+  "sessions": {
+    "s_c5a06ffaad29b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18f08-9c5f-7c13-a182-eaa9cddf8912",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
