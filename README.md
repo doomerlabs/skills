@@ -10,15 +10,17 @@ Run this from the repository you want Doomer to review:
 npx skills add doomerlabs/skills --skill doomer-review
 ```
 
-Then open Codex and start a coding task. You can explicitly invoke `$doomer-review` if it is not selected automatically.
+Select Codex or Claude Code when the installer asks, then open that agent and start a coding task. Explicitly invoke `$doomer-review` in Codex or `/doomer-review` in Claude Code if it is not selected automatically.
+
+Codex installs under `.agents/skills/`; Claude Code installs under `.claude/skills/`.
 
 ## doomer-review
 
-The first version supports Codex on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.3.2**, sets up Codex hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
+The skill supports Codex and Claude Code on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.3.3**, sets up the active agent's hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
 
 The CLI owns onboarding and saved task context. Trusted hooks deliver assessments, including zero-finding results, and review links; the skill does not poll internal state or require Python helpers.
 
-Before uploading code, Doomer opens a browser consent page for that repository. Installing the skill alone does not authorize uploads. You may also need to restart Codex and trust the installed hooks; the skill provides the steps. Declining leaves you free to continue coding without Doomer.
+Before uploading code, Doomer opens a browser consent page for that repository. Installing the skill alone does not authorize uploads. You may also need to restart your coding agent and trust the installed hooks; the skill provides the steps. Declining leaves you free to continue coding without Doomer.
 
 Reviews use `https://doomer.ai/api`. Local development builds and beta releases are not used. Existing installations are verified, and replacements require approval with a backup. The skill does not automatically request paid Deep reviews.
 
