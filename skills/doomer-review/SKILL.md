@@ -142,8 +142,8 @@ do not pass the literal placeholder or borrow a Codex session ID.
 After replacing a CLI, discard old capability results and run `onboard --help`
 on the newly installed absolute executable. For an already-configured repository
 with a running managed watcher, run a separate `onboard --repo REPO --refresh`
-if supported. REPO identifies the approved checkout/working directory; it does
-not change the watcher's original selection. Existing loaded/trusted hook
+if supported. REPO identifies an approved checkout for the permission check;
+refresh uses the watcher's saved working directory and original selection. Existing loaded/trusted hook
 commands do not need reactivation merely because the executable was replaced.
 Refresh does not establish trust: missing/changed/unloaded hooks still need
 normal onboarding and the agent activation flow. This refresh preserves consent,
