@@ -33,6 +33,8 @@ For application coding tasks, use `.agents/skills/doomer-review/SKILL.md` before
 editing. Use Doomer's Codex hooks and a local watcher, not direct `review`
 commands. Start or reuse the watcher once per session, then let the hooks submit
 task context and hypotheses and return review feedback after edits.
+Before the final answer, follow the skill's review-completion checkpoint.
+Watcher startup alone does not mean this task received a review.
 
 Investigate the leads, fix confirmed issues within the user's task, record
 responses through the hook's instructions, and explain confirmed fixes in plain
@@ -200,6 +202,11 @@ An installed hook file alone is not proof of trust, but unknown trust must not
 cause recurring onboarding.
 If events are demonstrably absent later, diagnose that once instead.
 
+Installing or replacing a missing CLI during this prompt can lose the prompt
+hook even when hook definitions already exist. In that case use the restart
+handoff before application edits; do not claim starting the watcher recovered
+the missing task context. Do not fabricate hook events or clear ownership state.
+
 ## Start or reuse the watcher
 
 Before the first application edit in a session, run this once unless this
@@ -226,6 +233,25 @@ attributable agent edits trigger review. If hooks were installed or trusted
 mid-turn, the next coding prompt may be needed to capture full task context.
 Do not change code solely to trigger a review.
 
+### Verify that this task was captured
+
+After setup, before application edits, run the bundled local check:
+
+```sh
+python3 "$doomer_repo_root/.agents/skills/doomer-review/scripts/check_review.py" --repo "$doomer_repo_root"
+```
+
+It reads the current session from `CODEX_THREAD_ID`. If that variable is absent,
+pass `--session` only with the actual session ID supplied by Codex or its hook;
+never choose the newest session from disk or another conversation.
+Retain the returned `turn` when status is `prompt_captured`.
+
+For `prompt_not_captured`, `session_unknown`, `ownership_ambiguous`, or
+`state_unreadable`, setup is not verified. Explain the specific blocker and use
+the restart/resume handoff, or let the user choose **skip**. Do not continue
+application edits while promising a review. A healthy watcher, installed hook
+file, or successful CLI command alone does not establish task capture.
+
 ## Hypotheses, findings, and responses
 
 Let the trusted hooks request concrete review hypotheses after edits. Submit
@@ -248,6 +274,39 @@ real review link when useful. Do not narrate dismissed leads or handoffs unless
 the user asks. Do not invent findings or links, or say code was
 reviewed when no assessment arrived. Do not start a paid/full review, log in,
 subscribe, or connect GitHub as part of this workflow.
+
+## Review-completion checkpoint
+
+After the task's application edits and ordinary checks, before the final answer,
+check the captured turn using the same session and retained turn ID:
+
+```sh
+python3 "$doomer_repo_root/.agents/skills/doomer-review/scripts/check_review.py" --repo "$doomer_repo_root" --turn "$doomer_turn" --wait 60
+```
+
+This is one bounded, local-only wait at task completion, not per-edit polling.
+It cannot upload code, generate hypotheses, or start a review. Let the hooks
+deliver their current instructions when this command returns.
+
+- `assessment_ready`: a result exists for this turn and edit fingerprint.
+  Zero leads is a successful initial assessment; no bug narration is needed.
+- `hypotheses_pending` or `feedback_pending`: handle the trusted hook's request
+  and record the required responses, then repeat this completion check once.
+  Do not invent findings or handoff IDs, or substitute a direct `review` call.
+- `assessment_pending` after the bounded wait: state plainly that the initial
+  assessment is still pending. Do not report it as passed or claim no bugs.
+- `edit_not_observed`, `ownership_ambiguous`, `prompt_not_captured`,
+  `turn_changed`, `session_unknown`, or `state_unreadable`: no verified review
+  exists for this task. Report the blocker once and inspect local diagnostics;
+  do not silently treat the task as reviewed or accept an old session's result.
+- `assessment_unavailable`: report that Doomer could not complete the initial
+  assessment. This is a service failure, not a clean review.
+
+If onboarding was declined or explicitly skipped, do not wait or re-prompt;
+complete the user's coding task and accurately say Doomer was skipped if relevant.
+Do not wait indefinitely or add repeated setup questions. Saved approval should
+remain saved: if reused during onboarding, briefly say it was reused rather
+than implying that this run opened a new consent page.
 
 For a missing-review report, inspect the watcher log and local hook diagnostics
 first. A single targeted `watch status --json` command with the same profile,
