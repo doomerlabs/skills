@@ -29,7 +29,7 @@ Resolve the Git root. If this conversation already confirms Doomer setup for
 this repository, continue the task without repeating setup or status checks.
 
 Install or verify the CLI following [installation](references/install.md).
-Use stable CLI **2026.11.3.3**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.3.4**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
