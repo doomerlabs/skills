@@ -342,3 +342,23 @@ first. A single targeted `watch status --json` command with the same profile,
 API, and repository is appropriate when needed. Distinguish a stopped watcher,
 missing hook events, service errors, and a pending assessment. Do not restore
 per-edit status polling or repeatedly ask the user for consent/trust.
+
+### Share the complete review link
+
+When including a review link in chat, retrieve it explicitly:
+
+```sh
+python3 "$doomer_repo_root/.agents/skills/doomer-review/scripts/check_review.py" --repo "$doomer_repo_root" --review-link
+```
+
+Use the returned `url` verbatim, including its entire `#` fragment. That fragment
+contains the anonymous review's access capability; do not strip it or reconstruct
+it from a log, repository name, SHA, or review ID. This command deliberately
+returns the private share link; do not copy it into commits or general logs.
+If `requires_sign_in` is true, tell the user the link requires the Doomer account
+used by this CLI. Never substitute the CLI credential into a URL.
+
+This returns the latest stored review for this Codex session, even when a
+follow-up question has started another turn. It does not prove the current turn
+was reviewed: retain the completion checkpoint above for that assertion. If the
+link is unavailable, say so instead of inventing a usable link.
