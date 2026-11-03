@@ -20,7 +20,12 @@ may choose to continue without Doomer; respect any such choice immediately.
 An update refusal is not automatically a refusal of Doomer. If the retained
 CLI cannot support this skill, explain the concrete incompatibility and ask
 whether to continue without reviews. Reuse an existing explicit skip decision;
-do not repeat the update offer or invent a compatibility requirement.
+do not repeat the update offer or invent a compatibility requirement. Retain
+this outcome as `compatibilityDecision: pending | use_doomer | skip` in the
+same durable task summary. No answer leaves it `pending`: keep the binary,
+do not re-probe or re-ask automatically, and wait before application edits.
+Silence is neither permission to skip nor permission to change the installation.
+An explicit user choice resumes the corresponding flow.
 
 Request installation permissions and repository upload consent through the
 normal approval flow. Never approve them yourself. If setup needs user action,
@@ -59,21 +64,30 @@ Node is incompatible, the subcommand is unsupported, a permission is declined,
 or the check fails, set only `updateCheckAttempted: true` and retain the current
 pin. Leave `updateDecision` unchanged (`not_asked` if no update was offered);
 `finished` is reserved for a completed update attempt, not a check.
-A failed or unchanged check still permits the one CLI update offer below if
-no update question has been asked.
+A failed, unknown, or unchanged skill check does not itself justify an update
+offer. Continue with the current pin: an existing managed CLI whose check
+positively reports `update_available` may trigger the combined offer below.
+A missing binary instead follows the verified fresh-install bootstrap in the
+installation reference, with its normal installation permissions, not an
+update offer or a command against a nonexistent executable.
 Never install Node, fetch another checker, retry interactively, or claim the
 skill is current. Bound the command to 30 seconds through the execution tool.
 Missing, truncated, ambiguous, or unmatched output means **unknown**, even with
-exit status zero. Only a positive result for this exact skill establishes its
-update status. Do not update other skills.
+exit status zero. For decision routing, handle unknown exactly like a failed
+check: set only `updateCheckAttempted`, retain the pin and existing decision,
+and make no claim of currency. Only a positive result for this exact skill
+establishes its update status. Do not update other skills.
 
 When either check identifies an update and `updateDecision` is `not_asked`, ask:
 **“A Doomer update is available. Update the skill and its matching managed CLI
 now?”** No answer is not approval. If declined, record `declined` and retain the
 current pair. If approved, record `approved`. When a newer skill is known,
 run the scoped skill update below and reread it before selecting the CLI pin.
-If the skill check was unavailable or found no update, update only the CLI to
-the current pin. An existing `approved` decision needs no second question for
+If the skill check was unavailable, failed, unknown, or found no update,
+and the existing managed CLI positively reported `update_available`, update
+that CLI to the current pin through the installation reference. Fresh install
+success does not set `updateDecision: finished` unless it completes a previously
+approved combined update; otherwise leave the update decision unchanged. An existing `approved` decision needs no second question for
 the remaining half; never infer approval from `not_asked` or a failed check.
 
 For a known skill update:

@@ -67,7 +67,7 @@ and `version: "2026.11.3.4"`. Retain that response for the entire setup.
 Do not select a different version from `stable.json`, a beta, a local staging
 manifest, or a checkout build. Apply the download recovery rules below before
 reporting a fetch failure. If the manifest cannot be validated, report the error
-and continue coding without pretending setup succeeded.
+and follow SKILL.md's user-choice rule; never claim setup succeeded.
 
 1. Detect the operating system and architecture with `uname -s` and `uname -m`.
    Map Darwin to `darwin`, Linux to `linux`, `x86_64` to `amd64`, and `arm64` or
@@ -116,8 +116,8 @@ Apply these rules to both the manifest and archive downloads:
   as if they were transient network failures.
 - If all attempts fail, report the exact download step, hostname, and error
   once. Explicitly say Doomer setup did not complete and reviews are unavailable
-  for this session, then continue the coding task. Never silently skip setup
-  or imply the code was reviewed.
+  until setup succeeds. Follow SKILL.md's user-choice rule about continuing
+  without reviews; never silently skip setup or imply the code was reviewed.
 
 ## Bootstrap an updater-equipped release
 
@@ -135,9 +135,15 @@ verified temporary downloads/executable created by this attempt. Do not delete
 `~/.local/bin/doomer`, its backups, or its ownership record. The updater verifies
 before replacement and rolls back a failed publication; a failed command is not
 permission to overwrite or remove an existing installation. Report the exact
-failure and continue coding without claiming setup succeeded. Do not silently
-fall back to the legacy copy path after an updater failure. For a transient fetch
-failure, use only the bounded retry rules below; checksum failures are terminal.
+failure without claiming setup succeeded. For a fresh install, ask once whether
+to retry the verified bootstrap or skip Doomer for this session. No answer leaves
+setup pending; do not edit application code or re-ask automatically. Honor one
+user-approved retry within the download limits above, without a legacy-copy
+fallback. An integrity failure (invalid manifest or checksum mismatch) is
+terminal: offer troubleshooting or skipping, not an unchanged retry. If the
+retry fails, report it and wait for the user's choice; never silently continue.
+For an existing installation, retain it and follow SKILL.md's compatibility/user-
+choice rule. Do not delete the installed binary or its ownership record.
 After any replacement, re-probe the installed executable's `onboard --help` and
 use the refresh/setup routing in SKILL.md, discarding any earlier help output.
 
