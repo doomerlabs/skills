@@ -20,7 +20,7 @@ The skill supports Codex and Claude Code on macOS and Linux (Intel and ARM). It 
 
 The CLI owns onboarding and saved task context. Trusted hooks deliver assessments, including zero-finding results, and review links; the skill does not poll internal state or require Python helpers.
 
-Before uploading code, Doomer opens a browser consent page for that repository. Installing the skill alone does not authorize uploads. You may also need to restart your coding agent and trust the installed hooks; the skill provides the steps. Declining leaves you free to continue coding without Doomer.
+Before uploading code, Doomer opens a browser consent page for that repository. Installing the skill alone does not authorize uploads. Claude verifies live hook delivery and continues without a restart when hooks respond. Codex may need a restart; the skill provides the steps. Approve any trust prompt in the coding agent yourself. Declining leaves you free to continue coding without Doomer.
 
 Reviews use `https://doomer.ai/api`. Local development builds and beta releases are not used. Existing installations are verified, and replacements require approval with a backup. The skill does not automatically request paid Deep reviews.
 

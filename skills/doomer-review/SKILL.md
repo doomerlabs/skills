@@ -57,8 +57,9 @@ value as the session argument:
 If the substitution is still literal or empty, treat the session ID as unknown;
 do not pass the literal placeholder or borrow a Codex session ID.
 
-Add `--restart` if the CLI was installed or replaced during this turn, because
-the prompt may have arrived before its hooks could run. Remove the temporary
+For Codex, add `--restart` if the CLI was installed or replaced during this turn,
+because the prompt may have arrived before its hooks could run. Claude uses the
+live-hook check below instead of an automatic restart. Remove the temporary
 input file after successful onboarding. If the session ID is unavailable, do
 not guess it: omit `--session` and `--task-stdin`, and retain the original task
 in this conversation for resumption.
@@ -76,9 +77,32 @@ the skill installation. Respect a refusal or pause; continue coding without
 Doomer and do not repeatedly ask in the same session. A failed setup is not a
 successful review; explain the concrete error briefly.
 
+## Claude: verify live hooks before asking for a restart
+
+Claude can reload hooks during a running session. After Claude onboarding
+returns, run its printed `onboard --agent claude --session … --check-hooks`
+command. This checks real hook callbacks and task capture in this session; it
+neither installs hooks again nor starts another review.
+
+- `ready`: continue the original task immediately. Do not ask the user to
+  restart or accept a separate hook-trust prompt.
+- `waiting_for_hooks`: retry the same check once after the tool result. The
+  check's own tool events can finish activation. Do not poll beyond that retry.
+- Still unconfirmed, or `setup_unavailable`: report that live delivery could not
+  be verified. Ask the user to inspect `/hooks` and any workspace trust prompt
+  or managed-policy restriction. A restart is only a fallback if the hook
+  definitions have not loaded; do not claim missing evidence proves missing
+  trust. The user may choose to continue without Doomer.
+
+If the user confirms the definitions have not loaded and chooses to restart,
+show the Claude resume command below. Otherwise do not interrupt their session
+with restart instructions. Keep the original task in context. Never write or
+accept trust settings on their behalf.
+
 ## A required restart
 
-If onboarding says a restart is needed, stop before editing application code.
+If Codex onboarding requires a restart, or a Claude reload fallback is needed,
+stop before editing application code.
 Show the CLI's actual command with these clear steps:
 
 1. **Copy the command below first.**
