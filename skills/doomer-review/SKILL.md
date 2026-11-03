@@ -198,52 +198,81 @@ restart handoff, not a suggestion to open `/hooks` in that same process.
 
 Preserve the actual coding request before this handoff. Use the original user
 message and relevant corrections verbatim, not an agent-written summary, and
-exclude unrelated conversation. Do not replace it with "continue" or a hook
-setup instruction. Retain this original request in the conversation too.
+exclude unrelated conversation. Store that text in a private temporary file.
+Use the known current session ID; never guess it or search unrelated histories.
+
+Save the one-time breadcrumb and temporary `AGENTS.md` resume instruction:
+
+```sh
+python3 "$doomer_repo_root/.agents/skills/doomer-review/scripts/restart_context.py" --repo "$doomer_repo_root" --session "$CODEX_THREAD_ID" --save < "$task_request_file"
+```
+
+This helper saves the request outside the repository in Doomer's local work
+folder. It adds only a uniquely marked temporary instruction to `AGENTS.md`,
+preserving existing instructions. It does not upload anything or grant consent.
+If it fails, report the failure; do not claim the task is safely saved.
 
 After all repository setup writes are complete, check whether the installed CLI
-supports `watch task --help`. If supported, save the original request on stdin:
+supports `watch task --help`. If supported, also save the original request for
+the review with the same private temporary file:
 
 ```sh
 "$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api watch task --repo "$doomer_repo_root" --session "$CODEX_THREAD_ID" < "$task_request_file"
 ```
 
-Use a private temporary file with the exact request (at most 3000 characters),
-then remove it. Do not invent a session ID, use another conversation, or include
-unrelated transcript history. This only saves local context for the first
-editing turn after restart; it grants no consent and uploads nothing. If the
-installed release lacks this command, omit it and use the context-bearing
-resume prompt below. Do not invoke an unsupported command or claim the context
-was saved. If task preservation fails, report that instead of silently losing
-it. Do not edit repository files after saving this handoff.
+Then remove the temporary input file. Do not remove either saved handoff file
+manually. Do not edit repository files after the CLI handoff is saved. The CLI
+handoff is separate from the one-time skill breadcrumb: it preserves the
+original request for the first review even after the skill consumes its copy.
 
-Tell the user to quit Codex and run a copyable command that reloads hooks and
-submits the continuation prompt automatically. Use the exact known session ID
-when available; otherwise use `--last` and explain it selects the latest session
-in this directory. The command should have this shape:
+End with this short, actionable handoff and no additional setup summary:
+
+**One restart left. Your task is saved.**
+
+1. **Copy the command below first.**
+2. **Exit Codex** with Ctrl+C until you see your normal terminal prompt.
+3. **Paste the command and press Enter.**
+
+Show a shell block with `cd` to the correctly quoted actual repository path and:
 
 ```sh
-cd '<actual absolute Git root>'
-codex resume <actual-session-id> '<continuation prompt>'
+codex resume --last "Resume after doomer.ai setup"
 ```
 
-Construct the continuation prompt as:
-"Resume the original coding task after Doomer setup. Original request: [exact
-original request and relevant corrections]. Check whether Doomer hook trust is
-complete; if it is still pending, ask me to trust the hooks before continuing."
-Properly shell-quote the complete prompt and path (including apostrophes and
-newlines); never interpolate raw user text into executable shell syntax. Do
-not assert that restarting grants trust. The user still reviews and trusts the
-named Doomer hooks in Codex. Offer **skip** to continue without Doomer.
+Prefer the exact known session ID in place of `--last`, so another recent
+conversation cannot be selected. Never include the original task or a long
+explanation in the command. If using `--last`, explain that it resumes the
+latest session in this directory. After the command, say only: "Codex will
+reopen this conversation and continue your task. Approve the Doomer hooks if
+prompted." Offer **skip** to continue without Doomer.
+
+### Consume the restart breadcrumb
+
+When the user request is **Resume after doomer.ai setup**, before any application
+edits run:
+
+```sh
+python3 "$doomer_repo_root/.agents/skills/doomer-review/scripts/restart_context.py" --repo "$doomer_repo_root" --session "$CODEX_THREAD_ID" --consume
+```
+
+The helper returns the original request once, deletes its breadcrumb, and
+removes only its own temporary `AGENTS.md` block. Follow the recovered original
+request, including its constraints, as the task to resume. Keep it in this
+conversation after consuming it. Verify hook readiness through the normal flow
+below; the resume phrase is not permission to trust hooks or upload code. If
+no matching breadcrumb exists, use the original request already visible in
+this conversation; ask for the task only if neither source is available.
+Do not recreate a consumed breadcrumb during ordinary coding or later turns.
 
 Do not present “I trusted the hooks” as an action before this restart. Do not
 continue coding after the handoff. Restarting reloads the definitions; only the
 user grants trust in Codex. Never write trust hashes, invoke a trust bypass, or
 treat silence or a promise to restart as approval.
 
-When the user returns after restarting and confirms **done**, continue watcher
-startup and resume the original coding task. If they return without confirming
-trust, ask them to review the named Doomer hooks before starting reviews. After
+After restarting, consume the breadcrumb when requested, continue watcher
+startup, and resume the original coding task once hook trust is established.
+If trust is still pending, ask them to review the named Doomer hooks before
+starting reviews. After
 **skip**, continue the task without Doomer and do not ask again in this session.
 This restart checkpoint applies only to newly installed or changed hooks.
 
