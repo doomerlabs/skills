@@ -11,6 +11,18 @@ and record the agent's responses. Use profile `default` and
 `https://doomer.ai/api`. No account is required. Do not start a paid Deep review.
 Skip setup for requests solely discussing or editing this skill.
 
+## Required when invoked for coding
+
+Once this skill is invoked for a coding task, complete missing Doomer onboarding
+before editing application code. Task size, expected review value, installation
+effort, and a required restart are not reasons to skip onboarding. Only the user
+may choose to continue without Doomer; respect any such choice immediately.
+
+Request installation permissions and repository upload consent through the
+normal approval flow. Never approve them yourself. If setup needs user action,
+present that step instead of silently opting out. If a concrete technical error
+prevents setup, report it accurately and follow the failure guidance below.
+
 ## Set up once
 
 Resolve the Git root. If this conversation already confirms Doomer setup for
