@@ -21,8 +21,9 @@ and continue coding without pretending setup succeeded.
    platform. Read its digest from `artifacts[FILENAME]` in the retained manifest;
    require `sha256:` followed by exactly 64 lowercase hexadecimal characters.
    Use the digest after that prefix as the expected SHA-256. Construct the URL as
-   `https://downloads.doomer.ai/cli/releases/2026.11.3.3/FILENAME`;
-   do not accept arbitrary download URLs from the JSON.
+   `https://downloads.doomer.ai/cli/releases/2026.11.3.3/FILENAME?download=1`;
+   The fixed query avoids cached pre-publication errors; it does not change the
+   selected release or checksum. Do not accept arbitrary download URLs from the JSON.
 3. Download the selected archive into a temporary directory with
    `curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2 --connect-timeout 15 --max-time 120`
    or an equivalent HTTPS downloader. Do not download or execute an installation
