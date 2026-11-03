@@ -77,12 +77,14 @@ command for that agent.
 **Codex:** use its current `CODEX_THREAD_ID`. For setup-only:
 
 ```sh
+# If the CLI was installed or replaced this turn, append --restart to this command.
 "$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID"
 ```
 
 With a coding task:
 
 ```sh
+# If the CLI was installed or replaced this turn, append --restart to this command.
 "$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID" --task-stdin < "$task_request_file"
 ```
 
