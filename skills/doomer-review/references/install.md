@@ -1,5 +1,45 @@
 # Install the verified CLI
 
+## Managed update fast path
+
+Once per coding session, if `~/.local/bin/doomer` is present, probe its
+`self-update --help`. If supported, use its absolute path to run:
+
+```sh
+"$HOME/.local/bin/doomer" self-update --check --version 2026.11.3.4
+```
+
+This reads only installation metadata and the binary; it does not upload code,
+read logins, or change files. Location alone is not proof of ownership. Inspect
+the JSON result:
+
+- `ready`: the installed bytes match a managed record for this pin. Reuse it.
+- `update_available`: offer the managed CLI update unless the user already
+  approved updating the skill and matching CLI in this session. After approval,
+  run `self-update --version 2026.11.3.4` using the verified absolute path.
+- `missing`: follow the verified bootstrap below.
+- `unmanaged`, `modified`, or `symlink`: explain that the file is not a matching
+  managed installation. Offer **“Replace the private CLI at ~/.local/bin/doomer
+  with VERSION and keep a backup, or skip Doomer for this session?”** Name the
+  symlink target if relevant. Only after that approval, use a verified bootstrap
+  executable below with `self-update --version 2026.11.3.4 --adopt`.
+- `newer_installed`: never downgrade it to this older pin. Offer to update the
+  skill; otherwise retain the binary and verify required commands exist before
+  onboarding. Explain any incompatibility rather than overwriting it.
+- An unexpected file type or status error: stop installation and explain it.
+
+The updater verifies its immutable release archive, keeps a uniquely named
+backup, atomically replaces the binary, and records its path, version, and
+SHA-256 under `~/.local/share/doomer/installation.json`. Require `state: ready`
+in its successful result before proceeding. A checksum failure is terminal;
+do not fall back to an unverified installation or repeat unchanged attempts.
+Never fabricate the ownership record or enable unattended updates.
+
+If `self-update` does not exist in the pinned release, use the legacy verified
+installation flow below. Do not invent updater commands or claim a legacy
+installation is managed. Older installations become managed only when a
+verified updater-equipped release installs them with explicit adoption.
+
 ## Select CLI release 2026.11.3.4
 
 Use version **2026.11.3.4** for this skill. Fetch its immutable release manifest
@@ -63,6 +103,22 @@ Apply these rules to both the manifest and archive downloads:
   once. Explicitly say Doomer setup did not complete and reviews are unavailable
   for this session, then continue the coding task. Never silently skip setup
   or imply the code was reviewed.
+
+## Bootstrap an updater-equipped release
+
+After verifying and extracting the pinned release below, probe the **temporary
+verified executable** for `self-update --help`. If supported, use that executable
+to run `self-update --version 2026.11.3.4`, adding `--adopt` only when the user has
+explicitly approved replacing the existing unmanaged file or link. This installs
+and records ownership even when no CLI is installed yet. Require its JSON result
+`state: ready`, then use `~/.local/bin/doomer` for onboarding. It may download the
+same release again for its own verification. Do not also perform the legacy copy
+or write installation metadata yourself.
+
+If the pinned executable lacks `self-update`, follow the legacy flow next. After
+any replacement, rerun onboarding with `--refresh` when supported so its managed
+watcher uses the new executable;
+retain repository consent and follow the existing hook activation rules.
 
 ## Install or offer an upgrade
 

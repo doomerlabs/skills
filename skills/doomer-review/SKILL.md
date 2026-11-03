@@ -23,12 +23,32 @@ normal approval flow. Never approve them yourself. If setup needs user action,
 present that step instead of silently opting out. If a concrete technical error
 prevents setup, report it accurately and follow the failure guidance below.
 
+## Check for updates once per coding session
+
+Before reusing a previous setup, run `npx skills check` once in this repository.
+Inspect only the update for `doomer-review` from `doomerlabs/skills`. Do not update
+other skills. If a newer version is available, ask: **“A Doomer update is
+available. Update the skill and its matching managed CLI now?”** Never treat no
+answer as approval. If declined, retain this skill's current CLI pin and do not
+ask again in this session. If the check is unavailable or offline, continue with
+the current pin and do not claim it is the latest.
+
+After approval, run `npx skills update doomer-review` in the same installation
+scope. Preserve user edits if an update conflicts with locally modified skill
+files. Reread the installed `SKILL.md` and its installation reference immediately;
+do not keep following the old instructions or old version pin. Apply the new
+pin using the managed update flow below. The approval covers this skill update
+and its matching **managed** binary update; do not ask twice. An unknown,
+manually replaced, or Homebrew-linked binary needs the explicit adoption choice
+in the installation reference. Update permission never grants upload consent.
+
 ## Set up once
 
 Resolve the Git root. If this conversation already confirms Doomer setup for
-this repository, continue the task without repeating setup or status checks.
+this repository and no update replaced its CLI, continue the task without
+repeating setup or status checks.
 
-Install or verify the CLI following [installation](references/install.md).
+Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
 Use stable CLI **2026.11.3.4**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
@@ -56,6 +76,11 @@ value as the session argument:
 
 If the substitution is still literal or empty, treat the session ID as unknown;
 do not pass the literal placeholder or borrow a Codex session ID.
+
+After replacing an existing CLI, add `--refresh` to onboarding to gracefully
+restart its managed watcher on the new binary. This preserves consent and never
+resumes a user-paused watcher. Use this only if `onboard --help` lists the flag;
+legacy CLIs require the normal supported flow and must not be claimed refreshed.
 
 For Codex, add `--restart` if the CLI was installed or replaced during this turn,
 because the prompt may have arrived before its hooks could run. Claude uses the
