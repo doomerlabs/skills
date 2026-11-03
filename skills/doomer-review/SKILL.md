@@ -25,22 +25,65 @@ prevents setup, report it accurately and follow the failure guidance below.
 
 ## Check for updates once per coding session
 
-Before reusing a previous setup, run `npx skills check` once in this repository.
-Inspect only the update for `doomer-review` from `doomerlabs/skills`. Do not update
-other skills. If a newer version is available, ask: **“A Doomer update is
-available. Update the skill and its matching managed CLI now?”** Never treat no
-answer as approval. If declined, retain this skill's current CLI pin and do not
-ask again in this session. If the check is unavailable or offline, continue with
-the current pin and do not claim it is the latest.
+Share `updateCheckAttempted` and `updateDecision` (`not_asked`, `approved`,
+`declined`, or `finished`) between this section and the installation reference.
+Retain them in the conversation's durable task summary with the active skill
+path and pin. Mark the check attempted before starting it. A decline or completed
+update attempt suppresses both update offers for the rest of this session. If an earlier decision cannot
+be recovered after compaction, keep the installed pair and do not prompt again
+unless the user explicitly asks to update. Do not add a state file or scan other
+chats. A separate coding session has its own decision.
 
-After approval, run `npx skills update doomer-review` in the same installation
-scope. Preserve user edits if an update conflicts with locally modified skill
-files. Reread the installed `SKILL.md` and its installation reference immediately;
-do not keep following the old instructions or old version pin. Apply the new
-pin using the managed update flow below. The approval covers this skill update
-and its matching **managed** binary update; do not ask twice. An unknown,
-manually replaced, or Homebrew-linked binary needs the explicit adoption choice
-in the installation reference. Update permission never grants upload consent.
+The checker is the official `skills@1.7.6` package from `vercel-labs/skills`
+(requires Node >=22.20). In the current installation scope, use the cached
+package without allowing npm to fetch a checker automatically:
+
+```sh
+npm exec --offline --yes --package=skills@1.7.6 -- skills check doomer-review --project
+```
+
+For a global installation use `--global` instead of `--project`; determine scope
+from this installed skill's canonical path. Do not combine the flags. Apply the
+coding agent's normal command/network approvals. If the package is not cached,
+Node is incompatible, the subcommand is unsupported, a permission is declined,
+or the check fails, finish this optional check and retain the current pin.
+A failed or unchanged check still permits the one CLI update offer below if
+no update question has been asked.
+Never install Node, fetch another checker, retry interactively, or claim the
+skill is current. Bound the command to 30 seconds through the execution tool.
+Missing, truncated, ambiguous, or unmatched output means **unknown**, even with
+exit status zero. Only a positive result for this exact skill establishes its
+update status. Do not update other skills.
+
+If a newer version is available and no update decision has been made, ask:
+**“A Doomer update is available. Update the skill and its matching managed CLI
+now?”** No answer is not approval. If declined, record `declined` and retain the
+current pair. If approved, record `approved` and run the scoped update:
+
+```sh
+npm exec --yes --package=skills@1.7.6 -- skills update doomer-review --project --yes
+```
+
+Use `--global` for a global installation. This approved command may fetch the
+pinned checker; its `--yes` flags cover only package execution/scope selection,
+never Doomer upload consent. If local edits conflict, the update is partial,
+or the skill was skipped, stop **both** halves of this update; preserve the
+existing files and binary and explain the conflict. Do not silently merge or
+switch pins. Only a successful skill update permits the matching binary step.
+
+After success, use file-read tools to read the newly installed `SKILL.md` and
+`references/install.md` from this skill's canonical on-disk directory, once.
+Use only the newly read pin and instructions afterward, not remembered text.
+The approval also covers updating a matching managed binary; do not ask again.
+Unknown, manually replaced, or Homebrew-linked binaries require the explicit
+adoption choice in the installation reference. Record `finished` after the
+attempt; update permission never grants upload consent.
+
+The binary is shared, but updating this skill does not authorize rewriting other
+repositories' or agents' independent skill copies. Shared aliases of the same
+canonical skill update together. Other copies detect a newer managed CLI on
+invocation and must not downgrade it; their compatibility check below governs
+whether they can use it. Do not claim all installations were updated.
 
 ## Set up once
 
@@ -77,13 +120,21 @@ value as the session argument:
 If the substitution is still literal or empty, treat the session ID as unknown;
 do not pass the literal placeholder or borrow a Codex session ID.
 
-After replacing an existing CLI, add `--refresh` to onboarding to gracefully
-restart its managed watcher on the new binary. This preserves consent and never
-resumes a user-paused watcher. Use this only if `onboard --help` lists the flag;
-legacy CLIs require the normal supported flow and must not be claimed refreshed.
+After replacing a CLI, discard old capability results and run `onboard --help`
+on the newly installed absolute executable. For an already-configured repository
+with a running managed watcher, run a separate `onboard --repo REPO --refresh`
+if supported. This refresh preserves consent, hooks, and saved task state; never
+combine it with `--restart`, `--task-stdin`, or `--check-hooks`. A `not_running`
+result is a no-op, not proof of a started watcher. A refresh error is not success:
+report it without changing pause/consent or pretending the new watcher is active.
+For a new setup use normal onboarding below. If an older release lacks refresh,
+state that its old watcher has not been refreshed and retain the supported setup
+flow; do not silently claim the running process was upgraded.
 
-For Codex, add `--restart` if the CLI was installed or replaced during this turn,
-because the prompt may have arrived before its hooks could run. Claude uses the
+For normal Codex onboarding, add `--restart` if the CLI was installed or replaced
+during this turn, because the prompt may have arrived before its hooks could run.
+A successful refresh of an already-configured watcher does not require rerunning
+normal onboarding or rewriting the saved task. Claude uses the
 live-hook check below instead of an automatic restart. Remove the temporary
 input file after successful onboarding. If the session ID is unavailable, do
 not guess it: omit `--session` and `--task-stdin`, and retain the original task

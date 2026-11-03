@@ -14,18 +14,27 @@ read logins, or change files. Location alone is not proof of ownership. Inspect
 the JSON result:
 
 - `ready`: the installed bytes match a managed record for this pin. Reuse it.
-- `update_available`: offer the managed CLI update unless the user already
-  approved updating the skill and matching CLI in this session. After approval,
-  run `self-update --version 2026.11.3.4` using the verified absolute path.
+- `update_available`: consult the shared session decision in SKILL.md. A previous
+  decline or finished attempt suppresses another offer. If the older binary cannot
+  run the current skill, continue the coding task without Doomer instead of asking
+  again. A prior approval covers this managed update. Otherwise ask once and record
+  the answer in that same decision. After approval, run
+  `self-update --version 2026.11.3.4` using the verified absolute path.
 - `missing`: follow the verified bootstrap below.
 - `unmanaged`, `modified`, or `symlink`: explain that the file is not a matching
   managed installation. Offer **“Replace the private CLI at ~/.local/bin/doomer
   with VERSION and keep a backup, or skip Doomer for this session?”** Name the
-  symlink target if relevant. Only after that approval, use a verified bootstrap
+  symlink target if relevant. Explain that adoption backs up and replaces only
+  this link, including a link into Homebrew; it never changes the package-manager
+  target or its files. If the user previously declined updates, do not re-offer
+  adoption automatically. Only after that approval, use a verified bootstrap
   executable below with `self-update --version 2026.11.3.4 --adopt`.
-- `newer_installed`: never downgrade it to this older pin. Offer to update the
-  skill; otherwise retain the binary and verify required commands exist before
-  onboarding. Explain any incompatibility rather than overwriting it.
+- `newer_installed`: never downgrade it to this older pin. Consult the shared
+  update decision before offering a skill update; never repeat a declined offer.
+  Retain the binary and probe its required commands before onboarding. If command
+  or output compatibility cannot be established, stop Doomer setup for this session
+  and continue coding without it. Do not overwrite other skill copies or claim
+  this older pin was installed.
 - An unexpected file type or status error: stop installation and explain it.
 
 The updater verifies its immutable release archive, keeps a uniquely named
@@ -115,10 +124,20 @@ and records ownership even when no CLI is installed yet. Require its JSON result
 same release again for its own verification. Do not also perform the legacy copy
 or write installation metadata yourself.
 
-If the pinned executable lacks `self-update`, follow the legacy flow next. After
-any replacement, rerun onboarding with `--refresh` when supported so its managed
-watcher uses the new executable;
-retain repository consent and follow the existing hook activation rules.
+On any updater error, malformed result, or non-ready result, clean up only the
+verified temporary downloads/executable created by this attempt. Do not delete
+`~/.local/bin/doomer`, its backups, or its ownership record. The updater verifies
+before replacement and rolls back a failed publication; a failed command is not
+permission to overwrite or remove an existing installation. Report the exact
+failure and continue coding without claiming setup succeeded. Do not silently
+fall back to the legacy copy path after an updater failure. For a transient fetch
+failure, use only the bounded retry rules below; checksum failures are terminal.
+After any replacement, re-probe the installed executable's `onboard --help` and
+use the refresh/setup routing in SKILL.md, discarding any earlier help output.
+
+If the pinned executable lacks `self-update`, follow the legacy flow next. For
+legacy replacement, re-probe the installed executable and follow SKILL.md's
+refresh/setup routing; retain consent and the existing hook activation rules.
 
 ## Install or offer an upgrade
 
