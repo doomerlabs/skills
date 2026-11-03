@@ -130,6 +130,12 @@ and records ownership even when no CLI is installed yet. Require its JSON result
 same release again for its own verification. Do not also perform the legacy copy
 or write installation metadata yourself.
 
+Never fall back to the legacy copy path after any updater failure, including
+a failed retry or a later user choice. Adoption must use the verified updater
+with explicit approval; it is not an escape from a failed integrity check.
+After the allowed retry is exhausted, the choices are troubleshooting or an
+explicit skip, not another unchanged retry or an unmanaged copy.
+
 On any updater error, malformed result, or non-ready result, clean up only the
 verified temporary downloads/executable created by this attempt. Do not delete
 `~/.local/bin/doomer`, its backups, or its ownership record. The updater verifies
@@ -137,7 +143,7 @@ before replacement and rolls back a failed publication; a failed command is not
 permission to overwrite or remove an existing installation. Report the exact
 failure without claiming setup succeeded. For a fresh install, ask once whether
 to retry the verified bootstrap or skip Doomer for this session. No answer leaves
-setup pending; do not edit application code or re-ask automatically. Honor one
+setup pending; end the turn with the question instead of polling or re-asking. Honor one
 user-approved retry within the download limits above, without a legacy-copy
 fallback. An integrity failure (invalid manifest or checksum mismatch) is
 terminal: offer troubleshooting or skipping, not an unchanged retry. If the

@@ -10,7 +10,22 @@ Run this from the repository you want Doomer to review:
 npx skills add doomerlabs/skills --skill doomer-review
 ```
 
-Select Codex or Claude Code when the installer asks, then open that agent and start a coding task. Explicitly invoke `$doomer-review` in Codex or `/doomer-review` in Claude Code if it is not selected automatically.
+Select Codex or Claude Code when the installer asks. In your new or existing
+Codex chat, send:
+
+```text
+Set up $doomer-review for this repo
+```
+
+In Claude Code, invoke `/doomer-review` and ask it to set up Doomer for this repo.
+Complete repository consent and any required restart or hook-trust steps. Once
+setup is ready, send your coding task in the next prompt; you do not need to
+mention the skill on every task. Setup alone does not start a coding task.
+If a newly installed skill is not available in Codex, restart Codex, reopen the
+chat, and send the setup request again.
+
+You can also invoke the skill with a coding task to set up Doomer and then
+continue that task.
 
 Codex installs under `.agents/skills/`; Claude Code installs under `.claude/skills/`.
 
