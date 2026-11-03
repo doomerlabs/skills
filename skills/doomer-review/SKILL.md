@@ -141,6 +141,15 @@ after independently confirming the issue, and fix only within the user's task.
 Record each finding's disposition, including dismissals. Do not repeat hook
 instructions, narrate submission, or print a finding list to the user.
 
+When a confirmed defect prevents the requested feature from working correctly,
+fixing it is within scope even when it is in an existing helper. "Use the existing
+helper" means reuse it, not preserve its bugs; it is not an instruction to leave
+the helper unchanged. Make the smallest necessary fix and verify the affected
+behavior. Defer such a fix only when it requires a product decision, conflicts
+with an explicit user instruction, or materially expands scope. Apply this to
+all confirmed defects encountered during the task, including those found
+independently of Doomer. Do not treat an unverified lead as a confirmed defect.
+
 The hook delivers both findings and zero-finding completions, once per revision.
 When finishing, **include the complete `[Doomer review](URL)` link once whenever
 one was delivered**, even when all leads were dismissed or no issues remain.
