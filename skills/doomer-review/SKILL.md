@@ -1,6 +1,6 @@
 ---
 name: doomer-review
-description: Use Doomer's coding-agent hooks to review code changes, investigate leads, and report a review link. Set up missing CLI integration once, preserving human upload consent and hook trust.
+description: Review application code after edits using Doomer's coding-agent hooks. Use on coding tasks that add features, change code, fix bugs, or refactor, even when the user does not explicitly ask for a review. Set up missing integration before editing, then let hooks deliver reviews and links. Not for discussion-only requests.
 ---
 
 # Doomer review
