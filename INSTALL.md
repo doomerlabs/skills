@@ -13,7 +13,7 @@ and configure reviews. This installation path needs no `npx` or Node.js.
 Supported systems are macOS and Linux on Intel/AMD 64-bit or ARM64, with Git
 available. Both options keep the skill repository-local. Local setup installs
 in your current checkout and leaves the changes uncommitted. Team setup may
-use a separate checkout to prepare the shareable installation changes in a PR.
+use a linked Git worktree to prepare the shareable installation changes in a PR.
 Each developer completes their own CLI setup, repository consent, and hook trust.
 
 ## Instructions for the coding agent
@@ -53,23 +53,55 @@ Offer **Local setup only** first and **Create a team PR** second. Wait for the
 answer before making changes. A team-PR choice authorizes creating the branch,
 committing the scoped setup files, pushing that branch, and opening the PR.
 
-Before asking, read the local setup record if present. Resolve the absolute
-Git common directory with `git rev-parse --path-format=absolute --git-common-dir`.
-Store setup progress in `doomer/agent-install.json` under that directory, keyed
-by the original checkout's absolute Git root and active agent. This is private
-Git metadata, outside tracked files. Record `mode` (`local` or `team-pr`),
-`originalRoot`, `setupRoot`, `branch`, `base`, `remote`, `sourceCommit`,
-`commit`, `prUrl`, `originalActivation`, and `phase`. Use null for values not yet known. Preserve
-other entries and write updates atomically. Store no secrets or consent here.
+Before asking, read the local setup record if present. Use
+`git rev-parse --git-common-dir` and resolve its output relative to the command's
+working directory to an absolute path. This also works with Git before 2.31.
+Store setup progress in `doomer/agent-install.json` under that directory.
+Use a JSON object with `schemaVersion: 1` and a `setups` object keyed by a
+fresh UUID per setup attempt. This is private Git metadata, outside tracked
+files. Linked worktrees share it. Use linked worktrees for isolation, never a
+separate clone that would lose access to this record.
 
-Record the selected mode immediately after the answer and reuse it on restart.
-Record the planned branch and setup root before creating them. Before retrying
-an interrupted operation, inspect the actual branch, commit, remote branch, or
-PR and reconcile the record. Resume the existing operation. A new explicit user
-choice replaces the saved mode. If the record is invalid or ambiguous, ask for
-clarification before writing or publishing.
-When resuming inside the setup worktree, locate the record whose `setupRoot`
-matches that root and retain its `originalRoot`.
+Each record has the following fields.
+
+| Field | Allowed value |
+| --- | --- |
+| `agent` | `codex` or `claude`, identifying the agent that started this attempt |
+| `agents` | Nonempty list of requested agents, drawn from `codex` and `claude` |
+| `mode` | `local` or `team-pr` |
+| `originalRoot`, `setupRoot` | Absolute canonical Git root paths; `setupRoot` may be null until planned |
+| `branch`, `base` | Valid Git branch/ref names, or null before planning; null for local mode |
+| `remote` | Existing Git remote name, or null before planning; null for local mode |
+| `sourceCommit`, `commit` | Full Git commit IDs, or null before the corresponding operation |
+| `prUrl` | HTTPS URL returned by the selected host for the recorded repository and branch, or null before publication |
+| `originalActivation` | `pending` or `verified`; only the original root's activation checks may set `verified` |
+| `phase` | `chosen`, `prepared`, `installed`, `configured`, `committed`, `pushed`, `pr-open`, `complete`, or `abandoned` |
+
+Record the selected mode immediately after the answer with phase `chosen`.
+Record the planned branch and setup root before creating them. Advance to
+`prepared` when the checkout is ready, `installed` when the skill is verified,
+and `configured` when onboarding is configured. Team publication advances
+through `committed`, `pushed`, and `pr-open` after verifying each operation.
+Local setup moves from `configured` to `complete` after activation. Team setup
+moves from `pr-open` to `complete` only after the PR is merged and original-root
+activation is verified. Retain the last confirmed phase on failure. A cancelled
+attempt becomes `abandoned` and is never automatically resumed.
+
+On restart, select the record matching the active `agent` and current
+`setupRoot`, or a unique non-abandoned record matching `originalRoot` and
+`agent`. Retain its UUID and original root. Reconcile its recorded operations
+with the actual local and remote Git state before retrying. Never create a
+second attempt when one can be resumed. A new attempt requires an explicit
+user request and a new UUID, preserving earlier records. If multiple records
+match, required fields are missing, values violate this schema, or recorded
+resources belong to another repository or attempt, ask for clarification.
+Null operation fields are valid only before those operations are confirmed.
+
+Serialize record updates with an exclusive lock beside the file, re-read the
+latest records while holding it, preserve all other UUID entries, and atomically
+replace the JSON. Release the lock after the write. An existing lock means
+another attempt may be active; wait or report it, without bypassing the lock or
+overwriting its data. Store no secrets or consent in this record.
 
 Treat the requested team PR as part of setup. After the skill reaches its
 setup-only completion step, finish the authorized publication steps below
