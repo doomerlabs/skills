@@ -243,6 +243,9 @@ Use the skill's existing, repository/session-scoped skip decisions
 record a new skip in the skill's durable task summary as it directs. A current
 explicit skip ends this setup attempt with phase `abandoned`; report that setup
 was skipped and retain its resources. It is not a permanent repository opt-out.
+The skill's durable summary is conversation state, separate from a coding-task
+handoff file. The abandoned phase in the existing private setup record also
+prevents automatic resumption after a restart; creating a task file is unnecessary.
 When the user explicitly resumes setup, follow the skill's
 resumption rules and require the block before reporting setup ready. Maintain
 one shared skip decision with the skill.
@@ -251,12 +254,18 @@ Before writing either instructions file, inspect its file type and any policy
 markers. Recognize only exact standalone policy-marker lines outside fenced
 code examples and larger HTML-comment blocks. The one-line marker comments
 themselves are valid delimiters. Markers shown in examples are not live policy.
+Match a fenced block's delimiter character and closing delimiter length
+(at least the opening length). HTML comments run from `<!--` to the next `-->`
+without nesting. Treat unclosed fences or comments, or uncertain marker context,
+as conflicts requiring user direction before any write.
 A symlink, another non-regular file, or duplicated, incomplete, or
 out-of-order markers requires reporting the conflict and obtaining the user's
 direction before changing that file. This check gates all writes below.
 
-If the user authorizes malformed-marker repair, preserve a backup outside
-tracked content. Remove only the malformed marker lines and obsolete Doomer
+If the user authorizes malformed-marker repair, preserve a uniquely named
+backup under `doomer/instruction-backups/` in the resolved private Git common
+directory. This keeps backups outside the worktree and the team PR. Remove
+only the malformed marker lines and obsolete Doomer
 content whose boundaries the user has confirmed, preserving all other text.
 Then insert one complete block and verify it under the rules below. If those
 boundaries remain unclear, request clarification and leave the file intact.
