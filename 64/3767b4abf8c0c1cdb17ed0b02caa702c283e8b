@@ -1,0 +1,23 @@
+README.md
+  s_c5a06ffaad29b7::t_a5daef2fc2be27 34
+skills/doomer-review/SKILL.md
+  s_c5a06ffaad29b7::t_e40b5497dc7b07 254
+skills/doomer-review/references/install.md
+  s_c5a06ffaad29b7::t_9a8f84808618a5 9,20,33,58,60,62,66,75,79,126
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "643767b4abf8c0c1cdb17ed0b02caa702c283e8b",
+  "prompts": {},
+  "sessions": {
+    "s_c5a06ffaad29b7": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a18f08-9c5f-7c13-a182-eaa9cddf8912",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
