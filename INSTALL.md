@@ -103,11 +103,13 @@ This explicit-choice rule takes precedence over automatic resumption.
 
 On restart, inspect records for the active `agent` whose `setupRoot` or
 `originalRoot` exactly equals the current canonical Git root. Repository
-identity alone is not a root match. Apply these cases in order.
+identity alone is not a root match. Perform every applicable step below in
+order; reporting records in step 2 never skips the checks in step 3.
 
 1. If exactly one nonterminal attempt matches, resume it with its UUID and
    original root. If several match, ask the user which one to continue and
-   whether to abandon the others. Persist that disposition before resuming.
+   whether to abandon the others. Persist approved abandonments by setting
+   those records' existing `phase` field to `abandoned` before resuming.
    When the user keeps several active attempts, have them select the intended
    setup worktree and resume there using its exact `setupRoot` match.
 2. If no nonterminal attempt matches, report any matching terminal records and
