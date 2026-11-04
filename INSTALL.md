@@ -117,7 +117,8 @@ the selected case determines which activation checks govern the current setup.
    attempt's own checks. Do not run terminal-record readiness checks at the same time.
 2. **Only terminal records match.** Terminal records do not conflict with each
    other. Never resume abandoned records. For completed records, verify the installed
-   skill and run its saved-setup and activation checks for the current root
+   skill and the repository instructions required by step 4, then run the
+   skill's saved-setup and activation checks for the current root
    before describing that checkout as ready. These checks are part of this
    case, not a separate alternative. Never replay a completed record's commits,
    pushes, or PR creation. If setup is missing or no longer ready, offer a new
@@ -201,10 +202,12 @@ follow their setup-only instructions in this conversation. You can read and
 follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
 download, existing-installation handling, onboarding commands, and activation.
+For both setup modes, complete the repository-instructions step below before
+the skill's setup-only completion message ends the task.
 
 The direct skill download above replaces the `npx skills add` step. The optional
-cached npm update check may be unavailable without Node.js. Follow the section
-**Check for updates once per coding session** in `SKILL.md`, which
+cached npm update check may be unavailable without Node.js. Follow
+the cached-check fallback in `SKILL.md`'s update-check section, which
 handles a missing cached checker or incompatible Node by retaining the current
 pin and recording the attempted check. This is separate from the CLI's local
 managed-binary check and verified bootstrap in `references/install.md`, which
@@ -223,6 +226,71 @@ and any agent hook-trust prompts themselves. Reuse valid saved consent and
 setup as directed by the skill. Keep required execution permissions separate
 from repository consent. Respect an existing paused watcher.
 
+#### Install the repository instructions
+
+After onboarding has written its repository instructions, and before the final
+setup report or a requested restart, ensure the Git root contains `AGENTS.md`
+with the block below. This is a required part of both local and team setup.
+Honor an explicit choice to skip Doomer instead of adding rules that contradict
+that choice.
+
+Create `AGENTS.md` if it is missing. Otherwise preserve all existing text and
+append the block with blank lines around it. If exactly one complete
+`doomer-review-policy` block already exists, update only that block. Keep the
+CLI-owned `doomer-review` block intact; onboarding may regenerate it. These
+separate markers keep the per-turn policy from being overwritten on later
+onboarding runs. Preserve unmarked repository-specific instructions.
+
+```markdown
+<!-- doomer-review-policy:start -->
+## Required Doomer review workflow
+
+Before each user turn that will edit repository files, read the active agent's
+installed doomer-review skill and its references/install.md from disk. For
+Codex, use .agents/skills/doomer-review/. For Claude Code, use
+.claude/skills/doomer-review/. Follow the skill for documentation, configuration,
+tests, and application code, including small edits and requests that do not
+explicitly mention review.
+
+Run the skill's local CLI version and managed-installation check once per
+editing turn before making changes. Use the current on-disk pin and the skill's
+saved approval decisions. A version remembered from an earlier turn or a
+previously completed setup does not satisfy this check. Keep the online skill
+update check scoped to once per coding session as the skill directs.
+
+Follow the skill's setup and review workflow. Reuse valid repository consent
+and verified hook activation. Keep repository upload consent and agent hook
+trust as user choices, preserve a paused watcher, and honor explicit skip
+decisions and the skill's read-only and skill-maintenance exemptions.
+
+Use trusted hooks to capture changes and deliver review results. Investigate
+feedback, fix confirmed issues within the user's scope, and record responses
+as the hooks direct. Follow the skill's completion gate for the current
+revision and include the complete Doomer review link when a review is delivered,
+including a review with no findings.
+<!-- doomer-review-policy:end -->
+```
+
+For Claude Code, also ensure the root `CLAUDE.md` loads this shared policy with
+an `@AGENTS.md` import on its own line, outside code fences. Create `CLAUDE.md`
+with that import if missing; otherwise add it only if an effective import is
+absent. Preserve its existing text and the CLI-owned Doomer block. When both
+agents are requested, keep one shared policy block in `AGENTS.md`.
+
+If either instructions file is a symlink or another non-regular file, or its
+policy markers are duplicated, incomplete, or out of order, report the conflict
+and obtain the user's direction before changing that file. Preserve the
+original file permissions and write changes atomically. If any existing rule
+explicitly conflicts with the requested Doomer policy, surface the conflict
+instead of silently deleting that rule.
+
+Read the resulting files back. Verify exactly one complete policy block,
+unchanged surrounding text, the installed skill paths for every requested
+agent, and Claude's import when applicable. Include the instructions files in
+the local-change summary or scoped team PR. A setup record marked complete
+still requires this guidance check when resuming this guide; repair missing or
+outdated guidance using these same rules without repeating completed publication.
+
 Complete the skill's activation checks. If a restart or other user action is
 required, give the exact next step and retain the setup state for resumption.
 Report installation, configuration, and verified activation separately. Claim
@@ -232,7 +300,7 @@ end-to-end review delivery only after a hook actually delivers a result.
 
 For the team-PR choice, review the complete diff against the selected base.
 Include the installed skill and its supporting files, plus portable integration
-instructions added to `AGENTS.md` or `CLAUDE.md` by the setup workflow. Include
+instructions added to `AGENTS.md` and, for Claude, `CLAUDE.md` by the setup workflow. Include
 other generated configuration only after verifying that it is portable and
 appropriate to share. Inspect any hook configuration for absolute paths,
 usernames, and machine-specific values before including it.
