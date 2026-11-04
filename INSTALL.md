@@ -87,10 +87,16 @@ moves from `pr-open` to `complete` only after the PR is merged and original-root
 activation is verified. Retain the last confirmed phase on failure. A cancelled
 attempt becomes `abandoned` and is never automatically resumed.
 
-An explicit new user choice always supersedes a saved mode. Mark a conflicting
-attempt `abandoned`, preserving its resources and reporting their locations,
-then create a new UUID for the requested mode. Cleanup still needs the approval
-described below. This rule takes precedence over automatic resumption.
+A re-sent setup prompt or confirmation of the saved mode resumes the same
+attempt. An explicit request for a different mode, or to start over, supersedes
+an in-progress attempt. Mark only that nonterminal attempt `abandoned`, preserve
+its resources, and offer the cleanup described below for any existing branch,
+worktree, commit, or PR before starting a new UUID. Keep resources the user
+chooses to retain. Preserve terminal records permanently with their original
+outcome. For a completed setup, report its result and existing PR first. A
+different mode or an explicit start-over request may then create a new UUID;
+repeating the same request reports the completed result. This explicit-choice
+rule takes precedence over automatic resumption of nonterminal attempts.
 
 On restart, select a nonterminal record matching the active `agent` and current
 `setupRoot`, or a unique nonterminal record matching `originalRoot` and
@@ -104,8 +110,11 @@ match, required fields are missing, values violate this schema, or recorded
 resources belong to another repository or attempt, ask for clarification.
 Null operation fields are valid only before those operations are confirmed.
 
-Serialize record updates with the platform's process-scoped advisory lock on
-a lock file beside the JSON. Hold the lock while re-reading the latest records,
+Serialize record updates with an OS-managed, flock-style advisory lock on
+a separate stable lock file beside the JSON. Keep the locking descriptor open
+in the same process through the entire read-modify-write operation. Never
+replace the lock file; the JSON and its temporary replacement are separate
+files. Hold the lock while re-reading the latest records,
 preserving other UUID entries, and atomically replacing the JSON. The operating
 system must release the lock when its holder exits or crashes. The lock file's
 existence alone never means it is held. If another live process holds the lock,
