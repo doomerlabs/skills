@@ -272,8 +272,9 @@ new user edits and leave a worktree intact if it contains them. Mark the record
 as abandoned after cleanup, retaining any resources the user chose to keep.
 
 Publication cleanup is limited to those PR, branch, worktree, and staging
-operations. Retain installed skills and CLI binaries. Before cleanup, compare
-the proposed resources with all active setup records and live worktrees.
+operations. Retain installed skills and CLI binaries. Before offering cleanup,
+and again before performing it, compare the proposed resources with all active
+setup records and live worktrees.
 Preserve anything shared with, or needed by, another attempt or the user's
 ongoing work. Offer cleanup only for verified attempt-owned, unshared resources.
 
