@@ -1,5 +1,60 @@
 # Install the verified CLI
 
+## Managed update fast path
+
+Once per coding session, if `~/.local/bin/doomer` is present, probe its
+`self-update --help`. If supported, use its absolute path to run:
+
+```sh
+"$HOME/.local/bin/doomer" self-update --check --version 2026.11.3.5
+```
+
+This reads only installation metadata and the binary; it does not upload code,
+read logins, or change files. Location alone is not proof of ownership. Inspect
+the JSON result:
+
+- `ready`: the installed bytes match a managed record for this pin. Reuse it.
+- `update_available`: follow SKILL.md's shared update decision and combined offer.
+  If `not_asked`, offer the update even when the older CLI is incompatible.
+  If `approved`, update to the selected skill pin without another question; for
+  the current pin run `self-update --version 2026.11.3.5` using the verified
+  absolute path. A known skill update goes first, as defined in SKILL.md.
+  If `declined` or `finished`, do not offer another update. Reuse the retained
+  CLI if it supports the required workflow; otherwise follow SKILL.md's
+  user-choice rule for continuing without reviews. Do not unilaterally skip.
+- `missing`: follow the verified bootstrap below.
+- `unmanaged`, `modified`, or `symlink`: explain that the file is not a matching
+  managed installation. Offer **“Replace the private CLI at ~/.local/bin/doomer
+  with VERSION and keep a backup, or skip Doomer for this session?”** Name the
+  symlink target if relevant. Explain that adoption backs up and replaces only
+  this link, including a link into Homebrew; it never changes the package-manager
+  target or its files. If the user previously declined updates, do not re-offer
+  adoption automatically. Only after that approval, use a verified bootstrap
+  executable below with `self-update --version 2026.11.3.5 --adopt`.
+- `newer_installed`: never downgrade it to this older pin. Consult the shared
+  decision before offering a known skill update; never repeat a declined offer.
+  Retain the binary. Probe `onboard --help` at its absolute path for the flags
+  used by this skill (`--repo`, `--agent`, `--session`, `--task-stdin`, plus
+  `--restart` for Codex or `--check-hooks` for Claude). If present, proceed with
+  the documented onboarding/activation flow and interpret its actual result.
+  Do not require hypothetical output-compatibility tests. Missing required flags
+  or an actual unsupported result is a concrete incompatibility: explain it and
+  follow SKILL.md's user-choice rule. Never overwrite other skill copies or
+  claim this older pin was installed.
+- An unexpected file type or status error: stop installation and explain it.
+
+The updater verifies its immutable release archive, keeps a uniquely named
+backup, atomically replaces the binary, and records its path, version, and
+SHA-256 under `~/.local/share/doomer/installation.json`. Require `state: ready`
+in its successful result before proceeding. A checksum failure is terminal;
+do not fall back to an unverified installation or repeat unchanged attempts.
+Never fabricate the ownership record or enable unattended updates.
+
+If `self-update` does not exist in the pinned release, use the legacy verified
+installation flow below. Do not invent updater commands or claim a legacy
+installation is managed. Older installations become managed only when a
+verified updater-equipped release installs them with explicit adoption.
+
 ## Select CLI release 2026.11.3.5
 
 Use version **2026.11.3.5** for this skill. Fetch its immutable release manifest
@@ -12,7 +67,7 @@ and `version: "2026.11.3.5"`. Retain that response for the entire setup.
 Do not select a different version from `stable.json`, a beta, a local staging
 manifest, or a checkout build. Apply the download recovery rules below before
 reporting a fetch failure. If the manifest cannot be validated, report the error
-and continue coding without pretending setup succeeded.
+and follow SKILL.md's user-choice rule; never claim setup succeeded.
 
 1. Detect the operating system and architecture with `uname -s` and `uname -m`.
    Map Darwin to `darwin`, Linux to `linux`, `x86_64` to `amd64`, and `arm64` or
@@ -61,8 +116,46 @@ Apply these rules to both the manifest and archive downloads:
   as if they were transient network failures.
 - If all attempts fail, report the exact download step, hostname, and error
   once. Explicitly say Doomer setup did not complete and reviews are unavailable
-  for this session, then continue the coding task. Never silently skip setup
-  or imply the code was reviewed.
+  until setup succeeds. Follow SKILL.md's user-choice rule about continuing
+  without reviews; never silently skip setup or imply the code was reviewed.
+
+## Bootstrap an updater-equipped release
+
+After verifying and extracting the pinned release below, probe the **temporary
+verified executable** for `self-update --help`. If supported, use that executable
+to run `self-update --version 2026.11.3.5`, adding `--adopt` only when the user has
+explicitly approved replacing the existing unmanaged file or link. This installs
+and records ownership even when no CLI is installed yet. Require its JSON result
+`state: ready`, then use `~/.local/bin/doomer` for onboarding. It may download the
+same release again for its own verification. Do not also perform the legacy copy
+or write installation metadata yourself.
+
+Never fall back to the legacy copy path after any updater failure, including
+a failed retry or a later user choice. Adoption must use the verified updater
+with explicit approval; it is not an escape from a failed integrity check.
+After the allowed retry is exhausted, the choices are troubleshooting or an
+explicit skip, not another unchanged retry or an unmanaged copy.
+
+On any updater error, malformed result, or non-ready result, clean up only the
+verified temporary downloads/executable created by this attempt. Do not delete
+`~/.local/bin/doomer`, its backups, or its ownership record. The updater verifies
+before replacement and rolls back a failed publication; a failed command is not
+permission to overwrite or remove an existing installation. Report the exact
+failure without claiming setup succeeded. For a fresh install, ask once whether
+to retry the verified bootstrap or skip Doomer for this session. No answer leaves
+setup pending; end the turn with the question instead of polling or re-asking. Honor one
+user-approved retry within the download limits above, without a legacy-copy
+fallback. An integrity failure (invalid manifest or checksum mismatch) is
+terminal: offer troubleshooting or skipping, not an unchanged retry. If the
+retry fails, report it and wait for the user's choice; never silently continue.
+For an existing installation, retain it and follow SKILL.md's compatibility/user-
+choice rule. Do not delete the installed binary or its ownership record.
+After any replacement, re-probe the installed executable's `onboard --help` and
+use the refresh/setup routing in SKILL.md, discarding any earlier help output.
+
+If the pinned executable lacks `self-update`, follow the legacy flow next. For
+legacy replacement, re-probe the installed executable and follow SKILL.md's
+refresh/setup routing; retain consent and the existing hook activation rules.
 
 ## Install or offer an upgrade
 

@@ -49,20 +49,123 @@ Once this skill is invoked for a coding task, complete missing Doomer onboarding
 before editing application code. Task size, expected review value, installation
 effort, and a required restart are not reasons to skip onboarding. Only the user
 may choose to continue without Doomer; respect any such choice immediately.
+An update refusal is not automatically a refusal of Doomer. If the retained
+CLI cannot support this skill, explain the concrete incompatibility and ask
+whether to continue without reviews. Reuse an existing explicit skip decision;
+do not repeat the update offer or invent a compatibility requirement. Retain
+this outcome as `compatibilityDecision: pending | use_doomer | skip` in the
+same durable task summary. No answer leaves it `pending`: keep the binary,
+do not re-probe or re-ask automatically. End the current turn with the question
+instead of polling, sleeping, or keeping a tool running. Application edits wait
+for the explicit choice; the agent is not left executing an indefinite loop.
+Silence is neither permission to skip nor permission to change the installation.
+An explicit user choice resumes the corresponding flow.
 
 Request installation permissions and repository upload consent through the
 normal approval flow. Never approve them yourself. If setup needs user action,
 present that step instead of silently opting out. If a concrete technical error
 prevents setup, report it accurately and follow the failure guidance below.
+The same user-choice rule covers manifest validation, download, and bootstrap/
+updater failures, not only version incompatibility. For a coding task, offer
+only the bounded recovery allowed by the installation reference or an explicit
+skip; end the turn if the choice is pending. For setup-only requests, report
+the failed/pending setup and stop without inventing coding work.
+
+## Check for updates once per coding session
+
+Share `updateCheckAttempted` and `updateDecision` (`not_asked`, `approved`,
+`declined`, or `finished`) between this section and the installation reference.
+Retain them in the conversation's durable task summary with the active skill
+path and pin. This section owns the decision for both update paths. The same
+combined offer below is used whichever path detects an update first; approval
+covers this active skill and its matching managed CLI in either order. It never
+covers adopting an unmanaged binary or updating independent skill copies. Keep
+`approved` until the whole requested update attempt completes, then record
+`finished`; do not finish the decision after only the first half.
+Mark the check attempted before starting it. A decline or completed
+update attempt suppresses both update offers for the rest of this session. If an earlier decision cannot
+be recovered after compaction, keep the installed pair and do not prompt again
+unless the user explicitly asks to update. Do not add a state file or scan other
+chats. A separate coding session has its own decision.
+
+The checker is the official `skills@1.7.6` package from `vercel-labs/skills`
+(requires Node >=22.20). In the current installation scope, use the cached
+package without allowing npm to fetch a checker automatically:
+
+```sh
+npm exec --offline --yes --package=skills@1.7.6 -- skills check doomer-review --project
+```
+
+For a global installation use `--global` instead of `--project`; determine scope
+from this installed skill's canonical path. Do not combine the flags. Apply the
+coding agent's normal command/network approvals. If the package is not cached,
+Node is incompatible, the subcommand is unsupported, a permission is declined,
+or the check fails, set only `updateCheckAttempted: true` and retain the current
+pin. Leave `updateDecision` unchanged (`not_asked` if no update was offered);
+`finished` is reserved for a completed update attempt, not a check.
+A failed, unknown, or unchanged skill check does not itself justify an update
+offer. Continue with the current pin: an existing managed CLI whose check
+positively reports `update_available` may trigger the combined offer below.
+A missing binary instead follows the verified fresh-install bootstrap in the
+installation reference, with its normal installation permissions, not an
+update offer or a command against a nonexistent executable.
+Never install Node, fetch another checker, retry interactively, or claim the
+skill is current. Bound the command to 30 seconds through the execution tool.
+Missing, truncated, ambiguous, or unmatched output means **unknown**, even with
+exit status zero. For decision routing, handle unknown exactly like a failed
+check: set only `updateCheckAttempted`, retain the pin and existing decision,
+and make no claim of currency. Only a positive result for this exact skill
+establishes its update status. Do not update other skills.
+
+When either check identifies an update and `updateDecision` is `not_asked`, ask:
+**“A Doomer update is available. Update the skill and its matching managed CLI
+now?”** No answer is not approval. If declined, record `declined` and retain the
+current pair. If approved, record `approved`. When a newer skill is known,
+run the scoped skill update below and reread it before selecting the CLI pin.
+If the skill check was unavailable, failed, unknown, or found no update,
+and the existing managed CLI positively reported `update_available`, update
+that CLI to the current pin through the installation reference. Fresh install
+success does not set `updateDecision: finished` unless it completes a previously
+approved combined update; otherwise leave the update decision unchanged. An existing `approved` decision needs no second question for
+the remaining half; never infer approval from `not_asked` or a failed check.
+
+For a known skill update:
+
+```sh
+npm exec --yes --package=skills@1.7.6 -- skills update doomer-review --project --yes
+```
+
+Use `--global` for a global installation. This approved command may fetch the
+pinned checker; its `--yes` flags cover only package execution/scope selection,
+never Doomer upload consent. If local edits conflict, the update is partial,
+or the skill was skipped, stop **both** halves of this update; preserve the
+existing files and binary and explain the conflict. Do not silently merge or
+switch pins. When a skill update was requested, only its success permits the
+matching binary step.
+
+After success, use file-read tools to read the newly installed `SKILL.md` and
+`references/install.md` from this skill's canonical on-disk directory, once.
+Use only the newly read pin and instructions afterward, not remembered text.
+Continue the approved update using this newly read pin; do not ask again.
+Unknown, manually replaced, or Homebrew-linked binaries require the explicit
+adoption choice in the installation reference. Record `finished` after the
+whole requested attempt; update permission never grants upload consent.
+
+The binary is shared, but updating this skill does not authorize rewriting other
+repositories' or agents' independent skill copies. Shared aliases of the same
+canonical skill update together. Other copies detect a newer managed CLI on
+invocation and must not downgrade it; their compatibility check below governs
+whether they can use it. Do not claim all installations were updated.
 
 ## Set up once
 
 Resolve the Git root. If this conversation confirms configuration and completed
-activation for this repository, continue coding without repeated setup/status
-checks, or acknowledge a repeated setup-only request and stop. A configured but
-unverified record does not qualify: follow the pending activation path below.
+activation for this repository and no update replaced its CLI, continue coding
+without repeated setup/status checks, or acknowledge a repeated setup-only
+request and stop. A configured but unverified record does not qualify: follow
+the pending activation path below.
 
-Install or verify the CLI following [installation](references/install.md).
+Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
 Use stable CLI **2026.11.3.5**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
@@ -105,8 +208,26 @@ With a coding task:
 If the substitution is still literal or empty, treat the session ID as unknown;
 do not pass the literal placeholder or borrow a Codex session ID.
 
-For Codex, add `--restart` if the CLI was installed or replaced during this turn,
-because the prompt may have arrived before its hooks could run. Claude uses the
+After replacing a CLI, discard old capability results and run `onboard --help`
+on the newly installed absolute executable. For an already-configured repository
+with a running managed watcher, run a separate `onboard --repo REPO --refresh`
+if supported. REPO identifies an approved checkout for the permission check;
+refresh uses the watcher's saved working directory and original selection. Existing loaded/trusted hook
+commands do not need reactivation merely because the executable was replaced.
+Refresh does not establish trust: missing/changed/unloaded hooks still need
+normal onboarding and the agent activation flow. This refresh preserves consent,
+hooks, and saved task state; never
+combine it with `--restart`, `--task-stdin`, or `--check-hooks`. A `not_running`
+result is a no-op, not proof of a started watcher. A refresh error is not success:
+report it without changing pause/consent or pretending the new watcher is active.
+For a new setup use normal onboarding below. If an older release lacks refresh,
+state that its old watcher has not been refreshed and retain the supported setup
+flow; do not silently claim the running process was upgraded.
+
+For normal Codex onboarding, add `--restart` if the CLI was installed or replaced
+during this turn, because the prompt may have arrived before its hooks could run.
+A successful refresh of an already-configured watcher does not require rerunning
+normal onboarding or rewriting the saved task. Claude uses the
 live-hook check below instead of an automatic restart. Remove the temporary
 input file after successful onboarding. If the session ID is unavailable, do
 not guess it: omit `--session` and `--task-stdin` (including its redirection),
