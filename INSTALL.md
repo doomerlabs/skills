@@ -257,11 +257,13 @@ Before writing either instructions file, inspect its file type and any policy
 markers. Recognize only exact standalone policy-marker lines outside fenced
 code examples and larger HTML-comment blocks. The one-line marker comments
 themselves are valid delimiters. Markers shown in examples are not live policy.
-Match a fenced block's delimiter character and closing delimiter length
-(at least the opening length). Track fenced code before scanning HTML comments;
-ignore comment-opening and comment-closing tokens inside fenced examples.
-In live text, HTML comments run from `<!--` to the next `-->`
-without nesting. Treat unclosed fences or comments, or uncertain marker context,
+Scan in source order while tracking the current Markdown block context.
+Inside a fenced code block, ignore comment tokens until its matching fence
+closes (same delimiter character, at least the opening length). Inside an HTML
+comment, ignore fence tokens until the next `-->`; comments do not nest.
+Only outside both contexts recognize a new fence or comment opener, and treat
+standalone policy-marker comments as the live delimiters. Treat unclosed fences
+or comments, or uncertain marker context,
 as conflicts requiring user direction before any write.
 A symlink, another non-regular file, or duplicated, incomplete, or
 out-of-order markers requires reporting the conflict and obtaining the user's
