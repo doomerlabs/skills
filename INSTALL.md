@@ -42,7 +42,8 @@ Desktop setup uses **Review hooks** beside the composer or
 activation flow even if an older CLI prints terminal restart instructions.
 After a CLI replacement, still re-probe the verified executable's
 `onboard --help` and follow the installation reference's capability checks.
-Keep activation unverified until the active agent's live hook check succeeds.
+Keep activation unverified until the active agent's live hook check succeeds
+or a real current-session hook callback confirms the target repository.
 For Codex, follow the skill's bounded `--check-hooks` verification; a successful
 hook may return no chat message.
 
