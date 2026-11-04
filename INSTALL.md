@@ -55,6 +55,11 @@ Before changing files, ask once, unless the user already specified their choice.
 Offer **Local setup only** first and **Create a team PR** second. Wait for the
 answer before making changes. A team-PR choice authorizes creating the branch,
 committing the scoped setup files, pushing that branch, and opening the PR.
+Creating a branch or worktree is only preparation for that choice. Its presence
+does not establish that the user requested a PR. If an earlier attempt left
+setup changes in a checkout without a confirmed publication choice, ask whether
+to keep those changes local or publish them as a PR. Reuse the existing setup
+work when possible. Honor an explicit local-only choice without asking again.
 
 Before asking, read the local setup record if present. Use
 `git rev-parse --git-common-dir` and resolve its output relative to the command's
@@ -154,9 +159,11 @@ existence alone never means it is held. If another live process holds the lock,
 wait briefly or report the contention; never bypass a held lock. Store no
 secrets or consent in this record.
 
-Treat the requested team PR as part of setup. After the skill reaches its
-setup-only completion step, finish the authorized publication steps below
-before ending the task.
+Treat the requested team PR as part of setup. Once the shareable setup files
+have been installed and verified, finish the authorized publication steps below
+before ending the task. Hook approval and live activation may remain pending
+while those files are published. Record and report publication and activation
+separately.
 
 For local setup, use the current checkout and leave the installation changes
 uncommitted. Report the changed paths when finished.
@@ -222,10 +229,12 @@ managed-binary check and verified bootstrap in `references/install.md`, which
 must still run as directed.
 
 For an authorized team PR, this guide's publication steps explicitly override
-the setup-only "Then stop" instruction in `SKILL.md`. After onboarding reaches
-its completion message, continue to step 5. Preserve all consent, trust, and
-activation requirements. A required user action still pauses onboarding;
-retain the publication state and resume when the user completes that action.
+the setup-only "Then stop" instruction in `SKILL.md`. After installing and
+verifying the shareable files, continue to step 5 even if onboarding awaits
+hook approval, a follow-up message, or a restart. Preserve all consent, trust,
+and activation requirements for enabling reviews. Publishing the authorized
+setup changes does not establish activation. A pending activation step alone
+must not leave an authorized PR uncreated.
 
 Explain that repository snapshots and edited content, including documentation,
 configuration, tests, and application code, plus task context and agent review
@@ -342,6 +351,9 @@ outdated guidance using these same rules without repeating completed publication
 
 Complete the skill's activation checks. If a restart or other user action is
 required, give the exact next step and retain the setup state for resumption.
+For an authorized team PR, continue to publication while reporting that pending
+activation step. If publication itself needs missing information or is blocked,
+identify that specific blocker.
 Report installation, configuration, and verified activation separately. Claim
 end-to-end review delivery only after a hook actually delivers a result.
 
@@ -368,6 +380,8 @@ skill source commit, validation performed, and any per-developer activation
 steps. If activation is pending, state that explicitly. Follow through after
 any required restart without repeating completed commits or opening a second
 PR. Reuse an existing PR for this setup branch.
+An isolated checkout or a local commit does not finish a requested PR. Verify
+the published PR URL and include it in the result.
 
 If there is no shareable diff, report that outcome instead of creating an empty
 commit or PR. If pushing or creating the PR is blocked, preserve the local
