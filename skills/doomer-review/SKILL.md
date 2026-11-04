@@ -55,8 +55,8 @@ Read-only inspection may continue while preparing setup. The absence of an
 AGENTS.md or CLAUDE.md instruction does not make this loaded skill optional;
 onboarding creates the integration instructions. Task size, expected review
 value, installation effort, and a required restart are not reasons to skip
-onboarding. Only the user
-may choose to continue without Doomer; respect any such choice immediately.
+onboarding. Only the user may choose to continue without Doomer; respect any
+such choice immediately.
 An update refusal is not automatically a refusal of Doomer. If the retained
 CLI cannot support this skill, explain the concrete incompatibility and ask
 whether to continue without reviews. Reuse an existing explicit skip decision;
@@ -78,6 +78,37 @@ updater failures, not only version incompatibility. For a coding task, offer
 only the bounded recovery allowed by the installation reference or an explicit
 skip; end the turn if the choice is pending. For setup-only requests, report
 the failed/pending setup and stop without inventing coding work.
+
+### When onboarding needs authorization
+
+Keep installation, onboarding authorization, repository upload consent, and
+hook activation distinct. A verified installed CLI is not completed onboarding.
+After installation succeeds, proceed to the onboarding command below; do not
+stop at explaining installation commands or propose skipping merely because
+onboarding needs permission.
+
+Use the agent's normal execution-approval mechanism for the actual onboarding
+command when required. Describe its real effects: it configures review hooks,
+obtains repository consent, and may start the watcher and send repository code
+and task context to Doomer when consent is recorded. Do not describe onboarding
+as only opening a browser or assume installation authorized uploads.
+
+If automatic approval review rejects onboarding for missing authorization,
+do not retry unchanged or work around the rejection. Ask the user explicitly:
+**“May I finish Doomer setup for this repository? It configures review hooks and
+enables sending repository code, task context, and agent review responses to
+doomer.ai after repository consent. Or would you prefer to skip Doomer for this
+session?”** Offer **“Allow Doomer setup”** and **“Skip Doomer this session”** when
+structured choices are available. Briefly identify the automatic approval
+rejection and its stated reason. Do not offer only to continue without review.
+
+Wait for the answer. If authorized, resume the documented onboarding command
+through the normal approval mechanism without reinstalling the verified CLI.
+The human must still make any repository-consent or hook-trust choice; never
+click, record, or fabricate it on their behalf. Reuse valid recorded consent
+through the CLI rather than demanding it again. If the user declines, continue
+the original task without Doomer. If approval is rejected again, report that
+blocker and stop setup; do not loop or bypass it.
 
 ## Check for updates once per coding session
 
