@@ -103,28 +103,27 @@ This explicit-choice rule takes precedence over automatic resumption.
 
 On restart, inspect records for the active `agent` whose `setupRoot` or
 `originalRoot` exactly equals the current canonical Git root. Repository
-identity alone is not a root match. Perform every applicable step below in
-order; reporting records in step 2 never skips the checks in step 3.
+identity alone is not a root match. Use the first matching case below.
 
-1. If exactly one nonterminal attempt matches, resume it with its UUID and
-   original root. If several match, ask the user which one to continue and
+1. **At least one nonterminal attempt matches.** Resume a unique match with
+   its UUID and original root. If several match, ask which one to continue and
    whether to abandon the others. Persist approved abandonments by setting
-   those records' existing `phase` field to `abandoned` before resuming.
-   When the user keeps several active attempts, have them select the intended
-   setup worktree and resume there using its exact `setupRoot` match.
-2. If no nonterminal attempt matches, report any matching terminal records and
-   their saved resources. Terminal records never conflict with one another;
-   each describes its own finished or abandoned attempt. Offer cleanup for
-   abandoned resources. They are never automatically resumed.
-3. For a matching completed attempt, verify that the skill still exists in the
-   current root and run its saved-setup and activation checks for that root
-   before describing the current checkout as ready. Never repeat that record's
-   commits, pushes, or PR creation. If setup is missing or no longer ready,
-   offer a new repair attempt while preserving the completed record.
-4. If only abandoned attempts match, obtain a new explicit choice as described
-   above before creating a new UUID. If no record matches, use the normal
-   local-or-team setup question. A different or moved checkout is a new target,
-   even if another checkout of the same repository has completed setup.
+   those records' existing `phase` to `abandoned` before resuming. When the user
+   keeps several active attempts, have them select the intended worktree and
+   resume using its exact `setupRoot` match. Readiness comes from the resumed
+   attempt's own checks. Do not run the terminal-record case at the same time.
+2. **Only terminal records match.** Report each record and its saved resources;
+   terminal records do not conflict with each other. Offer cleanup for abandoned
+   resources without resuming them. For completed records, verify the installed
+   skill and run its saved-setup and activation checks for the current root
+   before describing that checkout as ready. These checks are part of this
+   case, not a separate alternative. Never replay a completed record's commits,
+   pushes, or PR creation. If setup is missing or no longer ready, offer a new
+   repair attempt. If all matching records are abandoned, obtain a new explicit
+   setup choice before creating another UUID. Preserve all terminal records.
+3. **No records match.** Use the normal local-or-team setup question. A
+   different or moved checkout is a new target, even if another checkout of the
+   same repository has completed setup.
 
 An explicit new choice may create a new UUID after terminal outcomes have been
 reported. Reconcile any resumed record's operations with local and remote Git
