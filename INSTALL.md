@@ -88,8 +88,10 @@ activation is verified. Retain the last confirmed phase on failure. A cancelled
 attempt becomes `abandoned` and is never automatically resumed.
 
 A re-sent setup prompt or confirmation of the saved mode resumes the same
-nonterminal attempt. For an abandoned attempt, report its status and obtain a
-new explicit setup choice before creating a new UUID. Completed attempts follow
+nonterminal attempt. For an abandoned attempt, report its status and ask
+"Would you like to start a new local setup or a new team PR?" Only an answer to
+that new question creates a new UUID; a re-sent prompt or confirmation of the
+abandoned attempt's saved mode alone does not. Completed attempts follow
 the completed-setup rule below. An explicit request for a different mode, or to start over, supersedes
 an in-progress attempt. Mark only that nonterminal attempt `abandoned`, preserve
 its resources, and offer the cleanup described below for any existing branch,
@@ -102,7 +104,12 @@ rule takes precedence over automatic resumption of nonterminal attempts.
 
 On restart, select a nonterminal record matching the active `agent` and current
 `setupRoot`, or a unique nonterminal record matching `originalRoot` and
-`agent`. Both `complete` and `abandoned` are terminal. A matching `complete`
+`agent`. If no nonterminal record matches, look up terminal records by the same
+agent and root criteria. Report matching completed records as finished. If
+only abandoned records match, report their saved resources, offer cleanup,
+and use the new-setup question above before creating another attempt. If
+records conflict, ask which one the user intends to continue or replace.
+Both `complete` and `abandoned` are terminal. A matching `complete`
 record is a finished setup to report, never a reason to repeat commits, pushes,
 or PR creation. Retain an in-progress record's UUID and original root. Reconcile its recorded operations
 with the actual local and remote Git state before retrying. Never create a
