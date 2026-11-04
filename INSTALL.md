@@ -62,12 +62,21 @@ skill's installation reference.
 
 Before changing files, ask once, unless the user already specified their choice.
 
-> Would you like local setup only, or should I create a dedicated branch,
-> commit the shareable Doomer setup, and open a pull request for your team?
+> How would you like to set up Doomer?
 
-Offer **Local setup only** first and **Create a team PR** second. Wait for the
-answer before making changes. A team-PR choice authorizes creating the branch,
-committing the scoped setup files, pushing that branch, and opening the PR.
+Offer these choices in this order, including their descriptions.
+
+- **Set up on this computer**
+
+  Install and configure Doomer for you in this repository. Start using it now.
+
+- **Create a setup PR for the team**
+
+  Open a pull request adding Doomer setup instructions to the repository so
+  teammates can use it too. Each teammate completes their own local setup.
+
+Wait for the answer before making changes. A team-PR choice authorizes creating
+the branch, committing the scoped setup files, pushing that branch, and opening the PR.
 Creating a branch or worktree is only preparation for that choice. Its presence
 does not establish that the user requested a PR. If an earlier attempt left
 setup changes in a checkout without a confirmed publication choice, ask whether
