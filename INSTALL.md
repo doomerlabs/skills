@@ -30,9 +30,18 @@ If the current folder
 contains several repositories and the target is unclear, ask which to use.
 Determine whether you are running in Codex or Claude Code. Ask if you cannot
 determine the active agent. For Codex, also identify whether this is the desktop
-app or terminal. Desktop setup uses **Review hooks** beside the composer or
+app or terminal. `CODEX_INTERNAL_ORIGINATOR_OVERRIDE=Codex Desktop` confirms
+the desktop app. If that hint is absent, use the active client context or the
+user's statement. Absence alone does not identify a terminal session. If the
+client is still uncertain, ask whether the user is using Codex desktop or
+Codex in a terminal before choosing client-specific steps.
+Desktop setup uses **Review hooks** beside the composer or
 **Settings > Hooks** and continues in the same chat. Follow the skill's desktop
 activation flow even if an older CLI prints terminal restart instructions.
+After a CLI replacement, still re-probe the verified executable's
+`onboard --help` and follow the installation reference's capability checks.
+Keep activation unverified until the required checks and live hook callback
+succeed.
 
 Use a repository-local installation for the active agent.
 

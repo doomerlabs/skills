@@ -378,8 +378,12 @@ command for that agent.
 
 **Codex:** use its current `CODEX_THREAD_ID`. Distinguish the desktop app from
 the terminal using the active client context. `CODEX_INTERNAL_ORIGINATOR_OVERRIDE`
-set to `Codex Desktop` identifies a desktop session. Desktop onboarding stays in
-the current chat and uses the hook approval controls below. For setup-only:
+set to `Codex Desktop` identifies a desktop session. If it is absent, use the
+active client context or the user's statement. Absence alone does not identify
+a terminal session. If still uncertain, ask whether the user is using Codex
+desktop or Codex in a terminal before selecting the onboarding flow. Desktop
+onboarding stays in the current chat and uses the hook approval controls below.
+For setup-only:
 
 ```sh
 # In Codex terminal only, append --restart if the CLI was installed or replaced this turn.
@@ -470,7 +474,10 @@ approval dialog, invoke a terminal resume command, or write hook trust settings
 on the user's behalf. If approval or live delivery remains unverified, report
 that specific pending step and retain the activation gate. Use a restart only
 when the user confirms the hook definitions have not loaded and chooses that
-fallback. Desktop recovery stays in the desktop app.
+fallback. For that desktop fallback, have the user quit and reopen the Codex
+desktop app, reopen this same chat, and send the setup request again. Reuse the
+saved setup and original task, then finish the pending hook approval and live
+activation checks. Desktop recovery stays in the desktop app.
 
 ## Claude: verify live hooks before asking for a restart
 
@@ -549,8 +556,9 @@ For either mode, **do not repeat onboarding merely because of restart or run a
 breadcrumb-consumption command.** The bounded pending-Claude-activation recovery
 above is the exception when a later real coding prompt needs a fresh receipt.
 If hook trust is still pending, ask the
-user to review Doomer hooks in the active client's approval controls and complete any
-workspace trust prompt themselves; never select trust for them.
+user to review Doomer hooks in `/hooks` for Codex terminal or Claude Code,
+or **Review hooks / Settings > Hooks** for Codex desktop. Have the user complete
+any workspace trust prompt themselves. Never select trust for them.
 For a coding task, if no saved context is supplied, use the original request
 already in this chat; ask for it only if neither is available. Unknown trust alone must not trigger
 repeated onboarding. The user may choose to continue without reviews.
