@@ -117,6 +117,9 @@ the selected case determines which activation checks govern the current setup.
    attempt's own checks. Do not run terminal-record readiness checks at the same time.
    Re-run step 4's repository-instructions verification before completing any
    resumed attempt or advancing it from `configured` to `complete`.
+   Repair missing or outdated guidance using that step's write rules. Retain
+   the last confirmed phase until verification succeeds. If repair needs user
+   direction or permission, report the pending action and stop that attempt.
 2. **Only terminal records match.** Terminal records do not conflict with each
    other. Never resume abandoned records. For completed records, verify the installed
    skill and the repository instructions required by step 4, then run the
@@ -238,15 +241,25 @@ setup before the final ready report or a requested restart.
 Use the skill's existing, repository/session-scoped skip decisions
 (`compatibilityDecision: skip` or `onboardingAuthorization: skip_session`) and
 record a new skip in the skill's durable task summary as it directs. A current
-skip defers this step and leaves setup incomplete. It is not a permanent
-repository opt-out. When the user explicitly resumes setup, follow the skill's
+explicit skip ends this setup attempt with phase `abandoned`; report that setup
+was skipped and retain its resources. It is not a permanent repository opt-out.
+When the user explicitly resumes setup, follow the skill's
 resumption rules and require the block before reporting setup ready. Maintain
 one shared skip decision with the skill.
 
 Before writing either instructions file, inspect its file type and any policy
-markers. A symlink, another non-regular file, or duplicated, incomplete, or
+markers. Recognize only exact standalone policy-marker lines outside fenced
+code examples and larger HTML-comment blocks. The one-line marker comments
+themselves are valid delimiters. Markers shown in examples are not live policy.
+A symlink, another non-regular file, or duplicated, incomplete, or
 out-of-order markers requires reporting the conflict and obtaining the user's
 direction before changing that file. This check gates all writes below.
+
+If the user authorizes malformed-marker repair, preserve a backup outside
+tracked content. Remove only the malformed marker lines and obsolete Doomer
+content whose boundaries the user has confirmed, preserving all other text.
+Then insert one complete block and verify it under the rules below. If those
+boundaries remain unclear, request clarification and leave the file intact.
 
 Create `AGENTS.md` if it is missing. Append the block with blank lines around
 it only when the existing file contains neither policy marker. If exactly one
@@ -255,6 +268,7 @@ that block. Preserve all surrounding text and file permissions. Keep the
 CLI-owned `doomer-review` block intact; onboarding may regenerate it. These
 separate markers keep the per-turn policy from being overwritten on later
 onboarding runs. Preserve unmarked repository-specific instructions.
+Insert the contents of this example without its surrounding code fences.
 
 ```markdown
 <!-- doomer-review-policy:start -->
@@ -295,7 +309,8 @@ top-level line. A mention in prose, a comment, or an import inside another file
 does not satisfy this check. Preserve its existing text and the CLI-owned Doomer block. When both
 agents are requested, keep one shared policy block in `AGENTS.md`.
 
-Write changes atomically. If any existing rule
+Preserve the existing permissions of both `AGENTS.md` and `CLAUDE.md`, and
+write their changes atomically. If any existing rule
 explicitly conflicts with the requested Doomer policy, surface the conflict
 instead of silently deleting that rule.
 
