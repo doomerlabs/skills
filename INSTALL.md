@@ -115,6 +115,8 @@ the selected case determines which activation checks govern the current setup.
    keeps several active attempts, have them select the intended worktree and
    resume using its exact `setupRoot` match. Readiness comes from the resumed
    attempt's own checks. Do not run terminal-record readiness checks at the same time.
+   Re-run step 4's repository-instructions verification before completing any
+   resumed attempt or advancing it from `configured` to `complete`.
 2. **Only terminal records match.** Terminal records do not conflict with each
    other. Never resume abandoned records. For completed records, verify the installed
    skill and the repository instructions required by step 4, then run the
@@ -228,15 +230,28 @@ from repository consent. Respect an existing paused watcher.
 
 #### Install the repository instructions
 
-After onboarding has written its repository instructions, and before the final
-setup report or a requested restart, ensure the Git root contains `AGENTS.md`
-with the block below. This is a required part of both local and team setup.
-Honor an explicit choice to skip Doomer instead of adding rules that contradict
-that choice.
+After the onboarding step returns, whether or not it wrote repository
+instructions, ensure the Git root contains `AGENTS.md` with the block below.
+Verify it again when resuming setup. This is required for both local and team
+setup before the final ready report or a requested restart.
 
-Create `AGENTS.md` if it is missing. Otherwise preserve all existing text and
-append the block with blank lines around it. If exactly one complete
-`doomer-review-policy` block already exists, update only that block. Keep the
+Use the skill's existing, repository/session-scoped skip decisions
+(`compatibilityDecision: skip` or `onboardingAuthorization: skip_session`) and
+record a new skip in the skill's durable task summary as it directs. A current
+skip defers this step and leaves setup incomplete. It is not a permanent
+repository opt-out. When the user explicitly resumes setup, follow the skill's
+resumption rules and require the block before reporting setup ready. Maintain
+one shared skip decision with the skill.
+
+Before writing either instructions file, inspect its file type and any policy
+markers. A symlink, another non-regular file, or duplicated, incomplete, or
+out-of-order markers requires reporting the conflict and obtaining the user's
+direction before changing that file. This check gates all writes below.
+
+Create `AGENTS.md` if it is missing. Append the block with blank lines around
+it only when the existing file contains neither policy marker. If exactly one
+start marker and one end marker form a complete ordered block, update only
+that block. Preserve all surrounding text and file permissions. Keep the
 CLI-owned `doomer-review` block intact; onboarding may regenerate it. These
 separate markers keep the per-turn policy from being overwritten on later
 onboarding runs. Preserve unmarked repository-specific instructions.
@@ -273,14 +288,14 @@ including a review with no findings.
 
 For Claude Code, also ensure the root `CLAUDE.md` loads this shared policy with
 an `@AGENTS.md` import on its own line, outside code fences. Create `CLAUDE.md`
-with that import if missing; otherwise add it only if an effective import is
-absent. Preserve its existing text and the CLI-owned Doomer block. When both
+with that import if missing. For an existing file, count only a standalone line
+whose trimmed text is exactly `@AGENTS.md`, outside fenced code blocks and HTML
+comments, as the canonical import. If no such line exists, add it as a new
+top-level line. A mention in prose, a comment, or an import inside another file
+does not satisfy this check. Preserve its existing text and the CLI-owned Doomer block. When both
 agents are requested, keep one shared policy block in `AGENTS.md`.
 
-If either instructions file is a symlink or another non-regular file, or its
-policy markers are duplicated, incomplete, or out of order, report the conflict
-and obtain the user's direction before changing that file. Preserve the
-original file permissions and write changes atomically. If any existing rule
+Write changes atomically. If any existing rule
 explicitly conflicts with the requested Doomer policy, surface the conflict
 instead of silently deleting that rule.
 
