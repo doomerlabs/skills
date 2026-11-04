@@ -4,6 +4,23 @@ Agent skills for [Doomer](https://doomer.ai).
 
 ## Install
 
+### Ask your coding agent
+
+Paste this into Codex or Claude Code while working in your repository.
+
+```text
+Read https://raw.githubusercontent.com/doomerlabs/skills/main/INSTALL.md and
+follow the instructions to set up Doomer in this repository.
+```
+
+[The installation guide](INSTALL.md) downloads the skill directly, without
+`npx` or Node.js, and completes CLI setup, repository consent, and hook
+activation. Both choices keep the skill project-local. Local setup leaves the
+changes uncommitted. Team setup opens a focused PR with shareable setup files;
+each developer completes their own local activation.
+
+### Use the skills installer
+
 Run this from the repository you want Doomer to review:
 
 ```sh
