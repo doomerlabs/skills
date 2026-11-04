@@ -9,13 +9,17 @@ version even if another repository uses a newer one.
 
 Store releases at `~/.local/share/doomer/versions/VERSION/doomer`, with the
 updater's `installation.json` beside each executable. Set `doomer_cli` to this
-version-specific absolute path. The shared `~/.local/bin/doomer` command is a
+version-specific absolute path in the executing shell on every editing turn,
+using the freshly read pin. Require the path to be executable before invoking
+it. A missing variable or missing binary is an installation failure and does
+not change the online skill-update decision. Both project-local and globally
+installed skills use this same per-user release cache. The shared `~/.local/bin/doomer` command is a
 checkout-aware launcher. Its own version is independent of this checkout's pin.
 
 If the selected version is present, use that executable for the local check:
 
 ```sh
-"$doomer_cli" self-update --check --side-by-side --version 2026.11.3.7
+"${doomer_cli:?Set the verified pinned CLI path}" self-update --check --side-by-side --version 2026.11.3.7
 ```
 
 Inspect the JSON result. `ready` means the bytes match the managed record and
@@ -133,25 +137,40 @@ onboarding and review commands.
 If the shared launcher is missing, install it from the verified release:
 
 ```sh
-"$doomer_cli" self-update --side-by-side --install-launcher --version 2026.11.3.7
+"${doomer_cli:?Set the verified pinned CLI path}" self-update --side-by-side --install-launcher --version 2026.11.3.7
 ```
 
 If a legacy global installation exists, explain the migration and ask once
 whether to install the checkout-aware launcher while keeping a backup. Preserve
-that decision with the canonical launcher path and selected version. For an
+that `launcherMigrationDecision` with the canonical launcher path, selected
+version, and protocol. Keep it separate from legacy binary adoption decisions. For an
 unmanaged file or symlink, also explain the exact path or link target and use
 `--adopt` only with explicit approval. A symlink's target remains untouched.
 Never change a Homebrew installation or shell startup files.
 
 Before replacing the shared launcher or migrating existing hook registration,
-identify the configured
-repositories and their installed skill pins. Pins predating runtime protocol 1
+use the CLI's migration guard over the saved profile configuration. Its
+authoritative input is each `watch/<profile-key>/config.json` under
+`DOOMER_CONFIG_DIR`, or the platform's Doomer config directory when that override
+is unset (`~/Library/Application Support/doomer` on macOS, and
+`${XDG_CONFIG_HOME:-~/.config}/doomer` on Linux). It checks every saved
+`directories` checkout, reads the installed skill pin, and verifies that release
+and its runtime protocol. Any missing or incompatible pin blocks replacement
+before the launcher changes. A legacy `all_repositories` grant must first be
+converted to explicit repositories with the user's approval. Pins predating runtime protocol 1
 need a compatible skill update before their hooks can join the new dispatcher.
 Explain any affected checkouts and resolve those updates with the user before
 replacing their shared hook registration. A binary backup alone does not make
 old hook protocols compatible. If migration cannot proceed, retain the old
 launcher and hooks and report the pending compatibility work.
 
+The launcher-install command creates its backup before atomically replacing
+the executable. If installation or ownership-record publication fails, the CLI
+restores the prior executable and preserves its prior record. Stop on any error
+and recheck actual state before retrying. Never repair ownership metadata by
+hand or use a manual-copy fallback. A later onboarding or hook-registration
+failure is a separate pending activation step; retain the verified installation
+and backup, report the failure, and resume that step without reinstalling.
 The launcher-install result names any backup. Record that path. Launcher
 migration alone does not authorize uploads or establish hook trust. Use the
 normal onboarding flow to install the shared dispatcher hook and let the user

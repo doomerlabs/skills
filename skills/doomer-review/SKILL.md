@@ -175,10 +175,18 @@ Also share `adoptionDecision: not_asked | approved | declined | finished` with
 [installation](references/install.md), keyed by canonical skill path,
 destination path, and target CLI version. Keep it in the durable summary
 across turns, restarts, and compaction. It is separate from `updateDecision`;
-its `finished` means the approved launcher migration succeeded. Consult it before
+its `finished` means the approved legacy binary replacement succeeded. Consult it before
 replacement offers, retain declines, and keep approvals until that replacement
 completes. A session-wide skip suppresses both decision flows, including pending
 work; retain its record for an explicit user resumption.
+
+Record launcher migration separately as
+`launcherMigrationDecision: not_asked | approved | declined | finished`, keyed
+by the canonical launcher path, target release, and runtime protocol. An old
+`adoptionDecision: finished` records only a legacy binary replacement and never
+establishes launcher migration. Recheck the installed launcher and its protocol
+before offering a still-needed migration or marking this new decision finished.
+Preserve prior adoption decisions with their original meaning.
 
 Resolve the skill directory's real path before keying either decision. For a
 replacement destination, resolve the parent directory and retain the final
@@ -301,8 +309,11 @@ and the read-only `self-update --check` probe precede this check when needed to
 obtain a verified compatible executable. A declined update does not prevent
 checking saved setup with a compatible retained CLI.
 
-In the command templates below, set `doomer_cli` to the verified, pinned
-executable at `~/.local/share/doomer/versions/VERSION/doomer` and `doomer_repo_root` to the Git root resolved from the actual
+In the command templates below, set `doomer_cli` to the verified absolute path
+returned by the installation check. Both project-local and global skills use
+the per-user `~/.local/share/doomer/versions/VERSION/doomer` cache. Skill scope
+changes which skill is read, not the binary cache location. Set
+`doomer_repo_root` to the Git root resolved from the actual
 checkout being edited. Assign both in the executing shell before using them;
 never run a template with either value empty or unresolved.
 
@@ -416,13 +427,20 @@ After installing a new selected release, discard old capability results and run
 `onboard --help` on its verified absolute executable. If the checkout's pin
 changed, use normal onboarding for that checkout to start or reuse its selected
 runtime with existing consent. Preserve the original task and follow the
-active agent's hook activation flow. The stable hook dispatcher is shared, so
-a new release pin alone does not require reinstalling or trusting a changed
-hook definition. Verify actual hook delivery before claiming activation.
+active agent's hook activation flow. First verify the selected binary's exact
+managed identity and `runtime-info` protocol 1. Reuse hook configuration only
+when the installed dispatcher definition is unchanged. Have the user approve
+any new or changed definition through the active client's hook controls.
+Revalidate activation with a current-session callback from the selected runtime
+before claiming readiness.
 
 Do not refresh or stop the old version's watcher merely because this checkout
-changed pins. Other checkouts may still require it. An unchanged pin with
-verified active hooks reuses its runtime.
+changed pins. The runtime's checkout filter removes a checkout whose pin no
+longer matches on its next reconciliation. The old process may remain available
+for other checkouts using that version. Confirm the new runtime's callback;
+report a stale old checkout assignment as a runtime issue instead of stopping a
+shared version indiscriminately. An unchanged pin with verified active hooks
+reuses its runtime.
 
 For normal Codex terminal onboarding, add `--restart` if the CLI was installed
 or replaced during this turn, because the prompt may have arrived before its
