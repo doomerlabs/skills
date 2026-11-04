@@ -88,37 +88,47 @@ activation is verified. Retain the last confirmed phase on failure. A cancelled
 attempt becomes `abandoned` and is never automatically resumed.
 
 A re-sent setup prompt or confirmation of the saved mode resumes the same
-nonterminal attempt. For an abandoned attempt, report its status and ask
-"Would you like to start a new local setup or a new team PR?" Only an answer to
-that new question creates a new UUID; a re-sent prompt or confirmation of the
-abandoned attempt's saved mode alone does not. Completed attempts follow
-the completed-setup rule below. An explicit request for a different mode, or to start over, supersedes
-an in-progress attempt. Mark only that nonterminal attempt `abandoned`, preserve
-its resources, and offer the cleanup described below for any existing branch,
-worktree, commit, or PR before starting a new UUID. Keep resources the user
-chooses to retain. Preserve terminal records permanently with their original
-outcome. For a completed setup, report its result and existing PR first. A
-different mode or an explicit start-over request may then create a new UUID;
-repeating the same request reports the completed result. This explicit-choice
-rule takes precedence over automatic resumption of nonterminal attempts.
+nonterminal attempt. An unambiguous request for a new attempt, a different
+mode, or to start over is a new choice, whether volunteered by the user or
+answered in their own words. For example, "start a new local setup" is sufficient.
+A bare "yes" to an either/or question requires clarifying the mode. A generic
+re-sent prompt or confirmation of an abandoned attempt's old mode is not a new
+choice; ask whether the user wants a new local setup or a new team PR.
 
-On restart, select a nonterminal record matching the active `agent` and current
-`setupRoot`, or a unique nonterminal record matching `originalRoot` and
-`agent`. If no nonterminal record matches, look up terminal records by the same
-agent and root criteria. Report matching completed records as finished. If
-only abandoned records match, report their saved resources, offer cleanup,
-and use the new-setup question above before creating another attempt. If
-records conflict, ask which nonterminal attempt the user intends to continue.
-Preserve all unselected records and all terminal records. An explicit request
-to start over follows the new-attempt rule above, using a new UUID.
-Both `complete` and `abandoned` are terminal. A matching `complete`
-record is a finished setup to report, never a reason to repeat commits, pushes,
-or PR creation. Retain an in-progress record's UUID and original root. Reconcile its recorded operations
-with the actual local and remote Git state before retrying. Never create a
-second attempt when one can be resumed. A new attempt requires an explicit
-user request and a new UUID, preserving earlier records. If multiple records
-match, required fields are missing, values violate this schema, or recorded
-resources belong to another repository or attempt, ask for clarification.
+A new choice supersedes a conflicting nonterminal attempt. Mark only that
+attempt `abandoned`, preserve its resources, and offer the cleanup below
+before starting a new UUID. Keep resources the user chooses to retain.
+Preserve all terminal records permanently with their original outcomes.
+This explicit-choice rule takes precedence over automatic resumption.
+
+On restart, inspect records for the active `agent` whose `setupRoot` or
+`originalRoot` exactly equals the current canonical Git root. Repository
+identity alone is not a root match. Apply these cases in order.
+
+1. If exactly one nonterminal attempt matches, resume it with its UUID and
+   original root. If several match, ask the user which one to continue and
+   whether to abandon the others. Persist that disposition before resuming.
+   When the user keeps several active attempts, have them select the intended
+   setup worktree and resume there using its exact `setupRoot` match.
+2. If no nonterminal attempt matches, report any matching terminal records and
+   their saved resources. Terminal records never conflict with one another;
+   each describes its own finished or abandoned attempt. Offer cleanup for
+   abandoned resources. They are never automatically resumed.
+3. For a matching completed attempt, verify that the skill still exists in the
+   current root and run its saved-setup and activation checks for that root
+   before describing the current checkout as ready. Never repeat that record's
+   commits, pushes, or PR creation. If setup is missing or no longer ready,
+   offer a new repair attempt while preserving the completed record.
+4. If only abandoned attempts match, obtain a new explicit choice as described
+   above before creating a new UUID. If no record matches, use the normal
+   local-or-team setup question. A different or moved checkout is a new target,
+   even if another checkout of the same repository has completed setup.
+
+An explicit new choice may create a new UUID after terminal outcomes have been
+reported. Reconcile any resumed record's operations with local and remote Git
+state before retrying. Never create another attempt merely because a session
+restarted. If required fields are missing, values violate this schema, or
+recorded resources belong to another repository or attempt, ask for clarification.
 Null operation fields are valid only before those operations are confirmed.
 
 Serialize record updates with an OS-managed, flock-style advisory lock on
