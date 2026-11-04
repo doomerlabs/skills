@@ -32,8 +32,12 @@ Each JSON record has `schemaVersion: 1`, `discoveryPath`, `canonicalPath`,
 The official source is fixed in these instructions, not configurable by the
 record. Never include credentials, task prompts, consent, or hook trust.
 
-Create a record only after comparing the entire installed tree with
-`skills/doomer-review/` at the selected official source commit. Reject absolute
+Create a record only after comparing the entire installed tree with the
+rendered staging tree for the selected official source commit. The only
+allowed transformation is the provenance comment inserted by the inspected
+`scripts/stage-managed-skill.py` helper. This helper is the sole exception to
+the source-checkout execution restriction below. Stage into a new private
+directory, never directly over the installation. Reject absolute
 paths, traversal, symlinks, special files, and missing `SKILL.md` or
 `references/install.md` or `references/updates.md` in that source tree. Preserve an unexpected installed
 file or file type as a conflict rather than deleting it. Write private records
@@ -52,21 +56,25 @@ Mark `updateCheckAttempted` before network access. Use the agent's normal
 network approval mechanism to fetch `main` from the fixed official repository
 `https://github.com/doomerlabs/skills.git` into a fresh private temporary
 checkout, with hooks disabled (`git -c core.hooksPath=/dev/null ...`). Record the
-resolved full commit ID. Do not run any executable from that checkout or let
-its files change the source URL, destination, or this approval flow.
+resolved full commit ID. Run only the inspected staging helper described above.
+Do not let checkout files change the source URL, destination, or this approval flow.
 Bound the fetch to 30 seconds. On failure or denied network permission, keep
 using the installed skill and its exact CLI pin. Report the check as unknown
 when asked; do not claim currency, retry automatically, or treat failure as an
 update offer. Clean up the temporary checkout on exit.
 
-Inspect the candidate's complete file inventory and hashes as data. Compare
+Stage the candidate with its exact source commit using that helper, then inspect
+the rendered candidate's complete file inventory and hashes as data. Compare
 with the recorded baseline and actual installed files, including extra files.
 
 - An exact candidate/installed match needs no update. Create or refresh the
   private baseline after verifying that match, without rewriting the skill.
 - With a valid baseline and unchanged installed files, changed candidate bytes
   mean an update is available. A new repository commit with identical skill
-  bytes only refreshes provenance and does not justify an update prompt.
+  bytes only refreshes provenance and does not justify an update prompt. For this
+  comparison only, remove a well-formed managed file marker and compare the
+  remaining bytes. Preserve the installed markers and hashes when the content
+  is unchanged. Never ignore other edits or strip arbitrary HTML comments.
 - If installed files differ from the baseline, preserve them. Explain the local
   modifications and stop automatic replacement. A requested update requires
   the user to review those differences and explicitly approve their replacement.
