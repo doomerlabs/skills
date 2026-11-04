@@ -177,7 +177,21 @@ destination path, and target CLI version. Keep it in the durable summary
 across turns, restarts, and compaction. It is separate from `updateDecision`;
 its `finished` means the approved replacement succeeded. Consult it before
 replacement offers, retain declines, and keep approvals until that replacement
-completes. A session-wide skip suppresses both decision flows.
+completes. A session-wide skip suppresses both decision flows, including pending
+work; retain its record for an explicit user resumption.
+
+Resolve the skill directory's real path before keying either decision. For a
+replacement destination, resolve the parent directory and retain the final
+filename so approval replaces the link itself rather than its target. Persist
+these resolved paths and reuse them after restart. If relocation makes the
+record's identity uncertain, report the conflict without re-offering or
+transferring approval automatically.
+
+Adoption approval covers exactly its recorded target version. A pending
+adoption resumes only with that same pin. If the pin changed, retain the
+original record and report the conflict before replacement; do not carry its
+approval to a different version. A successful adoption therefore records
+`finished` against the same version that was approved.
 
 The combined offer below covers this active skill and its matching managed CLI
 in either order. If an approved skill update reveals a different pin, carry

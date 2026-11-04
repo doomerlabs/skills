@@ -14,7 +14,9 @@ skill are also exempt from these checks.
 For replacement/adoption offers in both the managed and legacy flows, retain
 `adoptionDecision: not_asked | approved | declined | finished` in the same
 durable summary, keyed by canonical skill path, destination path, and target
-CLI version. Record the user's answer before continuing and consult it across
+CLI version, using SKILL.md's path-resolution rules. Freeze that target for
+the approved replacement; a changed pin follows SKILL.md's conflict rule.
+Record the user's answer before continuing and consult it across
 turns, restarts, and compaction before offering replacement again. A declined
 replacement preserves the existing binary and routes to the shared
 compatibility choice without repeating the replacement offer. Approval applies
