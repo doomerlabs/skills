@@ -245,7 +245,10 @@ explicit skip ends this setup attempt with phase `abandoned`; report that setup
 was skipped and retain its resources. It is not a permanent repository opt-out.
 The skill's durable summary is conversation state, separate from a coding-task
 handoff file. The abandoned phase in the existing private setup record also
-prevents automatic resumption after a restart; creating a task file is unnecessary.
+prevents automatic resumption after a restart. Read that persisted phase before
+any step 3 download or step 4 probe: an abandoned attempt reports its outcome
+and waits for an explicit new setup choice under the terminal-record rules.
+This gate applies even when no conversation summary survives the restart.
 When the user explicitly resumes setup, follow the skill's
 resumption rules and require the block before reporting setup ready. Maintain
 one shared skip decision with the skill.
@@ -255,7 +258,9 @@ markers. Recognize only exact standalone policy-marker lines outside fenced
 code examples and larger HTML-comment blocks. The one-line marker comments
 themselves are valid delimiters. Markers shown in examples are not live policy.
 Match a fenced block's delimiter character and closing delimiter length
-(at least the opening length). HTML comments run from `<!--` to the next `-->`
+(at least the opening length). Track fenced code before scanning HTML comments;
+ignore comment-opening and comment-closing tokens inside fenced examples.
+In live text, HTML comments run from `<!--` to the next `-->`
 without nesting. Treat unclosed fences or comments, or uncertain marker context,
 as conflicts requiring user direction before any write.
 A symlink, another non-regular file, or duplicated, incomplete, or
