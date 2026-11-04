@@ -65,12 +65,21 @@ skill's installation reference.
 
 Before changing files, ask once, unless the user already specified their choice.
 
-> Would you like local setup only, or should I create a dedicated branch,
-> commit the shareable Doomer setup, and open a pull request for your team?
+> How would you like to set up Doomer?
 
-Offer **Local setup only** first and **Create a team PR** second. Wait for the
-answer before making changes. A team-PR choice authorizes creating the branch,
-committing the scoped setup files, pushing that branch, and opening the PR.
+Offer these choices in this order, including their descriptions.
+
+- **Set up on this computer**
+
+  Install and configure Doomer for you in this repository. Start using it now.
+
+- **Create a setup PR for the team**
+
+  Open a pull request adding Doomer setup instructions to the repository so
+  teammates can use it too. Each teammate completes their own local setup.
+
+Wait for the answer before making changes. A team-PR choice authorizes creating
+the branch, committing the scoped setup files, pushing that branch, and opening the PR.
 Creating a branch or worktree is only preparation for that choice. Its presence
 does not establish that the user requested a PR. If an earlier attempt left
 setup changes in a checkout without a confirmed publication choice, ask whether
@@ -212,11 +221,18 @@ record the resolved commit ID. The source directory is
 
 Before copying, verify that the source includes `SKILL.md` with the skill name
 `doomer-review`, `references/install.md`, and `references/updates.md`. Read
-these files. Copy the complete
-skill directory, including its supporting files, into the destination above.
+these files. Read and inspect the official source's
+`scripts/stage-managed-skill.py`, then run it with the verified source checkout,
+its exact full commit ID, and a new private staging-directory path. This helper
+is the only source-checkout executable permitted by this installation flow.
+It stages the complete skill inventory and marks Markdown files with their
+source revision and path. Validate that staging inventory, then copy it into
+the destination above. Preserve the markers, including their position after
+SKILL.md's YAML frontmatter.
 Validate all relative paths and reject symlinks or special files in the source.
 After verifying the full installed inventory, record its source revision and
-file hashes using `references/updates.md`. Keep this provenance in private
+file hashes using `references/updates.md`. Compare installation bytes to the
+rendered staging tree, not the unmarked upstream tree. Keep the baseline record in private
 installation metadata, outside the repository's tracked files. Do not create
 or modify `skills-lock.json`; the direct update flow uses Git and this baseline.
 Keep temporary checkout files outside the user's repository, and remove only
@@ -226,7 +242,7 @@ If you cannot fetch or identify the source, report the failure and stop
 installation.
 
 If the destination already exists, compare its full file inventory and file
-contents with the fetched skill, including `SKILL.md`, `references/install.md`,
+contents with the rendered staging tree, including `SKILL.md`, `references/install.md`,
 and `references/updates.md`. Reuse requires an exact match of the entire
 inventory and every file, not just those three named files. A copy missing
 `references/updates.md` requires an approved replacement before reuse or
@@ -331,7 +347,17 @@ copy or required files are missing, and add the newly installed agent. If any
 active agent, including a listed agent, encounters this block without its own
 installed copy, continue its normal task and explain
 how to opt into setup if requested; this block does not authorize installing it.
-Insert the generated contents without the surrounding code fences or placeholder.
+Use `templates/review-policy.md` at the same verified source commit as the
+skill. Render only `INSTALLED_AGENT_SKILL_PATHS` as specified above. Add this
+metadata comment immediately after `<!-- doomer-review-policy:start -->`,
+then the rendered template and `<!-- doomer-managed:end -->` before the
+existing policy end marker. Metadata fields use plain values on separate lines:
+`package: doomerlabs/skills`, `revision: FULL_SOURCE_COMMIT`,
+`source: templates/review-policy.md`, `kind: block`, and
+`agents: codex`, `agents: claude`, or `agents: codex,claude`.
+The comment opens with `<!-- doomer-managed` and closes with `-->`.
+Keep exactly the template's bytes outside the substituted agent list.
+Do not add whole-file exclusions to AGENTS.md or CLAUDE.md.
 
 ```markdown
 <!-- doomer-review-policy:start -->
