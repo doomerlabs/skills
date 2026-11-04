@@ -88,7 +88,9 @@ activation is verified. Retain the last confirmed phase on failure. A cancelled
 attempt becomes `abandoned` and is never automatically resumed.
 
 A re-sent setup prompt or confirmation of the saved mode resumes the same
-attempt. An explicit request for a different mode, or to start over, supersedes
+nonterminal attempt. For an abandoned attempt, report its status and obtain a
+new explicit setup choice before creating a new UUID. Completed attempts follow
+the completed-setup rule below. An explicit request for a different mode, or to start over, supersedes
 an in-progress attempt. Mark only that nonterminal attempt `abandoned`, preserve
 its resources, and offer the cleanup described below for any existing branch,
 worktree, commit, or PR before starting a new UUID. Keep resources the user
