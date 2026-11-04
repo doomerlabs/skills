@@ -114,22 +114,45 @@ through the CLI rather than demanding it again. If the user declines, continue
 the original task without Doomer. If approval is rejected again, report that
 blocker and stop setup; do not loop or bypass it.
 
-## Check for updates once per coding session
+## Check the local pin each turn
 
-Share `updateCheckAttempted` and `updateDecision` (`not_asked`, `approved`,
-`declined`, or `finished`) between this section and the installation reference.
-Retain them in the conversation's durable task summary with the active skill
-path and pin. This section owns the decision for both update paths. The same
-combined offer below is used whichever path detects an update first; approval
-covers this active skill and its matching managed CLI in either order. It never
-covers adopting an unmanaged binary or updating independent skill copies. Keep
-`approved` until the whole requested update attempt completes, then record
-`finished`; do not finish the decision after only the first half.
-Mark the check attempted before starting it. A decline or completed
-update attempt suppresses both update offers for the rest of this session. If an earlier decision cannot
-be recovered after compaction, keep the installed pair and do not prompt again
-unless the user explicitly asks to update. Do not add a state file or scan other
-chats. A separate coding session has its own decision.
+At the start of each user turn that uses this skill, reread `SKILL.md` and
+`references/install.md` from the active skill's canonical on-disk directory.
+Do this before reusing a prior setup decision. The files may have been updated
+outside this chat. Use their current CLI pin, not a version remembered from an
+earlier turn. Skip this check for read-only discussion or edits solely to this
+skill, and honor an explicit session-wide choice to skip Doomer.
+
+Run the installation reference's local managed check once in that turn. A
+matching managed binary needs no update prompt. A changed pin follows the
+version-specific decision below. A completed setup or update from an earlier
+turn does not bypass this check. This local check does not trigger an online
+skill check or repeat repository consent or hook trust.
+
+## Check online for skill updates once per coding session
+
+Keep `updateCheckAttempted` for the online skill check separate from the local
+check above. Share `updateDecision` (`not_asked`, `approved`, `declined`, or
+`finished`) with the installation reference, keyed by the active canonical
+skill path and target CLI version. Keep each target's decision in the durable
+conversation summary, together with the last observed pin and CLI version.
+Returning to a previously declined or completed target reuses its decision.
+A newly observed target version begins at `not_asked`; approval for an earlier
+version does not authorize a later one. An explicit session-wide skip still
+wins over a new target.
+
+The combined offer below covers this active skill and its matching managed CLI
+in either order. If an approved skill update reveals a different pin, carry
+that approval only into completing that same update attempt, then record
+`finished` against its resulting version. It never authorizes adoption of an
+unmanaged binary or updating independent skill copies. Keep `approved` until
+the whole requested attempt completes.
+
+Mark the online check attempted before starting it, at most once per session,
+even if a later turn discovers a changed local pin. If an earlier decision
+cannot be recovered after compaction, still perform the local check, but do not
+repeat an update offer without an explicit user update request. Do not add a
+state file or scan other chats. A separate coding session has its own decisions.
 
 The checker is the official `skills@1.7.6` package from `vercel-labs/skills`
 (requires Node >=22.20). In the current installation scope, use the cached
@@ -186,8 +209,8 @@ existing files and binary and explain the conflict. Do not silently merge or
 switch pins. When a skill update was requested, only its success permits the
 matching binary step.
 
-After success, use file-read tools to read the newly installed `SKILL.md` and
-`references/install.md` from this skill's canonical on-disk directory, once.
+After success, use file-read tools to reread the newly installed `SKILL.md` and
+`references/install.md` from this skill's canonical on-disk directory.
 Use only the newly read pin and instructions afterward, not remembered text.
 Continue the approved update using this newly read pin; do not ask again.
 Unknown, manually replaced, or Homebrew-linked binaries require the explicit
@@ -203,8 +226,9 @@ whether they can use it. Do not claim all installations were updated.
 ## Set up once
 
 Resolve the Git root of the repository being edited, not the org directory that
-contains the chat. If this conversation already verified its saved setup and
-no update replaced the CLI, continue without repeated setup/status checks.
+contains the chat. After the per-turn local pin check, if this conversation
+already verified its saved setup and no update replaced the CLI, continue
+without repeated setup/status checks.
 
 ### Reuse saved setup across chats
 
