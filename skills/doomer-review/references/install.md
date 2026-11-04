@@ -1,84 +1,39 @@
-# Install the verified CLI
+# Install the verified, checkout-pinned CLI
 
-## Managed update fast path
+## Resolve and verify the selected release
 
-First consult the shared durable decisions in SKILL.md. A recorded session-wide
-`compatibilityDecision: skip` (including `onboardingAuthorization: skip_session`)
-skips this entire installation/update flow, including probes and update offers,
-until the user explicitly resumes Doomer. Retain onboarding authorization and
-any blocked reason across turns; installation success does not clear them.
-Resume an in-flight `updateAttempt` under its existing approval before looking
-up a new version-scoped decision. Requests solely discussing or editing this
-skill are also exempt from these checks.
+Consult the shared decisions in SKILL.md first. Honor a session-wide skip and
+resume an approved update attempt with its recorded pin. Read this file's
+release heading from the current checkout each editing turn. Use that exact
+version even if another repository uses a newer one.
 
-For replacement/adoption offers in both the managed and legacy flows, retain
-`adoptionDecision: not_asked | approved | declined | finished` in the same
-durable summary, keyed by canonical skill path, destination path, and target
-CLI version, using SKILL.md's path-resolution rules. Freeze that target for
-the approved replacement; a changed pin follows SKILL.md's conflict rule.
-Record the user's answer before continuing and consult it across
-turns, restarts, and compaction before offering replacement again. A declined
-replacement preserves the existing binary and routes to the shared
-compatibility choice without repeating the replacement offer. Approval applies
-only to that replacement; record `finished` after success. A session-wide skip
-also sets `compatibilityDecision: skip` and suppresses the whole flow.
+Store releases at `~/.local/share/doomer/versions/VERSION/doomer`, with the
+updater's `installation.json` beside each executable. Set `doomer_cli` to this
+version-specific absolute path. The shared `~/.local/bin/doomer` command is a
+checkout-aware launcher. Its own version is independent of this checkout's pin.
 
-Once per user turn that uses this skill, reread this reference's current pin
-and check `~/.local/bin/doomer`. If present, probe `self-update --help` when its
-capability is unknown or the binary changed. If supported, use its absolute
-path to run this local, read-only check, even when setup succeeded earlier:
+If the selected version is present, use that executable for the local check:
 
 ```sh
-"$HOME/.local/bin/doomer" self-update --check --version 2026.11.3.7
+"$doomer_cli" self-update --check --side-by-side --version 2026.11.3.7
 ```
 
-This reads only installation metadata and the binary; it does not upload code,
-read logins, or change files. Location alone is not proof of ownership. Inspect
-the JSON result:
+Inspect the JSON result. `ready` means the bytes match the managed record and
+exact pin. Reuse that path. `missing` requires the verified bootstrap below.
+A modified, unmanaged, symlinked, or unsupported version path requires reporting
+the conflict. Preserve it for inspection rather than replacing immutable
+release files. A newer version elsewhere never satisfies this checkout's pin.
 
-- `ready`: the installed bytes match a managed record for this pin. Reuse it.
-- `update_available`: follow SKILL.md's shared update decision and combined offer.
-  If `not_asked`, offer the update even when the older CLI is incompatible.
-  If `approved`, update to the selected skill pin without another question; for
-  the current pin run `self-update --version 2026.11.3.7` using the verified
-  absolute path. A known skill update goes first, as defined in SKILL.md.
-  If `declined` or `finished` for this canonical skill path and target version,
-  do not offer another update for that target. Reuse the retained
-  CLI if it supports the required workflow; otherwise follow SKILL.md's
-  user-choice rule for continuing without reviews. Do not unilaterally skip.
-- `missing`: follow the verified bootstrap below.
-- `unmanaged`, `modified`, or `symlink`: explain that the file is not a matching
-  managed installation. Offer **“Replace the private CLI at ~/.local/bin/doomer
-  with VERSION and keep a backup, or skip Doomer for this session?”** Name the
-  symlink target if relevant. Explain that adoption backs up and replaces only
-  this link, including a link into Homebrew; it never changes the package-manager
-  target or its files. If the user declined this target or skipped Doomer for
-  the session, do not re-offer adoption automatically. Only after that approval,
-  use a verified bootstrap executable below with `self-update --version 2026.11.3.7 --adopt`.
-- `newer_installed`: never downgrade it to this older pin. Consult the shared
-  decision before offering a known skill update; never repeat a declined offer
-  for the same target.
-  Retain the binary. Probe `onboard --help` at its absolute path for the flags
-  used by this skill (`--repo`, `--agent`, `--session`, `--task-stdin`, plus
-  `--restart` for Codex or `--check-hooks` for Claude). If present, proceed with
-  the documented onboarding/activation flow and interpret its actual result.
-  Do not require hypothetical output-compatibility tests. Missing required flags
-  or an actual unsupported result is a concrete incompatibility: explain it and
-  follow SKILL.md's user-choice rule. Never overwrite other skill copies or
-  claim this older pin was installed.
-- An unexpected file type or status error: stop installation and explain it.
+An update installs the new pin alongside existing releases. It does not replace
+another repository's binary, change its skill, or move its running watcher to a
+new version. Keep the existing per-skill update approval and skip decisions.
+Use the existing combined skill-and-CLI update offer when an update is requested.
 
-The updater verifies its immutable release archive, keeps a uniquely named
-backup, atomically replaces the binary, and records its path, version, and
-SHA-256 under `~/.local/share/doomer/installation.json`. Require `state: ready`
-in its successful result before proceeding. A checksum failure is terminal;
-do not fall back to an unverified installation or repeat unchanged attempts.
-Never fabricate the ownership record or enable unattended updates.
-
-If `self-update` does not exist in the pinned release, use the legacy verified
-installation flow below. Do not invent updater commands or claim a legacy
-installation is managed. Older installations become managed only when a
-verified updater-equipped release installs them with explicit adoption.
+Before using a release for onboarding, run its `runtime-info` command and require
+JSON with `protocol: 1`. If the command is absent or unsupported, explain that
+this pin predates isolated runtimes and requires a compatible skill/CLI release.
+Retain existing setup and offer troubleshooting or skipping this session. Do
+not run a legacy updater, silently select another pin, or claim migration worked.
 
 ## Select CLI release 2026.11.3.7
 
@@ -147,78 +102,75 @@ Apply these rules to both the manifest and archive downloads:
   until setup succeeds. Follow SKILL.md's user-choice rule about continuing
   without reviews; never silently skip setup or imply the code was reviewed.
 
-## Bootstrap an updater-equipped release
+## Bootstrap a missing version
 
-After verifying and extracting the pinned release below, probe the **temporary
-verified executable** for `self-update --help`. If supported, use that executable
-to run `self-update --version 2026.11.3.7`, adding `--adopt` only when the user has
-explicitly approved replacing the existing unmanaged file or link. This installs
-and records ownership even when no CLI is installed yet. Require its JSON result
-`state: ready`, then use `~/.local/bin/doomer` for onboarding. It may download the
-same release again for its own verification. Do not also perform the legacy copy
-or write installation metadata yourself.
+Use the checksum-verified temporary executable from the steps above. Confirm
+`runtime-info` returns protocol 1 and `self-update --help` includes
+`--side-by-side` before invoking it. Then run:
 
-Never fall back to the legacy copy path after any updater failure, including
-a failed retry or a later user choice. Adoption must use the verified updater
-with explicit approval; it is not an escape from a failed integrity check.
-After the allowed retry is exhausted, the choices are troubleshooting or an
-explicit skip, not another unchanged retry or an unmanaged copy.
+```sh
+"$verified_bootstrap" self-update --side-by-side --version 2026.11.3.7
+```
 
-On any updater error, malformed result, or non-ready result, clean up only the
-verified temporary downloads/executable created by this attempt. Do not delete
-`~/.local/bin/doomer`, its backups, or its ownership record. The updater verifies
-before replacement and rolls back a failed publication; a failed command is not
-permission to overwrite or remove an existing installation. Report the exact
-failure without claiming setup succeeded. For a fresh install, ask once whether
-to retry the verified bootstrap or skip Doomer for this session. No answer leaves
-setup pending; end the turn with the question instead of polling or re-asking. Honor one
-user-approved retry within the download limits above, without a legacy-copy
-fallback. An integrity failure (invalid manifest or checksum mismatch) is
-terminal: offer troubleshooting or skipping, not an unchanged retry. If the
-retry fails, report it and wait for the user's choice; never silently continue.
-For an existing installation, retain it and follow SKILL.md's compatibility/user-
-choice rule. Do not delete the installed binary or its ownership record.
-After any replacement, re-probe the installed executable's `onboard --help` and
-use the refresh/setup routing in SKILL.md, discarding any earlier help output.
+Require `state: ready`, the selected version, and the expected version-specific
+path in the JSON result. Recheck through that installed path and set
+`doomer_cli` to it. Installation metadata is written by the updater. Do not
+fabricate records or use a manual-copy fallback after a verification failure.
+Clean up only this attempt's temporary downloads after successful installation.
+A failed installation retains existing binaries and setup. Report the exact
+error, honor the bounded download retries above, and use the skill's existing
+user-choice rules for retrying or continuing without reviews.
 
-If the pinned executable lacks `self-update`, follow the legacy flow next. For
-legacy replacement, re-probe the installed executable and follow SKILL.md's
-refresh/setup routing; retain consent and the existing hook activation rules.
+## Install or reuse the shared launcher
 
-## Install or offer an upgrade
+Check `~/.local/bin/doomer` separately. A managed launcher with `runtime-info`
+protocol 1 can be reused across all compatible release pins. Check ownership
+using its local `self-update --check --version 2026.11.3.7` result. A managed
+`ready`, `newer_installed`, or `update_available` result is acceptable for the
+launcher if protocol 1 is supported. Always use `doomer_cli` for this checkout's
+onboarding and review commands.
 
-Use the exact destination `~/.local/bin/doomer`. A `doomer-beta` or `doomer`
-elsewhere on PATH, including Homebrew, is a separate installation; do not
-uninstall it or change package-manager files.
+If the shared launcher is missing, install it from the verified release:
 
-- If the destination is absent, install the verified source with mode `0755`.
-- If it is a regular executable with the same SHA-256 as the verified source,
-  reuse it and continue setup.
-- If it differs, stop and ask a concrete question before replacing anything:
-  **“The CLI at ~/.local/bin/doomer differs from the requested build VERSION.
-  Upgrade it and keep a backup, or skip Doomer reviews for this session?”**
-  Substitute the resolved stable release version. Use a structured question
-  if available, otherwise end the turn with the question. Do not silently skip
-  setup, claim the desired version is installed, or treat no answer as approval.
-- If the destination is a symlink, explain where it points and offer to back up
-  and replace only the link with a private installation. Never follow it to
-  overwrite a Homebrew or other managed binary. If it is a directory or another
-  unexpected file type, stop and report the conflict.
+```sh
+"$doomer_cli" self-update --side-by-side --install-launcher --version 2026.11.3.7
+```
 
-After approval to upgrade, move the existing file/link to a unique backup path
-beside it. Copy the verified source to a temporary file in the destination
-folder, set mode `0755`, verify its hash, and atomically rename it to `doomer`.
-Restore the backup if installation fails. Never use `sudo` or copy through an
-existing destination symlink. Verify the final file is regular, executable,
-and byte-identical to the selected build. Retain its absolute path and version,
-clean up temporary downloads, then **return to the onboarding step**.
-If `~/.local/bin` is not on PATH, use the absolute path; do not edit shell startup
-files. Reuse repository upload consent independently of this upgrade decision.
-Localhost approvals do not authorize production uploads; let the browser flow
-obtain approval for https://doomer.ai/api before any production upload.
+If a legacy global installation exists, explain the migration and ask once
+whether to install the checkout-aware launcher while keeping a backup. Preserve
+that decision with the canonical launcher path and selected version. For an
+unmanaged file or symlink, also explain the exact path or link target and use
+`--adopt` only with explicit approval. A symlink's target remains untouched.
+Never change a Homebrew installation or shell startup files.
 
-If the user skips the upgrade or an installation permission request is declined,
-continue the coding task without Doomer and do not repeatedly ask this session.
+Before replacing the shared launcher or migrating existing hook registration,
+identify the configured
+repositories and their installed skill pins. Pins predating runtime protocol 1
+need a compatible skill update before their hooks can join the new dispatcher.
+Explain any affected checkouts and resolve those updates with the user before
+replacing their shared hook registration. A binary backup alone does not make
+old hook protocols compatible. If migration cannot proceed, retain the old
+launcher and hooks and report the pending compatibility work.
 
+The launcher-install result names any backup. Record that path. Launcher
+migration alone does not authorize uploads or establish hook trust. Use the
+normal onboarding flow to install the shared dispatcher hook and let the user
+review any changed hook definition.
 
-After installation, return to the onboarding step in SKILL.md. Do not run legacy `watch add`, `watch task`, or `watch start` commands separately.
+## Runtime and checkout behavior
+
+The active checkout's installed skill determines its release. Linked worktrees
+can select different pins, even though repository upload consent is shared.
+If Codex and Claude skills in one checkout declare conflicting pins, report the
+conflict and have the user select a consistent version before proceeding.
+
+The launcher dispatches hook events to version-specific watcher state. Updating
+one pin leaves other installed versions in place. A current-session callback
+from the selected runtime is required for verified activation. Reuse existing
+repository consent independently of installation and version selection.
+
+After installing the selected release and arranging a compatible launcher,
+return to SKILL.md's onboarding workflow using the absolute `doomer_cli` path.
+Do not independently start or stop watchers, change saved consent, or remove
+old release directories. Do not refresh unrelated repository runtimes as part
+of this checkout's update.

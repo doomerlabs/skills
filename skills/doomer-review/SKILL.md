@@ -175,7 +175,7 @@ Also share `adoptionDecision: not_asked | approved | declined | finished` with
 [installation](references/install.md), keyed by canonical skill path,
 destination path, and target CLI version. Keep it in the durable summary
 across turns, restarts, and compaction. It is separate from `updateDecision`;
-its `finished` means the approved replacement succeeded. Consult it before
+its `finished` means the approved launcher migration succeeded. Consult it before
 replacement offers, retain declines, and keep approvals until that replacement
 completes. A session-wide skip suppresses both decision flows, including pending
 work; retain its record for an explicit user resumption.
@@ -233,8 +233,8 @@ or the check fails, set only `updateCheckAttempted: true` and retain the current
 pin. Leave `updateDecision` unchanged (`not_asked` if no update was offered);
 `finished` is reserved for a completed update attempt, not a check.
 A failed, unknown, or unchanged skill check does not itself justify an update
-offer. Continue with the current pin: an existing managed CLI whose check
-positively reports `update_available` may trigger the combined offer below.
+offer. Continue with the current pin and verify its exact version-specific
+installation. A missing release follows the installation reference.
 A missing binary instead follows the verified fresh-install bootstrap in the
 installation reference, with its normal installation permissions, not an
 update offer or a command against a nonexistent executable.
@@ -251,9 +251,8 @@ When either check identifies an update and `updateDecision` is `not_asked`, ask:
 now?”** No answer is not approval. If declined, record `declined` and retain the
 current pair. If approved, record `approved`. When a newer skill is known,
 run the scoped skill update below and reread it before selecting the CLI pin.
-If the skill check was unavailable, failed, unknown, or found no update,
-and the existing managed CLI positively reported `update_available`, update
-that CLI to the current pin through the installation reference. Fresh install
+If this checkout's selected release is missing, install that exact pin through
+the installation reference. A different release elsewhere is independent. Fresh install
 success does not set `updateDecision: finished` unless it completes a previously
 approved combined update; otherwise leave the update decision unchanged. An existing `approved` decision needs no second question for
 the remaining half; never infer approval from `not_asked` or a failed check.
@@ -280,11 +279,10 @@ Unknown, manually replaced, or Homebrew-linked binaries require the explicit
 adoption choice in the installation reference. Record `finished` after the
 whole requested attempt; update permission never grants upload consent.
 
-The binary is shared, but updating this skill does not authorize rewriting other
-repositories' or agents' independent skill copies. Shared aliases of the same
-canonical skill update together. Other copies detect a newer managed CLI on
-invocation and must not downgrade it; their compatibility check below governs
-whether they can use it. Do not claim all installations were updated.
+Release binaries are shared only among checkouts using the same pin. Updating
+this skill does not authorize rewriting other repositories' or agents'
+independent skill copies. Shared aliases of the same canonical skill update
+together. Other checkouts retain their own pins and versioned runtimes.
 
 ## Set up once
 
@@ -303,8 +301,8 @@ and the read-only `self-update --check` probe precede this check when needed to
 obtain a verified compatible executable. A declined update does not prevent
 checking saved setup with a compatible retained CLI.
 
-In the command templates below, set `doomer_cli` to the verified executable's
-absolute path and `doomer_repo_root` to the Git root resolved from the actual
+In the command templates below, set `doomer_cli` to the verified, pinned
+executable at `~/.local/share/doomer/versions/VERSION/doomer` and `doomer_repo_root` to the Git root resolved from the actual
 checkout being edited. Assign both in the executing shell before using them;
 never run a template with either value empty or unresolved.
 
@@ -364,7 +362,7 @@ non-`Watching` checkout uses the repair branch even when the other flags are
 true. A pending restart, failed activation, or configured-but-unverified state
 always follows the activation path; saved status never overrides it.
 
-Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
+Install or verify the checkout-pinned CLI following [installation](references/install.md), including its managed ownership and runtime-protocol checks.
 Use stable CLI **2026.11.3.7**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
@@ -410,29 +408,25 @@ With a coding task:
 If the substitution is still literal or empty, treat the session ID as unknown;
 do not pass the literal placeholder or borrow a Codex session ID.
 
-After replacing a CLI, discard old capability results and run `onboard --help`
-on the newly installed absolute executable. For an already-configured repository
-with a running managed watcher, run a separate `onboard --repo REPO --refresh`
-if supported. REPO identifies an approved checkout for the permission check;
-refresh uses the watcher's saved working directory and original selection. Existing loaded/trusted hook
-commands do not need reactivation merely because the executable was replaced.
-Refresh does not establish trust: missing/changed/unloaded hooks still need
-normal onboarding and the agent activation flow. This refresh preserves consent,
-hooks, and saved task state; never
-combine it with `--restart`, `--task-stdin`, or `--check-hooks`. A `not_running`
-result is a no-op, not proof of a started watcher. A refresh error is not success:
-report it without changing pause/consent or pretending the new watcher is active.
-For a new setup use normal onboarding below. If an older release lacks refresh,
-state that its old watcher has not been refreshed and retain the supported setup
-flow; do not silently claim the running process was upgraded.
+After installing a new selected release, discard old capability results and run
+`onboard --help` on its verified absolute executable. If the checkout's pin
+changed, use normal onboarding for that checkout to start or reuse its selected
+runtime with existing consent. Preserve the original task and follow the
+active agent's hook activation flow. The stable hook dispatcher is shared, so
+a new release pin alone does not require reinstalling or trusting a changed
+hook definition. Verify actual hook delivery before claiming activation.
+
+Do not refresh or stop the old version's watcher merely because this checkout
+changed pins. Other checkouts may still require it. An unchanged pin with
+verified active hooks reuses its runtime.
 
 For normal Codex terminal onboarding, add `--restart` if the CLI was installed
 or replaced during this turn, because the prompt may have arrived before its
 hooks could run. In Codex desktop, omit `--restart` and follow the desktop
 activation flow below, including when an older CLI prints terminal restart
 instructions.
-A successful refresh of an already-configured watcher does not require rerunning
-normal onboarding or rewriting the saved task. Claude uses the
+An already-configured matching runtime does not require rerunning normal
+onboarding or rewriting the saved task. Claude uses the
 live-hook check below instead of an automatic restart. Remove the temporary
 input file after successful onboarding. If the session ID is unavailable, do
 not guess it: omit `--session` and `--task-stdin` (including its redirection),

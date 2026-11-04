@@ -15,6 +15,8 @@ available. Both options keep the skill repository-local. Local setup installs
 in your current checkout and leaves the changes uncommitted. Team setup may
 use a linked Git worktree to prepare the shareable installation changes in a PR.
 Each developer completes their own CLI setup, repository consent, and hook trust.
+CLI releases are installed side by side. Each checkout uses the release pinned
+by its installed skill, so updating one repository leaves other pins intact.
 
 ## Instructions for the coding agent
 
