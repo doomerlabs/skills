@@ -206,8 +206,14 @@ record the resolved commit ID. The source directory is
 `skills/doomer-review/` inside that checkout.
 
 Before copying, verify that the source includes `SKILL.md` with the skill name
-`doomer-review` and `references/install.md`. Read both files. Copy the complete
+`doomer-review`, `references/install.md`, and `references/updates.md`. Read
+these files. Copy the complete
 skill directory, including its supporting files, into the destination above.
+Validate all relative paths and reject symlinks or special files in the source.
+After verifying the full installed inventory, record its source revision and
+file hashes using `references/updates.md`. Keep this provenance in private
+installation metadata, outside the repository's tracked files. Do not create
+or modify `skills-lock.json`; the direct update flow uses Git and this baseline.
 Keep temporary checkout files outside the user's repository, and remove only
 the temporary files you created after installation.
 
@@ -215,15 +221,19 @@ If you cannot fetch or identify the source, report the failure and stop
 installation.
 
 If the destination already exists, compare its full file inventory and file
-contents with the fetched skill, including `SKILL.md` and `references/install.md`.
-Reuse it only when these match. A different CLI pin, missing file, extra file,
+contents with the fetched skill, including `SKILL.md`, `references/install.md`,
+and `references/updates.md`. Reuse requires an exact match of the entire
+inventory and every file, not just those three named files. A copy missing
+`references/updates.md` requires an approved replacement before reuse or
+baseline creation. A different CLI pin, missing file, extra file,
 or changed content requires explaining the difference and obtaining approval
 before replacing it. Preserve a backup for any approved replacement. Preserve unrelated skills,
 agent settings, and repository changes.
 
 ### 4. Run the installed skill's setup workflow
 
-Read `SKILL.md` and `references/install.md` from the installed destination and
+Read `SKILL.md`, `references/install.md`, and `references/updates.md` from the
+installed destination and
 follow their setup-only instructions in this conversation. You can read and
 follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
@@ -231,13 +241,12 @@ download, existing-installation handling, onboarding commands, and activation.
 For both setup modes, complete the repository-instructions step below before
 the skill's setup-only completion message ends the task.
 
-The direct skill download above replaces the `npx skills add` step. The optional
-cached npm update check may be unavailable without Node.js. Follow
-the cached-check fallback in `SKILL.md`'s update-check section, which
-handles a missing cached checker or incompatible Node by retaining the current
-pin and recording the attempted check. This is separate from the CLI's local
-managed-binary check and verified bootstrap in `references/install.md`, which
-must still run as directed.
+The direct skill download above completes the skill installation. Its own
+`references/updates.md` defines update checks using Git, with no npm dependency.
+The private source record is local to this installation. A teammate cloning
+committed skill files establishes their own baseline through that flow.
+The CLI's managed-binary check and verified bootstrap in `references/install.md`
+still run as directed.
 
 For an authorized team PR, this guide's publication steps explicitly override
 the setup-only "Then stop" instruction in `SKILL.md`. After installing and
@@ -307,16 +316,29 @@ that block. Preserve all surrounding text and file permissions. Keep the
 CLI-owned `doomer-review` block intact; onboarding may regenerate it. These
 separate markers keep the per-turn policy from being overwritten on later
 onboarding runs. Preserve unmarked repository-specific instructions.
-Insert the contents of this example without its surrounding code fences.
+Generate the block for the agents actually installed in this attempt. In the
+example below, replace `INSTALLED_AGENT_SKILL_PATHS` with only their verified
+paths, such as `Codex uses .agents/skills/doomer-review/` for a Codex-only install.
+Do not name a Claude path unless that copy exists, or require a noninstalled
+agent to run this policy. On later setup, recheck every existing entry on disk
+for its skill and referenced files before preserving it. Drop entries whose
+copy or required files are missing, and add the newly installed agent. If any
+active agent, including a listed agent, encounters this block without its own
+installed copy, continue its normal task and explain
+how to opt into setup if requested; this block does not authorize installing it.
+Insert the generated contents without the surrounding code fences or placeholder.
 
 ```markdown
 <!-- doomer-review-policy:start -->
 ## Required Doomer review workflow
 
-Before each user turn that will edit repository files, read the active agent's
-installed doomer-review skill and its references/install.md from disk. For
-Codex, use .agents/skills/doomer-review/. For Claude Code, use
-.claude/skills/doomer-review/. Follow the skill for documentation, configuration,
+INSTALLED_AGENT_SKILL_PATHS
+
+For an active agent listed above, if its skill or required reference files are missing,
+continue the normal task and report the missing installation. Do not infer
+permission to reinstall it. Otherwise, before each user turn that will edit
+repository files, read its installed doomer-review skill and
+references/install.md from disk. Follow the skill for documentation, configuration,
 tests, and application code, including small edits and requests that do not
 explicitly mention review.
 
