@@ -131,7 +131,11 @@ Check `~/.local/bin/doomer` separately. A managed launcher with `runtime-info`
 protocol 1 can be reused across all compatible release pins. Check ownership
 using its local `self-update --check --version 2026.11.3.7` result. A managed
 `ready`, `newer_installed`, or `update_available` result is acceptable for the
-launcher if protocol 1 is supported. Always use `doomer_cli` for this checkout's
+launcher if protocol 1 is supported. This launcher check omits `--side-by-side`,
+so it reads the global binary and its global ownership record. The version
+argument only selects the comparison result. A valid managed launcher at a
+different version yields `newer_installed` or `update_available`, both reusable;
+it does not yield `missing`. Always use `doomer_cli` for this checkout's
 onboarding and review commands.
 
 If the shared launcher is missing, install it from the verified release:
@@ -143,7 +147,10 @@ If the shared launcher is missing, install it from the verified release:
 If a legacy global installation exists, explain the migration and ask once
 whether to install the checkout-aware launcher while keeping a backup. Preserve
 that `launcherMigrationDecision` with the canonical launcher path, selected
-version, and protocol. Keep it separate from legacy binary adoption decisions. For an
+version, and protocol in the shared durable summary across turns, restarts, and
+compaction. Consult it before each migration offer, honor recorded declines,
+and resume an approved pending migration without asking again. Keep it separate
+from legacy binary adoption decisions. For an
 unmanaged file or symlink, also explain the exact path or link target and use
 `--adopt` only with explicit approval. A symlink's target remains untouched.
 Never change a Homebrew installation or shell startup files.

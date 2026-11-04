@@ -182,10 +182,15 @@ work; retain its record for an explicit user resumption.
 
 Record launcher migration separately as
 `launcherMigrationDecision: not_asked | approved | declined | finished`, keyed
-by the canonical launcher path, target release, and runtime protocol. An old
+by the canonical skill path, launcher path, target release, and runtime protocol. An old
 `adoptionDecision: finished` records only a legacy binary replacement and never
 establishes launcher migration. Recheck the installed launcher and its protocol
 before offering a still-needed migration or marking this new decision finished.
+Retain this decision in the shared durable summary across turns, restarts, and
+compaction, and consult it before each offer. Reuse an approved pending attempt
+without asking again. A declined migration routes to the shared compatibility
+choice and is not offered again for that key unless the user explicitly reopens
+it. Mark finished only after verifying the installed launcher and protocol.
 Preserve prior adoption decisions with their original meaning.
 
 Resolve the skill directory's real path before keying either decision. For a
@@ -434,13 +439,18 @@ any new or changed definition through the active client's hook controls.
 Revalidate activation with a current-session callback from the selected runtime
 before claiming readiness.
 
-Do not refresh or stop the old version's watcher merely because this checkout
-changed pins. The runtime's checkout filter removes a checkout whose pin no
+For a verified protocol-1 runtime, do not refresh or stop the old version's
+watcher merely because this checkout changed pins. Its checkout filter removes
+a checkout whose pin no
 longer matches on its next reconciliation. The old process may remain available
 for other checkouts using that version. Confirm the new runtime's callback;
 report a stale old checkout assignment as a runtime issue instead of stopping a
 shared version indiscriminately. An unchanged pin with verified active hooks
-reuses its runtime.
+reuses its runtime. Legacy runtimes lack this guarantee. The launcher migration
+guard must block until their configured checkouts are migrated to verified
+protocol-1 releases. If a legacy watcher remains, report the affected checkouts
+and obtain explicit approval for targeted retirement through its supported
+repository controls before activating overlapping coverage.
 
 For normal Codex terminal onboarding, add `--restart` if the CLI was installed
 or replaced during this turn, because the prompt may have arrived before its
