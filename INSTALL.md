@@ -108,7 +108,9 @@ On restart, select a nonterminal record matching the active `agent` and current
 agent and root criteria. Report matching completed records as finished. If
 only abandoned records match, report their saved resources, offer cleanup,
 and use the new-setup question above before creating another attempt. If
-records conflict, ask which one the user intends to continue or replace.
+records conflict, ask which nonterminal attempt the user intends to continue.
+Preserve all unselected records and all terminal records. An explicit request
+to start over follows the new-attempt rule above, using a new UUID.
 Both `complete` and `abandoned` are terminal. A matching `complete`
 record is a finished setup to report, never a reason to repeat commits, pushes,
 or PR creation. Retain an in-progress record's UUID and original root. Reconcile its recorded operations
