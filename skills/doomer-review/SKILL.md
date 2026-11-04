@@ -324,17 +324,20 @@ location to its hooks.
   available read-only tools, explain the mismatch and have the user restore
   and approve the standard matcher or follow the shared user-choice rule.
   Keep the pre-edit gate. Do not poll beyond that retry. If still pending,
-  report that live activation remains unverified. Inspect approval controls
-  when the client reports missing trust or the user confirms unloaded hooks.
+  report that live activation remains unverified. For Codex desktop, follow
+  **Recover silent desktop hooks** below when its prerequisites hold. Inspect
+  approval controls when the client reports missing trust or the user confirms
+  unloaded hooks.
 - `error`, a command failure, or malformed output requires reporting the actual
   diagnostic. Preserve Git stderr, including license or executable errors.
   Missing task capture, unavailable setup, and failed hooks are distinct from
   missing trust. Follow the shared user-choice rule without inventing a cause.
 
 A missing current session ID leaves activation unverified. Do not borrow an ID
-from another chat. Follow an actual outstanding restart requirement or the
-user's confirmation that hooks are unloaded; missing history alone does not
-prove a restart is necessary.
+from another chat. Report the missing ID and follow the shared user-choice rule.
+Follow an independently established restart requirement or the user's
+confirmation that hooks are unloaded. A missing ID alone does not qualify for
+the desktop recovery flow, which requires a completed current-session check.
 
 These rules reuse configuration while preserving the activation gate. A
 non-`Watching` checkout uses the repair branch even when the other flags are
@@ -520,13 +523,49 @@ capture alone does not require a restart.
 
 The approval controls belong to Codex. Do not claim that Doomer opened the
 approval dialog, invoke a terminal resume command, or write hook trust settings
-on the user's behalf. If approval or live delivery remains unverified, report
-that specific pending step and retain the activation gate. Use a restart only
-when the user confirms the hook definitions have not loaded and chooses that
-fallback. For that desktop fallback, have the user quit and reopen the Codex
-desktop app, reopen this same chat, and send the setup request again. Reuse the
-saved setup and original task, then finish the pending hook approval and live
-activation checks. Desktop recovery stays in the desktop app.
+on the user's behalf. If approval remains pending, report that step. If the
+user confirms approval but live delivery remains unverified, use the bounded
+recovery below. Keep the activation gate until verification succeeds.
+
+### Recover silent desktop hooks
+
+Use this flow only in Codex desktop when the user has confirmed Doomer's hook
+approval, the verified CLI and saved setup report consent, installed hooks,
+a running watcher and a `Watching` target repository, and the activation check
+still returns `pending` after its one read-only probe and retry. A command
+error, missing setup, or a reported trust restriction follows its own diagnostic
+path instead. Silence alone does not establish the cause.
+
+Use the standalone read-only `watch status --json` command in **Reuse saved
+setup across chats** to establish the setup prerequisites. Reuse its result
+from this attempt; if absent, run that check once. Its `approved`, `paused`,
+`running`, `hooks_installed`, and `repository_status` fields distinguish setup
+from activation. The prohibition on watcher writes and polling still applies.
+
+Explain that Codex may need to reload hooks installed or approved during an
+existing chat. Offer one app reopen as a recovery step, then guide the user.
+
+1. In this chat's durable summary, record `desktopHookRecovery` under the
+   resolved Git root, with the CLI pin, `attempted: true`, pre-reopen session ID,
+   confirmed setup and approval, and original task or setup-only intent. Keep
+   this entry across turns, app restarts, and compaction. Its lookup key is the
+   Git root within this chat, independent of the session ID. Check for an
+   existing attempted entry before offering a reopen.
+2. Have the user fully quit and reopen Codex, then reopen this same chat.
+3. Ask them to send `Resume after doomer.ai setup` so the hook can also deliver
+   any saved coding task.
+4. In that new turn, consult `desktopHookRecovery` in the durable summary by
+   resolved Git root. Use the actual current session ID with **Verify Codex
+   hooks** and retain the recorded attempt even if this ID changed. Reuse the
+   existing installation, consent, hooks, watcher, and setup record. Do not
+   repeat onboarding or create another PR.
+
+A `ready` result completes activation; apply **Restore the original
+task** before coding, or finish setup-only onboarding. If still `pending` after
+the post-reopen check's bounded probe and retry, report the unresolved delivery
+failure and offer troubleshooting or the existing explicit skip choice. If
+the check fails, report its exact error. Do not repeat reopen or hook-approval
+requests automatically for the same recovery attempt.
 
 ## Claude: verify live hooks before asking for a restart
 
