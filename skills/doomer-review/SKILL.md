@@ -9,7 +9,9 @@ Use Doomer's hooks to review repository changes. The hooks capture the
 task and changes, request hypotheses, deliver the free Look Closer assessment,
 and record the agent's responses. Use profile `default` and
 `https://doomer.ai/api`. No account is required. Do not start a paid Deep review.
-Skip setup for requests solely discussing or editing this skill.
+Requests solely discussing or editing this skill and its supporting files are
+exempt from this review workflow, including setup and update checks. Explicit
+requests to install or update Doomer still use the corresponding flow below.
 
 ## Setup-only requests
 
@@ -45,10 +47,12 @@ any outstanding restart/trust step. Preserve this state across compaction.
 
 ## Required before repository edits
 
-In this skill, a "coding task" includes any requested repository edit, including
-documentation-only changes. Renaming a docs heading, updating a README, changing
-configuration, and editing tests all use this workflow. A request need not
-mention Doomer or code review. Do not treat docs-only or trivial edits as exempt.
+Except for the skill-maintenance exemption above, a "coding task" includes any
+requested repository edit, including documentation-only changes. Renaming a docs
+heading, updating a README, changing configuration, and editing tests all use
+this workflow. A request need not
+mention Doomer or code review. This includes requested edits to tracked dotfiles,
+lockfiles, and generated files. Do not treat docs-only or trivial edits as exempt.
 
 Complete missing Doomer onboarding before the first repository content edit.
 Read-only inspection may continue while preparing setup. The absence of an
@@ -69,8 +73,21 @@ for the explicit choice; the agent is not left executing an indefinite loop.
 Silence is neither permission to skip nor permission to change the installation.
 An explicit user choice resumes the corresponding flow.
 
+Every explicit session-wide skip sets `compatibilityDecision: skip` in the
+shared durable task summary before work resumes. All installation, update,
+onboarding, and activation paths consult it before probing or prompting. Reuse
+it across turns, restarts, and compaction until the user explicitly resumes
+Doomer. An execution rejection alone is a blocked setup, not a user skip.
+
 Request installation permissions and repository upload consent through the
-normal approval flow. Never approve them yourself. If setup needs user action,
+normal approval flow. Explain before consent that repository snapshots and
+edited content, including documentation, README text, configuration, tests,
+and application code, plus task context and agent review responses, can be
+uploaded to doomer.ai. A prior approval explicitly limited to application code
+does not authorize the broader scope. Obtain the user's explicit approval of
+that scope before edits or capture in that case, retaining the decision in the
+durable summary. Reuse valid repository-wide consent reported by the CLI.
+Never approve permissions yourself. If setup needs user action,
 present that step instead of silently opting out. If a concrete technical error
 prevents setup, report it accurately and follow the failure guidance below.
 The same user-choice rule covers manifest validation, download, and bootstrap/
@@ -94,25 +111,38 @@ onboarding needs permission.
 Use the agent's normal execution-approval mechanism for the actual onboarding
 command when required. Describe its real effects: it configures review hooks,
 obtains repository consent, and may start the watcher and send repository code
-and task context to Doomer when consent is recorded. Do not describe onboarding
+and task context to Doomer when consent is recorded. Include documentation,
+configuration, and the other repository content described above in this
+explanation. Do not describe onboarding
 as only opening a browser or assume installation authorized uploads.
 
 If automatic approval review rejects onboarding for missing authorization,
 do not retry unchanged or work around the rejection. Ask the user explicitly:
 **“May I finish Doomer setup for this repository? It configures review hooks and
-enables sending repository code, task context, and agent review responses to
+enables sending repository content, including documentation and configuration,
+task context, and agent review responses to
 doomer.ai after repository consent. Or would you prefer to skip Doomer for this
 session?”** Offer **“Allow Doomer setup”** and **“Skip Doomer this session”** when
 structured choices are available. Briefly identify the automatic approval
 rejection and its stated reason. Do not offer only to continue without review.
 
-Wait for the answer. If authorized, resume the documented onboarding command
+Retain `onboardingAuthorization: pending | allowed | blocked | skip_session`
+for this repository in the durable task summary shared with the installation
+reference. Record `pending` before asking and wait for the answer. Reuse a
+recorded `allowed` decision across turns and restarts without re-asking. If the
+user skips, record `skip_session` and `compatibilityDecision: skip` before
+resuming work. Missing history never supplies approval.
+
+If authorized, record `allowed` and resume the documented onboarding command
 through the normal approval mechanism without reinstalling the verified CLI.
 The human must still make any repository-consent or hook-trust choice; never
 click, record, or fabricate it on their behalf. Reuse valid recorded consent
 through the CLI rather than demanding it again. If the user declines, continue
-the original task without Doomer. If approval is rejected again, report that
-blocker and stop setup; do not loop or bypass it.
+the original task without Doomer using the recorded skip. If approval is
+rejected again, record `blocked` with the reason, report it, and stop setup.
+Retain the blocked state across turns without automatic retries or re-prompts.
+Resume only when the user explicitly requests recovery or the stated blocker
+changes; do not loop or bypass it.
 
 ## Check the local pin each turn
 
@@ -137,9 +167,9 @@ check above. Share `updateDecision` (`not_asked`, `approved`, `declined`, or
 skill path and target CLI version. Keep each target's decision in the durable
 conversation summary, together with the last observed pin and CLI version.
 Returning to a previously declined or completed target reuses its decision.
-A newly observed target version begins at `not_asked`; approval for an earlier
-version does not authorize a later one. An explicit session-wide skip still
-wins over a new target.
+Outside an in-flight approved attempt, a newly observed target version begins
+at `not_asked`; approval for an earlier version does not authorize a later one.
+An explicit session-wide skip still wins over a new target.
 
 The combined offer below covers this active skill and its matching managed CLI
 in either order. If an approved skill update reveals a different pin, carry
@@ -147,6 +177,17 @@ that approval only into completing that same update attempt, then record
 `finished` against its resulting version. It never authorizes adoption of an
 unmanaged binary or updating independent skill copies. Keep `approved` until
 the whole requested attempt completes.
+
+Before starting an approved update, retain `updateAttempt` in the durable
+summary with the canonical skill path, original target, resulting pin when
+known, and completed/pending halves. Persist the resulting pin immediately
+after rereading the updated skill. On later turns or after compaction, consult
+this record before version-scoped decisions and resume the pending half with
+the same approval. A permission interruption leaves the attempt pending. If
+local files changed to an unrelated pin, stop and report the conflict rather
+than extending that approval. Clear the record on completion or explicit
+abandonment, recording the outcome for the original and resulting targets.
+A failed or abandoned attempt must not trigger an automatic fresh offer.
 
 Mark the online check attempted before starting it, at most once per session,
 even if a later turn discovers a changed local pin. If an earlier decision
@@ -235,10 +276,18 @@ without repeated setup/status checks.
 After verifying the installed CLI through the installation reference, check
 saved setup once for this repository in a new chat or when setup history is
 unknown. Run this standalone, read-only command before any normal `onboard`
-command or setup-permission question:
+command or onboarding-authorization question. Installation/update permissions
+and the read-only `self-update --check` probe precede this check when needed to
+obtain a verified compatible executable. A declined update does not prevent
+checking saved setup with a compatible retained CLI.
+
+In the command templates below, set `doomer_cli` to the verified executable's
+absolute path and `doomer_repo_root` to the Git root resolved from the actual
+checkout being edited. Assign both in the executing shell before using them;
+never run a template with either value empty or unresolved.
 
 ```sh
-"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api watch status --json "$doomer_repo_root"
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api watch status --json "${doomer_repo_root:?Set the target Git root}"
 ```
 
 This inspects saved consent, installed hooks, and watcher status. It does not
@@ -246,11 +295,13 @@ install hooks, start a watcher, or upload repository content. Do not combine it
 with onboarding, updates, or other writes in the same command.
 
 - If `approved` is true, `paused` is false, `running` is true, and
-  `hooks_installed` is true for the active agent, reuse that configuration.
-  If `repository_status` is `Watching`, continue the task using the hooks.
-  Do not rerun onboarding, save a restart task, reopen browser consent, or ask
-  the user to enable Doomer again. For a setup-only request, report the saved
-  configuration instead of reinstalling it.
+  `hooks_installed` is true for the active agent, and `repository_status` is
+  `Watching`, reuse that configuration. Continue through the activation gate
+  below before treating reviews as ready. For this complete configuration,
+  do not rerun installation/onboarding, save a restart task, reopen browser
+  consent, or ask to enable Doomer again, except for the bounded Claude
+  activation recovery below. For setup-only requests, report the saved
+  configuration and its actual activation state.
 - `hook_trust: "user_managed"` is a statement of who controls trust, not a
   report that trust is missing. Do not demand `/hooks`, a restart, or another
   confirmation solely because this value is present. Let the coding agent
@@ -259,7 +310,7 @@ with onboarding, updates, or other writes in the same command.
   resume it unless the user explicitly asks. Never rewrite consent to resume.
 - If consent or the active agent's hooks are missing, use normal onboarding
   below. If consent and hooks exist but the watcher is stopped or this checkout
-  is not yet watching, repair only that missing setup through onboarding,
+  is not `Watching`, repair only that missing setup through onboarding,
   retaining saved consent. Explain the specific missing part if execution
   authorization is required; do not ask for repository upload consent again
   when the CLI reports it valid. A new linked worktree is not proof of missing
@@ -268,11 +319,27 @@ with onboarding, updates, or other writes in the same command.
   negative consent decision or proof that hooks need reinstalling. Do not
   blindly invoke onboarding as a diagnostic fallback.
 
-This saved-setup path takes precedence over the initial onboarding and Claude
-activation steps below. Those steps apply to newly configured/changed hooks or
-an explicitly pending activation, not every new chat with existing hooks. A
-known pending restart or failed activation is still pending; status does not
-override it. Missing chat history alone does not create such a pending state.
+Saved configuration does not establish live activation. Retain activation as
+`pending`, `unverified`, or `verified` for the current repository and active
+agent/session in the durable summary. A current-session hook callback or
+Claude's current-session `ready` check can establish verification. Status flags
+alone cannot. A summary for another session does not establish current-session
+activation, and missing history leaves it `unverified`.
+
+For pending or unverified Claude activation, use **Complete pending Claude
+activation** below. For Codex, a current-session Doomer hook callback confirms
+loaded hooks. Without that evidence, report configured but unverified, have the
+user inspect Doomer's hooks and trust in `/hooks`, and retain the activation
+gate before repository edits. Follow an actual outstanding restart requirement
+or the user's confirmation that hooks are unloaded; missing history alone does
+not prove a restart is necessary. If verification remains unavailable, use the
+shared user-choice rule to continue without verified reviews only by explicit
+choice. Do not reinstall or rewrite saved task state to diagnose activation.
+
+These rules reuse configuration while preserving the activation gate. A
+non-`Watching` checkout uses the repair branch even when the other flags are
+true. A pending restart, failed activation, or configured-but-unverified state
+always follows the activation path; saved status never overrides it.
 
 Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
 Use stable CLI **2026.11.3.6**, which provides the consolidated onboarding command.
@@ -290,14 +357,14 @@ command for that agent.
 
 ```sh
 # If the CLI was installed or replaced this turn, append --restart to this command.
-"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID"
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent codex --session "$CODEX_THREAD_ID"
 ```
 
 With a coding task:
 
 ```sh
 # If the CLI was installed or replaced this turn, append --restart to this command.
-"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$CODEX_THREAD_ID" --task-stdin < "$task_request_file"
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent codex --session "$CODEX_THREAD_ID" --task-stdin < "$task_request_file"
 ```
 
 **Claude Code:** the current skill session is `${CLAUDE_SESSION_ID}`. This is
@@ -305,13 +372,13 @@ Claude's skill substitution, not a shell environment variable. Use its expanded
 value as the session argument. For setup-only:
 
 ```sh
-"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent claude --session '${CLAUDE_SESSION_ID}'
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent claude --session '${CLAUDE_SESSION_ID}'
 ```
 
 With a coding task:
 
 ```sh
-"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent claude --session '${CLAUDE_SESSION_ID}' --task-stdin < "$task_request_file"
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent claude --session '${CLAUDE_SESSION_ID}' --task-stdin < "$task_request_file"
 ```
 
 If the substitution is still literal or empty, treat the session ID as unknown;

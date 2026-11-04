@@ -2,6 +2,15 @@
 
 ## Managed update fast path
 
+First consult the shared durable decisions in SKILL.md. A recorded session-wide
+`compatibilityDecision: skip` (including `onboardingAuthorization: skip_session`)
+skips this entire installation/update flow, including probes and update offers,
+until the user explicitly resumes Doomer. Retain onboarding authorization and
+any blocked reason across turns; installation success does not clear them.
+Resume an in-flight `updateAttempt` under its existing approval before looking
+up a new version-scoped decision. Requests solely discussing or editing this
+skill are also exempt from these checks.
+
 Once per user turn that uses this skill, reread this reference's current pin
 and check `~/.local/bin/doomer`. If present, probe `self-update --help` when its
 capability is unknown or the binary changed. If supported, use its absolute
