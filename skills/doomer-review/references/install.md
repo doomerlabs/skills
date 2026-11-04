@@ -11,6 +11,16 @@ Resume an in-flight `updateAttempt` under its existing approval before looking
 up a new version-scoped decision. Requests solely discussing or editing this
 skill are also exempt from these checks.
 
+For replacement/adoption offers in both the managed and legacy flows, retain
+`adoptionDecision: not_asked | approved | declined | finished` in the same
+durable summary, keyed by canonical skill path, destination path, and target
+CLI version. Record the user's answer before continuing and consult it across
+turns, restarts, and compaction before offering replacement again. A declined
+replacement preserves the existing binary and routes to the shared
+compatibility choice without repeating the replacement offer. Approval applies
+only to that replacement; record `finished` after success. A session-wide skip
+also sets `compatibilityDecision: skip` and suppresses the whole flow.
+
 Once per user turn that uses this skill, reread this reference's current pin
 and check `~/.local/bin/doomer`. If present, probe `self-update --help` when its
 capability is unknown or the binary changed. If supported, use its absolute
