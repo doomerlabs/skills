@@ -564,27 +564,38 @@ corrections still present in this conversation. The bare
 message saying a task was saved are not the original task.
 
 For setup-only onboarding, verify hooks and report readiness. For a coding
-task with missing request text, recover it as follows.
+task, track the handoff in the durable summary by resolved Git root and Codex
+session ID. Record whether onboarding saved a task, whether the resume prompt
+was requested or sent, and whether the hook delivered task text. A successful
+`onboard --task-stdin` for that repository and session confirms a saved task,
+regardless of its wording. Missing history leaves the corresponding state
+unknown. A summary tracks recovery state. It does not authorize edits.
 
-- **Codex desktop.** After any required approval, request
-  `Resume after doomer.ai setup` once in the original chat if the prompt has
-  not already been requested or sent for this handoff. The hook looks for
-  saved context for that repository and session. This recovery works without
-  a retained onboarding message or summary. If the hook supplies no task text,
-  ask the user for the original request and constraints.
-- **Codex terminal.** If a restart is pending, follow **A required restart**
-  below. The `codex resume` command supplies the resume prompt and counts as its
-  single delivery. After restart, record that delivery before evaluating
-  recovery. If task text is still missing, ask the user for the original request
-  and constraints. Use the same fallback when no restart is pending.
-- **Claude Code or unknown client.** Ask the user for the original request and
-  constraints.
+When the original request is missing, use the first applicable case below.
 
-Record prompt-request and delivery outcomes in the durable summary to avoid
-repeating the prompt. Use those records only to track the handoff. Before
-editing, require the user request or actual hook-delivered task text as
-described above. If only a summary of the task remains, ask the user to
-confirm the request and constraints and wait for that confirmation.
+1. **Codex terminal with a required restart and a confirmed saved task.** Follow
+   **A required restart** below. The restart command itself sends the resume
+   prompt. Record that send on resuming before choosing any recovery step.
+2. **Codex desktop, or Codex terminal with no restart pending, with a confirmed
+   saved task and confirmation that the prompt has not been requested or
+   sent.** After any required hook approval, ask the user to send
+   `Resume after doomer.ai setup` once in that session.
+3. **Codex desktop in the original chat with missing handoff history.** If the
+   prompt has not been requested or sent in the visible conversation and no
+   scoped record says it was, offer the resume prompt once after hook approval
+   as a recovery attempt. The hook can recover a task only for that repository
+   and session. This attempt is also safe when there is no saved task.
+4. **All other cases, including Claude Code, unknown terminal handoff state,
+   or a resume prompt already sent without task text available.** Ask the user
+   for the original request and constraints. If a terminal restart is
+   independently required for hook activation, follow that requirement
+   separately.
+
+After the prompt, use the actual task text if the trusted hook delivers it.
+Otherwise ask the user for the original request and constraints. Wait for one
+of those sources before editing. Trusted hook-delivered text qualifies even
+when condensed. If the only remaining text is an agent-authored summary, ask
+the user to confirm the request and constraints before editing.
 
 ## Codex desktop: approve hooks in the current chat
 
