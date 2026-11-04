@@ -2,8 +2,31 @@
 
 ## Managed update fast path
 
-Once per coding session, if `~/.local/bin/doomer` is present, probe its
-`self-update --help`. If supported, use its absolute path to run:
+First consult the shared durable decisions in SKILL.md. A recorded session-wide
+`compatibilityDecision: skip` (including `onboardingAuthorization: skip_session`)
+skips this entire installation/update flow, including probes and update offers,
+until the user explicitly resumes Doomer. Retain onboarding authorization and
+any blocked reason across turns; installation success does not clear them.
+Resume an in-flight `updateAttempt` under its existing approval before looking
+up a new version-scoped decision. Requests solely discussing or editing this
+skill are also exempt from these checks.
+
+For replacement/adoption offers in both the managed and legacy flows, retain
+`adoptionDecision: not_asked | approved | declined | finished` in the same
+durable summary, keyed by canonical skill path, destination path, and target
+CLI version, using SKILL.md's path-resolution rules. Freeze that target for
+the approved replacement; a changed pin follows SKILL.md's conflict rule.
+Record the user's answer before continuing and consult it across
+turns, restarts, and compaction before offering replacement again. A declined
+replacement preserves the existing binary and routes to the shared
+compatibility choice without repeating the replacement offer. Approval applies
+only to that replacement; record `finished` after success. A session-wide skip
+also sets `compatibilityDecision: skip` and suppresses the whole flow.
+
+Once per user turn that uses this skill, reread this reference's current pin
+and check `~/.local/bin/doomer`. If present, probe `self-update --help` when its
+capability is unknown or the binary changed. If supported, use its absolute
+path to run this local, read-only check, even when setup succeeded earlier:
 
 ```sh
 "$HOME/.local/bin/doomer" self-update --check --version 2026.11.3.7
@@ -19,7 +42,8 @@ the JSON result:
   If `approved`, update to the selected skill pin without another question; for
   the current pin run `self-update --version 2026.11.3.7` using the verified
   absolute path. A known skill update goes first, as defined in SKILL.md.
-  If `declined` or `finished`, do not offer another update. Reuse the retained
+  If `declined` or `finished` for this canonical skill path and target version,
+  do not offer another update for that target. Reuse the retained
   CLI if it supports the required workflow; otherwise follow SKILL.md's
   user-choice rule for continuing without reviews. Do not unilaterally skip.
 - `missing`: follow the verified bootstrap below.
@@ -28,11 +52,12 @@ the JSON result:
   with VERSION and keep a backup, or skip Doomer for this session?”** Name the
   symlink target if relevant. Explain that adoption backs up and replaces only
   this link, including a link into Homebrew; it never changes the package-manager
-  target or its files. If the user previously declined updates, do not re-offer
-  adoption automatically. Only after that approval, use a verified bootstrap
-  executable below with `self-update --version 2026.11.3.7 --adopt`.
+  target or its files. If the user declined this target or skipped Doomer for
+  the session, do not re-offer adoption automatically. Only after that approval,
+  use a verified bootstrap executable below with `self-update --version 2026.11.3.7 --adopt`.
 - `newer_installed`: never downgrade it to this older pin. Consult the shared
-  decision before offering a known skill update; never repeat a declined offer.
+  decision before offering a known skill update; never repeat a declined offer
+  for the same target.
   Retain the binary. Probe `onboard --help` at its absolute path for the flags
   used by this skill (`--repo`, `--agent`, `--session`, `--task-stdin`, plus
   `--restart` for Codex or `--check-hooks` for Claude). If present, proceed with
@@ -88,8 +113,11 @@ and follow SKILL.md's user-choice rule; never claim setup succeeded.
    and unexpected file types. Use that verified executable as the installation
    source and compute its SHA-256 for the installed-file comparison.
 
-Verify this pinned release once per new coding session, not after every edit.
-A skill update can change the pinned version.
+Check the local installed binary against the freshly read pin once per user
+turn, not after each edit or tool call. Fetch the immutable manifest and archive
+only when installation or an approved update needs them. Do not repeat downloads
+for a matching managed binary. Online skill update checks remain once per
+session as defined in SKILL.md.
 
 ### Recover transient download failures
 
