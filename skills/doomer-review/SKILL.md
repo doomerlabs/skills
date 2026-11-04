@@ -563,14 +563,30 @@ corrections still present in this conversation. The bare
 `Resume after doomer.ai setup` prompt, a setup prompt, a `ready` status, and a
 message saying a task was saved are not the original task.
 
-If the original request is missing and onboarding saved a coding task, complete
-the applicable Codex resume flow below. In desktop, after any required hook
-approval, ask the user to send `Resume after doomer.ai setup` in this chat once
-and wait for the trusted hook's restored task text. If the resume prompt was
-already sent and the hook supplied no task text, or no saved task is known,
-ask the user for the original request and constraints. Wait for that context
-before editing. For setup-only onboarding, verify hooks and report readiness
-without inventing a coding task.
+Record the handoff in the durable conversation summary for the target Git root
+and session. After Codex onboarding with `--task-stdin` succeeds and prints
+`Your task is saved.`, record that marker and the original request and constraints.
+Setup-only onboarding has no saved coding task. Record whether the resume prompt
+was sent and whether the hook delivered the task text, and retain the delivered
+text across compaction. Consult this summary after resuming. A `ready` receipt
+does not supply any of these handoff facts.
+
+If the original coding request is still missing, choose the recovery step by
+active agent and client:
+
+- In Codex desktop, if the summary confirms a saved task for this repository
+  and session and the resume prompt has not been sent, request
+  `Resume after doomer.ai setup` once after any required hook approval.
+- In Codex terminal, if that same saved-task evidence exists and the resume
+  prompt has not been sent, use the Codex terminal instructions under
+  **A required restart** below when a restart is pending. In an already
+  resumed terminal session, ask the user to send the same prompt there once.
+- In Claude Code, or if the saved-task evidence or client is unknown, ask the
+  user for the original request and constraints. Do the same if the resume
+  prompt was already sent and the task text is still unavailable.
+
+Wait for the restored or user-supplied task before editing. For setup-only
+onboarding, verify hooks and report readiness without inventing a coding task.
 
 ## Codex desktop: approve hooks in the current chat
 
