@@ -29,7 +29,10 @@ repository. If Git is missing, explain that it is required and stop setup.
 If the current folder
 contains several repositories and the target is unclear, ask which to use.
 Determine whether you are running in Codex or Claude Code. Ask if you cannot
-determine the active agent.
+determine the active agent. For Codex, also identify whether this is the desktop
+app or terminal. Desktop setup uses **Review hooks** beside the composer or
+**Settings > Hooks** and continues in the same chat. Follow the skill's desktop
+activation flow even if an older CLI prints terminal restart instructions.
 
 Use a repository-local installation for the active agent.
 

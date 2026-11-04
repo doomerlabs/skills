@@ -23,7 +23,7 @@ a coding task or start editing application code.
 
 For setup-only onboarding, use the setup-only command for the active agent
 below. Do not create a task file or save the setup request as a coding-task
-handoff. Still add `--restart` for Codex when required.
+handoff. Add `--restart` only for a Codex terminal session when required.
 
 Keep configuration and activation separate in the conversation summary:
 repository, active agent/session when known, consent outcome, required restart,
@@ -351,8 +351,9 @@ activation, and missing history leaves it `unverified`.
 For pending or unverified Claude activation, use **Complete pending Claude
 activation** below. For Codex, a current-session Doomer hook callback confirms
 loaded hooks. Without that evidence, report configured but unverified, have the
-user inspect Doomer's hooks and trust in `/hooks`, and retain the activation
-gate before repository edits. Follow an actual outstanding restart requirement
+user inspect Doomer's hook approval controls for the active client, and retain
+the activation gate before repository edits. In Codex desktop, use **Review hooks**
+beside the composer or **Settings > Hooks**. In the terminal, use `/hooks`. Follow an actual outstanding restart requirement
 or the user's confirmation that hooks are unloaded; missing history alone does
 not prove a restart is necessary. If verification remains unavailable, use the
 shared user-choice rule to continue without verified reviews only by explicit
@@ -375,17 +376,20 @@ unrelated conversation. Do not search other chats. Choose the active coding
 agent, not another agent merely installed on the machine. Run one onboarding
 command for that agent.
 
-**Codex:** use its current `CODEX_THREAD_ID`. For setup-only:
+**Codex:** use its current `CODEX_THREAD_ID`. Distinguish the desktop app from
+the terminal using the active client context. `CODEX_INTERNAL_ORIGINATOR_OVERRIDE`
+set to `Codex Desktop` identifies a desktop session. Desktop onboarding stays in
+the current chat and uses the hook approval controls below. For setup-only:
 
 ```sh
-# If the CLI was installed or replaced this turn, append --restart to this command.
+# In Codex terminal only, append --restart if the CLI was installed or replaced this turn.
 "${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent codex --session "$CODEX_THREAD_ID"
 ```
 
 With a coding task:
 
 ```sh
-# If the CLI was installed or replaced this turn, append --restart to this command.
+# In Codex terminal only, append --restart if the CLI was installed or replaced this turn.
 "${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the target Git root}" --agent codex --session "$CODEX_THREAD_ID" --task-stdin < "$task_request_file"
 ```
 
@@ -422,8 +426,11 @@ For a new setup use normal onboarding below. If an older release lacks refresh,
 state that its old watcher has not been refreshed and retain the supported setup
 flow; do not silently claim the running process was upgraded.
 
-For normal Codex onboarding, add `--restart` if the CLI was installed or replaced
-during this turn, because the prompt may have arrived before its hooks could run.
+For normal Codex terminal onboarding, add `--restart` if the CLI was installed
+or replaced during this turn, because the prompt may have arrived before its
+hooks could run. In Codex desktop, omit `--restart` and follow the desktop
+activation flow below, including when an older CLI prints terminal restart
+instructions.
 A successful refresh of an already-configured watcher does not require rerunning
 normal onboarding or rewriting the saved task. Claude uses the
 live-hook check below instead of an automatic restart. Remove the temporary
@@ -449,6 +456,21 @@ accept consent for them, or write coding-agent trust records. Do not infer conse
 the skill installation. Respect a refusal or pause; continue coding without
 Doomer and do not repeatedly ask in the same session. A failed setup is not a
 successful review; explain the concrete error briefly.
+
+## Codex desktop: approve hooks in the current chat
+
+After onboarding, direct the user to **Review hooks** beside the composer. If
+that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
+hooks. Then ask for a follow-up message in this chat and check for an actual
+current-session hook callback. Preserve the original task in the conversation;
+missing its initial prompt capture alone does not require a restart.
+
+The approval controls belong to Codex. Do not claim that Doomer opened the
+approval dialog, invoke a terminal resume command, or write hook trust settings
+on the user's behalf. If approval or live delivery remains unverified, report
+that specific pending step and retain the activation gate. Use a restart only
+when the user confirms the hook definitions have not loaded and chooses that
+fallback. Desktop recovery stays in the desktop app.
 
 ## Claude: verify live hooks before asking for a restart
 
@@ -498,7 +520,7 @@ a task to renew activation. A missing session follows the limitation above.
 
 ## A required restart
 
-If Codex onboarding requires a restart, or a Claude reload fallback is needed,
+For a Codex terminal restart or a Claude terminal reload fallback,
 stop before editing repository content, including documentation.
 Show the CLI's actual command with these clear steps:
 
@@ -527,7 +549,7 @@ For either mode, **do not repeat onboarding merely because of restart or run a
 breadcrumb-consumption command.** The bounded pending-Claude-activation recovery
 above is the exception when a later real coding prompt needs a fresh receipt.
 If hook trust is still pending, ask the
-user to review Doomer hooks in that agent's `/hooks` interface and complete any
+user to review Doomer hooks in the active client's approval controls and complete any
 workspace trust prompt themselves; never select trust for them.
 For a coding task, if no saved context is supplied, use the original request
 already in this chat; ask for it only if neither is available. Unknown trust alone must not trigger
