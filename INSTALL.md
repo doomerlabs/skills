@@ -115,9 +115,15 @@ the selected case determines which activation checks govern the current setup.
    keeps several active attempts, have them select the intended worktree and
    resume using its exact `setupRoot` match. Readiness comes from the resumed
    attempt's own checks. Do not run terminal-record readiness checks at the same time.
+   Re-run step 4's repository-instructions verification before completing any
+   resumed attempt or advancing it from `configured` to `complete`.
+   Repair missing or outdated guidance using that step's write rules. Retain
+   the last confirmed phase until verification succeeds. If repair needs user
+   direction or permission, report the pending action and stop that attempt.
 2. **Only terminal records match.** Terminal records do not conflict with each
    other. Never resume abandoned records. For completed records, verify the installed
-   skill and run its saved-setup and activation checks for the current root
+   skill and the repository instructions required by step 4, then run the
+   skill's saved-setup and activation checks for the current root
    before describing that checkout as ready. These checks are part of this
    case, not a separate alternative. Never replay a completed record's commits,
    pushes, or PR creation. If setup is missing or no longer ready, offer a new
@@ -201,10 +207,12 @@ follow their setup-only instructions in this conversation. You can read and
 follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
 download, existing-installation handling, onboarding commands, and activation.
+For both setup modes, complete the repository-instructions step below before
+the skill's setup-only completion message ends the task.
 
 The direct skill download above replaces the `npx skills add` step. The optional
-cached npm update check may be unavailable without Node.js. Follow the section
-**Check for updates once per coding session** in `SKILL.md`, which
+cached npm update check may be unavailable without Node.js. Follow
+the cached-check fallback in `SKILL.md`'s update-check section, which
 handles a missing cached checker or incompatible Node by retaining the current
 pin and recording the attempted check. This is separate from the CLI's local
 managed-binary check and verified bootstrap in `references/install.md`, which
@@ -223,6 +231,112 @@ and any agent hook-trust prompts themselves. Reuse valid saved consent and
 setup as directed by the skill. Keep required execution permissions separate
 from repository consent. Respect an existing paused watcher.
 
+#### Install the repository instructions
+
+After the onboarding step returns, whether or not it wrote repository
+instructions, ensure the Git root contains `AGENTS.md` with the block below.
+Verify it again when resuming setup. This is required for both local and team
+setup before the final ready report or a requested restart.
+
+Use the skill's existing, repository/session-scoped skip decisions
+(`compatibilityDecision: skip` or `onboardingAuthorization: skip_session`) and
+record a new skip in the skill's durable task summary as it directs. A current
+explicit skip ends this setup attempt with phase `abandoned`; report that setup
+was skipped and retain its resources. It is not a permanent repository opt-out.
+The skill's durable summary is conversation state, separate from a coding-task
+handoff file. The abandoned phase in the existing private setup record also
+prevents automatic resumption after a restart. Read that persisted phase before
+any step 3 download or step 4 probe: an abandoned attempt reports its outcome
+and waits for an explicit new setup choice under the terminal-record rules.
+This gate applies even when no conversation summary survives the restart.
+When the user explicitly resumes setup, follow the skill's
+resumption rules and require the block before reporting setup ready. Maintain
+one shared skip decision with the skill.
+
+Before writing either instructions file, inspect its file type and any policy
+markers. Recognize only exact standalone policy-marker lines outside fenced
+code examples and larger HTML-comment blocks. The one-line marker comments
+themselves are valid delimiters. Markers shown in examples are not live policy.
+Scan in source order while tracking the current Markdown block context.
+Inside a fenced code block, ignore comment tokens until its matching fence
+closes (same delimiter character, at least the opening length). Inside an HTML
+comment, ignore fence tokens until the next `-->`; comments do not nest.
+Only outside both contexts recognize a new fence or comment opener, and treat
+standalone policy-marker comments as the live delimiters. Treat unclosed fences
+or comments, or uncertain marker context,
+as conflicts requiring user direction before any write.
+A symlink, another non-regular file, or duplicated, incomplete, or
+out-of-order markers requires reporting the conflict and obtaining the user's
+direction before changing that file. This check gates all writes below.
+
+If the user authorizes malformed-marker repair, preserve a uniquely named
+backup under `doomer/instruction-backups/` in the resolved private Git common
+directory. This keeps backups outside the worktree and the team PR. Remove
+only the malformed marker lines and obsolete Doomer
+content whose boundaries the user has confirmed, preserving all other text.
+Then insert one complete block and verify it under the rules below. If those
+boundaries remain unclear, request clarification and leave the file intact.
+
+Create `AGENTS.md` if it is missing. Append the block with blank lines around
+it only when the existing file contains neither policy marker. If exactly one
+start marker and one end marker form a complete ordered block, update only
+that block. Preserve all surrounding text and file permissions. Keep the
+CLI-owned `doomer-review` block intact; onboarding may regenerate it. These
+separate markers keep the per-turn policy from being overwritten on later
+onboarding runs. Preserve unmarked repository-specific instructions.
+Insert the contents of this example without its surrounding code fences.
+
+```markdown
+<!-- doomer-review-policy:start -->
+## Required Doomer review workflow
+
+Before each user turn that will edit repository files, read the active agent's
+installed doomer-review skill and its references/install.md from disk. For
+Codex, use .agents/skills/doomer-review/. For Claude Code, use
+.claude/skills/doomer-review/. Follow the skill for documentation, configuration,
+tests, and application code, including small edits and requests that do not
+explicitly mention review.
+
+Run the skill's local CLI version and managed-installation check once per
+editing turn before making changes. Use the current on-disk pin and the skill's
+saved approval decisions. A version remembered from an earlier turn or a
+previously completed setup does not satisfy this check. Keep the online skill
+update check scoped to once per coding session as the skill directs.
+
+Follow the skill's setup and review workflow. Reuse valid repository consent
+and verified hook activation. Keep repository upload consent and agent hook
+trust as user choices, preserve a paused watcher, and honor explicit skip
+decisions and the skill's read-only and skill-maintenance exemptions.
+
+Use trusted hooks to capture changes and deliver review results. Investigate
+feedback, fix confirmed issues within the user's scope, and record responses
+as the hooks direct. Follow the skill's completion gate for the current
+revision and include the complete Doomer review link when a review is delivered,
+including a review with no findings.
+<!-- doomer-review-policy:end -->
+```
+
+For Claude Code, also ensure the root `CLAUDE.md` loads this shared policy with
+an `@AGENTS.md` import on its own line, outside code fences. Create `CLAUDE.md`
+with that import if missing. For an existing file, count only a standalone line
+whose trimmed text is exactly `@AGENTS.md`, outside fenced code blocks and HTML
+comments, as the canonical import. If no such line exists, add it as a new
+top-level line. A mention in prose, a comment, or an import inside another file
+does not satisfy this check. Preserve its existing text and the CLI-owned Doomer block. When both
+agents are requested, keep one shared policy block in `AGENTS.md`.
+
+Preserve the existing permissions of both `AGENTS.md` and `CLAUDE.md`, and
+write their changes atomically. If any existing rule
+explicitly conflicts with the requested Doomer policy, surface the conflict
+instead of silently deleting that rule.
+
+Read the resulting files back. Verify exactly one complete policy block,
+unchanged surrounding text, the installed skill paths for every requested
+agent, and Claude's import when applicable. Include the instructions files in
+the local-change summary or scoped team PR. A setup record marked complete
+still requires this guidance check when resuming this guide; repair missing or
+outdated guidance using these same rules without repeating completed publication.
+
 Complete the skill's activation checks. If a restart or other user action is
 required, give the exact next step and retain the setup state for resumption.
 Report installation, configuration, and verified activation separately. Claim
@@ -232,7 +346,7 @@ end-to-end review delivery only after a hook actually delivers a result.
 
 For the team-PR choice, review the complete diff against the selected base.
 Include the installed skill and its supporting files, plus portable integration
-instructions added to `AGENTS.md` or `CLAUDE.md` by the setup workflow. Include
+instructions added to `AGENTS.md` and, for Claude, `CLAUDE.md` by the setup workflow. Include
 other generated configuration only after verifying that it is portable and
 appropriate to share. Inspect any hook configuration for absolute paths,
 usernames, and machine-specific values before including it.

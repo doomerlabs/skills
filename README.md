@@ -15,7 +15,9 @@ follow the instructions to set up Doomer in this repository.
 
 [The installation guide](INSTALL.md) downloads the skill directly, without
 `npx` or Node.js, and completes CLI setup, repository consent, and hook
-activation. Both choices keep the skill project-local. Local setup leaves the
+activation. It creates or updates `AGENTS.md` with the required review workflow
+and per-turn version checks, and connects that policy to `CLAUDE.md` for Claude
+Code. Both choices keep the skill project-local. Local setup leaves the
 changes uncommitted. Team setup opens a focused PR with shareable setup files;
 each developer completes their own local activation.
 
