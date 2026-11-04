@@ -46,6 +46,9 @@ Keep activation unverified until the active agent's live hook check succeeds
 or a real current-session hook callback confirms the target repository.
 For Codex, follow the skill's bounded `--check-hooks` verification; a successful
 hook may return no chat message.
+If approved desktop hooks remain silent after that check and its retry, use the
+skill's **Recover silent desktop hooks** flow. It offers one app reopen and
+verification in the same chat while reusing the existing setup.
 
 Use a repository-local installation for the active agent.
 
