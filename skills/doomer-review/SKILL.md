@@ -81,6 +81,10 @@ the failed/pending setup and stop without inventing coding work.
 
 ### When onboarding needs authorization
 
+First apply the saved-setup check under **Set up once**. Missing conversation
+history is not evidence that setup or consent is missing. Do not request setup
+authorization merely because this is a new chat or context.
+
 Keep installation, onboarding authorization, repository upload consent, and
 hook activation distinct. A verified installed CLI is not completed onboarding.
 After installation succeeds, proceed to the onboarding command below; do not
@@ -198,11 +202,53 @@ whether they can use it. Do not claim all installations were updated.
 
 ## Set up once
 
-Resolve the Git root. If this conversation confirms configuration and completed
-activation for this repository and no update replaced its CLI, continue coding
-without repeated setup/status checks, or acknowledge a repeated setup-only
-request and stop. A configured but unverified record does not qualify: follow
-the pending activation path below.
+Resolve the Git root of the repository being edited, not the org directory that
+contains the chat. If this conversation already verified its saved setup and
+no update replaced the CLI, continue without repeated setup/status checks.
+
+### Reuse saved setup across chats
+
+After verifying the installed CLI through the installation reference, check
+saved setup once for this repository in a new chat or when setup history is
+unknown. Run this standalone, read-only command before any normal `onboard`
+command or setup-permission question:
+
+```sh
+"$HOME/.local/bin/doomer" --profile default --api-url https://doomer.ai/api watch status --json "$doomer_repo_root"
+```
+
+This inspects saved consent, installed hooks, and watcher status. It does not
+install hooks, start a watcher, or upload repository content. Do not combine it
+with onboarding, updates, or other writes in the same command.
+
+- If `approved` is true, `paused` is false, `running` is true, and
+  `hooks_installed` is true for the active agent, reuse that configuration.
+  If `repository_status` is `Watching`, continue the task using the hooks.
+  Do not rerun onboarding, save a restart task, reopen browser consent, or ask
+  the user to enable Doomer again. For a setup-only request, report the saved
+  configuration instead of reinstalling it.
+- `hook_trust: "user_managed"` is a statement of who controls trust, not a
+  report that trust is missing. Do not demand `/hooks`, a restart, or another
+  confirmation solely because this value is present. Let the coding agent
+  enforce its trust controls. Do not claim live review delivery until observed.
+- If `paused` is true, respect the pause and continue without Doomer; do not
+  resume it unless the user explicitly asks. Never rewrite consent to resume.
+- If consent or the active agent's hooks are missing, use normal onboarding
+  below. If consent and hooks exist but the watcher is stopped or this checkout
+  is not yet watching, repair only that missing setup through onboarding,
+  retaining saved consent. Explain the specific missing part if execution
+  authorization is required; do not ask for repository upload consent again
+  when the CLI reports it valid. A new linked worktree is not proof of missing
+  consent: check its own resolved path first.
+- If the check fails, report the actual error. An unreadable result is not a
+  negative consent decision or proof that hooks need reinstalling. Do not
+  blindly invoke onboarding as a diagnostic fallback.
+
+This saved-setup path takes precedence over the initial onboarding and Claude
+activation steps below. Those steps apply to newly configured/changed hooks or
+an explicitly pending activation, not every new chat with existing hooks. A
+known pending restart or failed activation is still pending; status does not
+override it. Missing chat history alone does not create such a pending state.
 
 Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
 Use stable CLI **2026.11.3.5**, which provides the consolidated onboarding command.
@@ -280,8 +326,9 @@ continue without verified reviews.
 Onboarding owns repository consent, matching hooks, the background watcher,
 the marked Doomer instructions in `AGENTS.md` for Codex or `CLAUDE.md` for Claude
 Code, and saved task context. It reuses valid
-consent and an existing watcher. **Do not separately run `watch add`, `watch
-task`, `watch start`, a status polling loop, or scripts that read Doomer's state.**
+consent and an existing watcher. The one-time read-only saved-setup check above
+is allowed. **Do not separately run `watch add`, `watch task`, `watch start`, a
+status polling loop, or scripts that read Doomer's state.**
 Do not directly write Doomer's grant, hook definitions, or saved task files.
 
 Let the CLI's browser page obtain the user's upload decision. Never use `--yes`,
