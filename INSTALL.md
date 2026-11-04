@@ -10,9 +10,10 @@ follow the instructions to set up Doomer in this repository.
 
 The agent downloads the Doomer skill directly and uses it to install the CLI
 and configure reviews. This installation path needs no `npx` or Node.js.
-Supported systems are macOS and Linux on Intel/AMD 64-bit or ARM64.
-Both options install the skill in this project. Local setup leaves the changes
-uncommitted. Team setup publishes the shareable installation changes in a PR.
+Supported systems are macOS and Linux on Intel/AMD 64-bit or ARM64, with Git
+available. Both options keep the skill repository-local. Local setup installs
+in your current checkout and leaves the changes uncommitted. Team setup may
+use a separate checkout to prepare the shareable installation changes in a PR.
 Each developer completes their own CLI setup, repository consent, and hook trust.
 
 ## Instructions for the coding agent
@@ -23,7 +24,9 @@ coding task.
 
 ### 1. Identify the repository and agent
 
-Resolve the Git root of the user's target repository. If the current folder
+Check that Git is available, then resolve the Git root of the user's target
+repository. If Git is missing, explain that it is required and stop setup.
+If the current folder
 contains several repositories and the target is unclear, ask which to use.
 Determine whether you are running in Codex or Claude Code. Ask if you cannot
 determine the active agent.
@@ -47,9 +50,26 @@ Before changing files, ask once, unless the user already specified their choice.
 > commit the shareable Doomer setup, and open a pull request for your team?
 
 Offer **Local setup only** first and **Create a team PR** second. Wait for the
-answer before making changes. Reuse this choice after a restart or interrupted
-setup. A team-PR choice authorizes creating the branch, committing the scoped
-setup files, pushing that branch, and opening the PR.
+answer before making changes. A team-PR choice authorizes creating the branch,
+committing the scoped setup files, pushing that branch, and opening the PR.
+
+Before asking, read the local setup record if present. Resolve the absolute
+Git common directory with `git rev-parse --path-format=absolute --git-common-dir`.
+Store setup progress in `doomer/agent-install.json` under that directory, keyed
+by the original checkout's absolute Git root and active agent. This is private
+Git metadata, outside tracked files. Record `mode` (`local` or `team-pr`),
+`originalRoot`, `setupRoot`, `branch`, `base`, `remote`, `sourceCommit`,
+`commit`, `prUrl`, `originalActivation`, and `phase`. Use null for values not yet known. Preserve
+other entries and write updates atomically. Store no secrets or consent here.
+
+Record the selected mode immediately after the answer and reuse it on restart.
+Record the planned branch and setup root before creating them. Before retrying
+an interrupted operation, inspect the actual branch, commit, remote branch, or
+PR and reconcile the record. Resume the existing operation. A new explicit user
+choice replaces the saved mode. If the record is invalid or ambiguous, ask for
+clarification before writing or publishing.
+When resuming inside the setup worktree, locate the record whose `setupRoot`
+matches that root and retain its `originalRoot`.
 
 Treat the requested team PR as part of setup. After the skill reaches its
 setup-only completion step, finish the authorized publication steps below
@@ -68,10 +88,14 @@ checkout. Tell the user which checkout will be configured. Resolve an ambiguous
 remote or base with the user before publishing.
 
 In a separate worktree, run the remaining installation and onboarding steps
-against that worktree's Git root. Consent and watcher state may be
-checkout-specific. Report which checkout has verified activation and any
-remaining setup for the user's original checkout. A PR alone does not activate
-reviews for other developers.
+against that worktree's Git root. Treat activation as specific to the exact
+root passed to onboarding. Never infer that activation there enables the
+original checkout. Record the original checkout as pending until it has its
+own installed skill and the skill's saved-setup and activation checks succeed
+for that exact root. Its onboarding must obtain any consent the CLI requires;
+never copy consent records between checkouts. Report that the user must merge
+and update their original checkout, then resume this guide there to complete
+that activation. A PR alone does not activate reviews for other developers.
 
 ### 3. Download and install the skill
 
@@ -86,15 +110,14 @@ skill directory, including its supporting files, into the destination above.
 Keep temporary checkout files outside the user's repository, and remove only
 the temporary files you created after installation.
 
-If Git is unavailable, download an archive of this same public repository over
-HTTPS, resolve and record its commit ID, and extract the skill into a temporary
-directory before copying. If you cannot fetch or identify the source, report
-the failure and stop installation.
+If you cannot fetch or identify the source, report the failure and stop
+installation.
 
-If the destination already exists, inspect it first. Reuse a complete existing
-installation and continue its setup workflow. If it is incomplete, modified,
-or needs replacement, explain the conflict and obtain approval before replacing
-it. Preserve a backup for any approved replacement. Preserve unrelated skills,
+If the destination already exists, compare its full file inventory and file
+contents with the fetched skill, including `SKILL.md` and `references/install.md`.
+Reuse it only when these match. A different CLI pin, missing file, extra file,
+or changed content requires explaining the difference and obtaining approval
+before replacing it. Preserve a backup for any approved replacement. Preserve unrelated skills,
 agent settings, and repository changes.
 
 ### 4. Run the installed skill's setup workflow
@@ -105,9 +128,19 @@ follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
 download, existing-installation handling, onboarding commands, and activation.
 
-The direct skill download above replaces the `npx skills add` step. The skill's
-optional cached update check may be unavailable without Node.js. Follow its
-documented fallback and continue with the installed skill's pinned CLI.
+The direct skill download above replaces the `npx skills add` step. The optional
+cached npm update check may be unavailable without Node.js. Follow the section
+**Check for updates once per coding session** in `SKILL.md`, which
+handles a missing cached checker or incompatible Node by retaining the current
+pin and recording the attempted check. This is separate from the CLI's local
+managed-binary check and verified bootstrap in `references/install.md`, which
+must still run as directed.
+
+For an authorized team PR, this guide's publication steps explicitly override
+the setup-only "Then stop" instruction in `SKILL.md`. After onboarding reaches
+its completion message, continue to step 5. Preserve all consent, trust, and
+activation requirements. A required user action still pauses onboarding;
+retain the publication state and resume when the user completes that action.
 
 Explain that repository snapshots and edited content, including documentation,
 configuration, tests, and application code, plus task context and agent review
@@ -148,6 +181,21 @@ PR. Reuse an existing PR for this setup branch.
 If there is no shareable diff, report that outcome instead of creating an empty
 commit or PR. If pushing or creating the PR is blocked, preserve the local
 branch and commit, identify the failed step, and provide the next action.
+
+#### Resume or abandon publication
+
+Use the saved branch, base, remote, setup root, commit, and PR URL to resume.
+Check remote state before retrying a push or PR creation so a completed request
+with a lost response does not produce duplicate work. Update `phase` after each
+confirmed operation. If the original checkout now contains the merged setup,
+complete activation there instead of creating another branch or PR.
+
+If the user cancels publication, preserve completed work and report its exact
+locations. Ask before closing a PR, deleting a local or remote branch, removing
+a worktree, or unstaging setup hunks. After explicit cleanup approval, operate
+only on the recorded setup resources and verified setup hunks. Preserve any
+new user edits and leave a worktree intact if it contains them. Mark the record
+as abandoned after cleanup, retaining any resources the user chose to keep.
 
 ### 6. Report the result
 
