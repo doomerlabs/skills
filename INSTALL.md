@@ -271,6 +271,12 @@ only on the recorded setup resources and verified setup hunks. Preserve any
 new user edits and leave a worktree intact if it contains them. Mark the record
 as abandoned after cleanup, retaining any resources the user chose to keep.
 
+Publication cleanup is limited to those PR, branch, worktree, and staging
+operations. Retain installed skills and CLI binaries. Before cleanup, compare
+the proposed resources with all active setup records and live worktrees.
+Preserve anything shared with, or needed by, another attempt or the user's
+ongoing work. Offer cleanup only for verified attempt-owned, unshared resources.
+
 ### 6. Report the result
 
 Give the installed skill path, source commit ID, verified CLI version, and
