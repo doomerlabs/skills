@@ -10,8 +10,7 @@ Paste this into Codex or Claude Code while working in your repository.
 
 ```text
 Read https://raw.githubusercontent.com/doomerlabs/skills/main/INSTALL.md and
-follow it to install and set up Doomer for this repository. Ask whether I want
-local setup only or a dedicated branch, commit, and pull request for my team.
+follow the instructions to set up Doomer in this repository.
 ```
 
 [The installation guide](INSTALL.md) downloads the skill directly, without
