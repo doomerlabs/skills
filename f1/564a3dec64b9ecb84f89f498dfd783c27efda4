@@ -1,0 +1,21 @@
+INSTALL.md
+  s_f59c0263ff1599::t_86e5930c7852be 8
+README.md
+  s_f59c0263ff1599::t_e07ae96b3c45c9 13
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f1564a3dec64b9ecb84f89f498dfd783c27efda4",
+  "prompts": {},
+  "sessions": {
+    "s_f59c0263ff1599": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a698-f508-74f3-9bb3-df0273d6a8c2",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
