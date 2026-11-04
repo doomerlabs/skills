@@ -166,7 +166,7 @@ request and stop. A configured but unverified record does not qualify: follow
 the pending activation path below.
 
 Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
-Use stable CLI **2026.11.3.5**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.3.6**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
