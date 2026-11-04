@@ -477,8 +477,9 @@ successful review; explain the concrete error briefly.
 
 After onboarding, direct the user to **Review hooks** beside the composer. If
 that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
-hooks. Then ask for a follow-up message in this chat and check for an actual
-current-session hook callback. Preserve the original task in the conversation;
+hooks. Then ask the user to send `Resume after doomer.ai setup` in this chat
+and check for an actual current-session hook callback. When a task was supplied
+to onboarding, that prompt lets the trusted hook restore its saved context. Preserve the original task in the conversation;
 missing its initial prompt capture alone does not require a restart.
 
 The approval controls belong to Codex. Do not claim that Doomer opened the
