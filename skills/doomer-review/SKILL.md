@@ -365,20 +365,54 @@ with onboarding, updates, or other writes in the same command.
 Saved configuration does not establish live activation. Retain activation as
 `pending`, `unverified`, or `verified` for the current repository and active
 agent/session in the durable summary. A current-session hook callback or
-Claude's current-session `ready` check can establish verification. Status flags
+the active agent's current-session `ready` check can establish verification. Status flags
 alone cannot. A summary for another session does not establish current-session
 activation, and missing history leaves it `unverified`.
 
 For pending or unverified Claude activation, use **Complete pending Claude
-activation** below. For Codex, a current-session Doomer hook callback confirms
-loaded hooks. Without that evidence, report configured but unverified, have the
-user inspect Doomer's hook approval controls for the active client, and retain
-the activation gate before repository edits. In Codex desktop, use **Review hooks**
-beside the composer or **Settings > Hooks**. In the terminal, use `/hooks`. Follow an actual outstanding restart requirement
-or the user's confirmation that hooks are unloaded; missing history alone does
-not prove a restart is necessary. If verification remains unavailable, use the
-shared user-choice rule to continue without verified reviews only by explicit
-choice. Do not reinstall or rewrite saved task state to diagnose activation.
+activation** below. For Codex, use **Verify Codex hooks** below. A successful
+hook can return empty output, so the absence of a chat message is not evidence
+that hooks are unloaded or untrusted. Do not reinstall, rewrite saved task
+state, or repeat hook-approval prompts to diagnose silence.
+
+### Verify Codex hooks
+
+Use the verified checkout-pinned CLI and the resolved Git root of the target
+repository. The chat may start in an organization directory containing several
+repositories; run the check with the target repository as the tool's working
+directory and pass that same path as `--repo`.
+
+First inspect the selected CLI's `onboard --help`. Its `--check-hooks` description
+must explicitly support Codex. Older releases support only Claude. If this
+capability is missing, report that Codex activation verification requires a
+newer compatible skill/CLI release and follow the existing update/user-choice
+flow. Do not invoke the unsupported check, infer missing trust, or repeatedly
+ask the user to enable hooks. Never change the pinned release on your own.
+
+With the current `CODEX_THREAD_ID`, run this read-only check.
+
+```sh
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "${doomer_repo_root:?Set the Git root}" --agent codex --session "${CODEX_THREAD_ID:?Current Codex session required}" --check-hooks
+```
+
+- `ready` verifies a recent real hook for this repository and the current task
+  in this session. Continue the task, including repository edits, without
+  requiring an additional chat callback. This does not claim a completed review.
+- `pending` permits one read-only tool call in the target repository, such as
+  `git status --short`, followed by one retry. The hook around that tool can
+  establish the receipt. The check itself never fabricates activation. Do not
+  poll beyond that retry. If still pending, report that live activation remains
+  unverified and follow the shared user-choice rule. Inspect approval controls
+  when the client reports missing trust or the user confirms unloaded hooks.
+- `error`, a command failure, or malformed output requires reporting the actual
+  diagnostic. Preserve Git stderr, including license or executable errors.
+  Missing task capture, unavailable setup, and failed hooks are distinct from
+  missing trust. Follow the shared user-choice rule without inventing a cause.
+
+A missing current session ID leaves activation unverified. Do not borrow an ID
+from another chat. Follow an actual outstanding restart requirement or the
+user's confirmation that hooks are unloaded; missing history alone does not
+prove a restart is necessary.
 
 These rules reuse configuration while preserving the activation gate. A
 non-`Watching` checkout uses the repair branch even when the other flags are
@@ -443,14 +477,14 @@ active agent's hook activation flow. First verify the selected binary's exact
 managed identity and `runtime-info` protocol 1. Reuse hook configuration only
 when the installed dispatcher definition is unchanged. Have the user approve
 any new or changed definition through the active client's hook controls.
-Revalidate activation with a current-session callback from the selected runtime
+Revalidate activation with the active agent's current-session hook check from the selected runtime
 before claiming readiness.
 
 For a verified protocol-1 runtime, do not refresh or stop the old version's
 watcher merely because this checkout changed pins. Its checkout filter removes
 a checkout whose pin no
 longer matches on its next reconciliation. The old process may remain available
-for other checkouts using that version. Confirm the new runtime's callback;
+for other checkouts using that version. Confirm the new runtime's activation;
 report a stale old checkout assignment as a runtime issue instead of stopping a
 shared version indiscriminately. An unchanged pin with verified active hooks
 reuses its runtime.
@@ -500,7 +534,7 @@ successful review; explain the concrete error briefly.
 After onboarding, direct the user to **Review hooks** beside the composer. If
 that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
 hooks. Then ask the user to send `Resume after doomer.ai setup` in this chat
-and check for an actual current-session hook callback. When a task was supplied
+and use **Verify Codex hooks** to check the current session. When a task was supplied
 to onboarding, that prompt lets the trusted hook restore its saved context. Preserve the original task in the conversation;
 missing its initial prompt capture alone does not require a restart.
 
