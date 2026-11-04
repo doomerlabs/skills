@@ -384,10 +384,14 @@ directory and pass that same path as `--repo`.
 
 First inspect the selected CLI's `onboard --help`. Its `--check-hooks` description
 must explicitly support Codex. Older releases support only Claude. If this
-capability is missing, an actual Doomer callback for the target repository and
-current session can still verify activation. Otherwise report that the receipt
-check requires a newer compatible skill/CLI release and follow the existing
-update/user-choice flow. Do not invoke the unsupported check, infer missing trust, or repeatedly
+capability is missing, count a callback only when its trusted hook output
+identifies both the resolved target Git root and the current session ID, and
+the callback was delivered by a tool call in this turn after any required hook
+approval. Compare both identifiers with the values used for this task. Prior
+turns, summaries, setup success messages, and callbacks with missing or
+mismatched identifiers leave activation unverified. If that evidence is
+unavailable, report that the receipt check requires a newer compatible
+skill/CLI release and follow the existing update/user-choice flow. Do not invoke the unsupported check, infer missing trust, or repeatedly
 ask the user to enable hooks. Never change the pinned release on your own.
 
 Check the current session ID in the same tool shell that runs verification.
@@ -411,9 +415,10 @@ location to its hooks.
 ```
 
 - `ready` verifies a recent real hook for this repository and the current task
-  in this session. Setup and resume prompts also count as captured prompts.
-  Continue the task once any saved-task handoff below is complete. The receipt
-  verifies activation only.
+  in this session. Setup and resume prompts can establish hook activation.
+  Before any coding edit, apply **Restore the original task** below. A receipt
+  for a setup or resume prompt alone never proves that the coding task was
+  restored.
 - `pending` permits one read-only tool call in the target repository followed by
   one retry. Choose a tool matched by the Doomer tool hooks. The installer uses
   `.*` for Codex tool hooks, so a shell tool running `git status --short` works
@@ -548,6 +553,22 @@ the skill installation. Respect a refusal or pause; continue coding without
 Doomer and do not repeatedly ask in the same session. A failed setup is not a
 successful review; explain the concrete error briefly.
 
+### Restore the original task
+
+A `ready` receipt verifies hook execution, not delivery of saved task context.
+Before editing after onboarding or restart, identify the original coding
+request and its constraints from either the actual restored task text delivered
+by the trusted hook in this conversation or the original user request and
+corrections still present in this conversation. The bare
+`Resume after doomer.ai setup` prompt, a setup prompt, a `ready` status, and a
+message saying a task was saved are not the original task.
+
+If neither source contains the original coding request and its constraints,
+ask the user to provide them and wait before making coding edits. Do not infer
+the task from the resume prompt, query other chats, or treat activation as proof
+of successful restoration. For setup-only onboarding, verify hooks and report
+readiness without inventing a coding task.
+
 ## Codex desktop: approve hooks in the current chat
 
 After onboarding, direct the user to **Review hooks** beside the composer. If
@@ -555,8 +576,8 @@ that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
 hooks. Then ask the user to send `Resume after doomer.ai setup` in this chat
 before using **Verify Codex hooks**. This applies to setup-only onboarding as
 well. When onboarding saved a coding task, the resume prompt is required to
-restore that task. An earlier `ready` result verifies hook execution only.
-Preserve the original task in the conversation. Missing its initial prompt
+restore that task. Apply **Restore the original task** before any coding edit,
+even when verification returns `ready`. Preserve the original task in the conversation. Missing its initial prompt
 capture alone does not require a restart.
 
 The approval controls belong to Codex. Do not claim that Doomer opened the
