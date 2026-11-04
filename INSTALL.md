@@ -104,6 +104,9 @@ This explicit-choice rule takes precedence over automatic resumption.
 On restart, inspect records for the active `agent` whose `setupRoot` or
 `originalRoot` exactly equals the current canonical Git root. Repository
 identity alone is not a root match. Use the first matching case below.
+Before selecting a case, report any matching terminal records and offer cleanup
+for abandoned resources. This reporting never establishes current readiness;
+the selected case determines which activation checks govern the current setup.
 
 1. **At least one nonterminal attempt matches.** Resume a unique match with
    its UUID and original root. If several match, ask which one to continue and
@@ -111,10 +114,9 @@ identity alone is not a root match. Use the first matching case below.
    those records' existing `phase` to `abandoned` before resuming. When the user
    keeps several active attempts, have them select the intended worktree and
    resume using its exact `setupRoot` match. Readiness comes from the resumed
-   attempt's own checks. Do not run the terminal-record case at the same time.
-2. **Only terminal records match.** Report each record and its saved resources;
-   terminal records do not conflict with each other. Offer cleanup for abandoned
-   resources without resuming them. For completed records, verify the installed
+   attempt's own checks. Do not run terminal-record readiness checks at the same time.
+2. **Only terminal records match.** Terminal records do not conflict with each
+   other. Never resume abandoned records. For completed records, verify the installed
    skill and run its saved-setup and activation checks for the current root
    before describing that checkout as ready. These checks are part of this
    case, not a separate alternative. Never replay a completed record's commits,
