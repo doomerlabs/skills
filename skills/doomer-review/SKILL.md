@@ -263,20 +263,78 @@ it with onboarding, updates, or other writes in the same command.
 Saved configuration does not establish live activation. Retain activation as
 `pending`, `unverified`, or `verified` for the current repository and active
 agent/session in the durable summary. A current-session hook callback or
-Claude's current-session `ready` check can establish verification. Status flags
+the active agent's current-session `ready` check can establish verification. Status flags
 alone cannot. A summary for another session does not establish current-session
 activation, and missing history leaves it `unverified`.
 
 For pending or unverified Claude activation, use **Complete pending Claude
-activation** below. For Codex, a current-session Doomer hook callback confirms
-loaded hooks. Without that evidence, report configured but unverified, have the
-user inspect Doomer's hook approval controls for the active client, and retain
-the activation gate before repository edits. In Codex desktop, use **Review hooks**
-beside the composer or **Settings > Hooks**. In the terminal, use `/hooks`. Follow an actual outstanding restart requirement
-or the user's confirmation that hooks are unloaded; missing history alone does
-not prove a restart is necessary. If verification remains unavailable, use the
-shared user-choice rule to continue without verified reviews only by explicit
-choice. Do not reinstall or rewrite saved task state to diagnose activation.
+activation** below. For Codex, use **Verify Codex hooks** below. A successful
+hook can return empty output, so the absence of a chat message is not evidence
+that hooks are unloaded or untrusted. Do not reinstall, rewrite saved task
+state, or repeat hook-approval prompts to diagnose silence.
+
+### Verify Codex hooks
+
+Use the verified checkout-pinned CLI and the resolved Git root of the target
+repository. The chat may start in an organization directory containing several
+repositories; run the check with the target repository as the tool's working
+directory and pass that same path as `--repo`.
+
+First inspect the selected CLI's `onboard --help`. Its `--check-hooks` description
+must explicitly support Codex. Older releases support only Claude. If this
+capability is missing, count a callback only when its trusted hook output
+identifies both the resolved target Git root and the current session ID, and
+the callback was delivered by a tool call in this turn after any required hook
+approval. Compare both identifiers with the values used for this task. Prior
+turns, summaries, setup success messages, and callbacks with missing or
+mismatched identifiers leave activation unverified. If that evidence is
+unavailable, report that the receipt check requires a newer compatible
+skill/CLI release and follow the existing update/user-choice flow. Do not invoke the unsupported check, infer missing trust, or repeatedly
+ask the user to enable hooks. Never change the pinned release on your own.
+
+Check the current session ID in the same tool shell that runs verification.
+The command reports an unexported ID separately from an exported empty ID.
+Use the repository as the tool's working directory so Codex also passes that
+location to its hooks.
+
+```sh
+(
+  if ! codex_session=$(printenv CODEX_THREAD_ID); then
+    printf '%s\n' 'CODEX_THREAD_ID is not exported in this tool shell.' >&2
+    exit 1
+  fi
+  if [ -z "$codex_session" ]; then
+    printf '%s\n' 'CODEX_THREAD_ID is exported but empty.' >&2
+    exit 1
+  fi
+  cd "${doomer_repo_root:?Set the Git root}" &&
+    "${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api onboard --repo "$doomer_repo_root" --agent codex --session "$codex_session" --check-hooks
+)
+```
+
+- `ready` verifies a recent real hook for this repository and the current task
+  in this session. Setup and resume prompts can establish hook activation.
+  Before any coding edit, apply **Restore the original task** below. A receipt
+  for a setup or resume prompt alone never proves that the coding task was
+  restored.
+- `pending` permits one read-only tool call in the target repository followed by
+  one retry. Choose a tool matched by the Doomer tool hooks. The installer uses
+  `.*` for Codex tool hooks, so a shell tool running `git status --short` works
+  with the standard configuration. If customized matchers exclude all
+  available read-only tools, explain the mismatch and have the user restore
+  and approve the standard matcher or follow the shared user-choice rule.
+  Keep the pre-edit gate. Do not poll beyond that retry. If still pending,
+  report that live activation remains unverified. Inspect approval controls
+  when the client reports missing trust or the user confirms unloaded hooks.
+- `error`, a command failure, or malformed output requires reporting the actual
+  diagnostic. Preserve Git stderr, including license or executable errors.
+  Missing task capture, unavailable setup, and failed hooks are distinct from
+  missing trust. Follow the shared user-choice rule without inventing a cause.
+
+A missing current session ID leaves activation unverified. Do not borrow an ID
+from another chat. Follow an actual outstanding restart requirement or the
+user's confirmation that hooks are unloaded; missing history alone does not
+prove a restart is necessary.
 
 These rules reuse configuration while preserving the activation gate. A
 non-`Watching` checkout uses the repair branch even when the other flags are
@@ -284,7 +342,7 @@ true. A pending restart, failed activation, or configured-but-unverified state
 always follows the activation path; saved status never overrides it.
 
 Install or verify the checkout-pinned CLI following [installation](references/install.md), including its managed ownership and runtime-protocol checks.
-Use stable CLI **2026.11.4.1**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.4.2**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
@@ -353,14 +411,14 @@ active agent's hook activation flow. First verify the selected binary's exact
 managed identity and `runtime-info` protocol 1. Reuse hook configuration only
 when the installed dispatcher definition is unchanged. Have the user approve
 any new or changed definition through the active client's hook controls.
-Revalidate activation with a current-session callback from the selected runtime
+Revalidate activation with the active agent's current-session hook check from the selected runtime
 before claiming readiness.
 
 For a verified protocol-1 runtime, do not refresh or stop the old version's
 watcher merely because this checkout changed pins. Its checkout filter removes
 a checkout whose pin no
 longer matches on its next reconciliation. The old process may remain available
-for other checkouts using that version. Confirm the new runtime's callback;
+for other checkouts using that version. Confirm the new runtime's activation;
 report a stale old checkout assignment as a runtime issue instead of stopping a
 shared version indiscriminately. An unchanged pin with verified active hooks
 reuses its runtime.
@@ -405,14 +463,60 @@ the skill installation. Respect a refusal or pause; continue coding without
 Doomer and do not repeatedly ask in the same session. A failed setup is not a
 successful review; explain the concrete error briefly.
 
+### Restore the original task
+
+A `ready` receipt verifies hook execution, not delivery of saved task context.
+Before editing after onboarding or restart, identify the original coding
+request and its constraints from either the actual restored task text delivered
+by the trusted hook in this conversation or the original user request and
+corrections still present in this conversation. The bare
+`Resume after doomer.ai setup` prompt, a setup prompt, a `ready` status, and a
+message saying a task was saved are not the original task.
+
+For setup-only onboarding, verify hooks and report readiness. For a coding
+task, track the handoff in the durable summary by resolved Git root and Codex
+session ID. Record whether onboarding saved a task, whether the resume prompt
+was requested or sent, and whether the hook delivered task text. A successful
+`onboard --task-stdin` for that repository and session confirms a saved task,
+regardless of its wording. Missing history leaves the corresponding state
+unknown. A summary tracks recovery state. It does not authorize edits.
+
+When the original request is missing, use the first applicable case below.
+
+1. **Codex terminal with a required restart and a confirmed saved task.** Follow
+   **A required restart** below. The restart command itself sends the resume
+   prompt. Record that send on resuming before choosing any recovery step.
+2. **Codex desktop, or Codex terminal with no restart pending, with a confirmed
+   saved task and confirmation that the prompt has not been requested or
+   sent.** After any required hook approval, ask the user to send
+   `Resume after doomer.ai setup` once in that session.
+3. **Codex desktop in the original chat with missing handoff history.** If the
+   prompt has not been requested or sent in the visible conversation and no
+   scoped record says it was, offer the resume prompt once after hook approval
+   as a recovery attempt. The hook can recover a task only for that repository
+   and session. This attempt is also safe when there is no saved task.
+4. **All other cases, including Claude Code, unknown terminal handoff state,
+   or a resume prompt already sent without task text available.** Ask the user
+   for the original request and constraints. If a terminal restart is
+   independently required for hook activation, follow that requirement
+   separately.
+
+After the prompt, use the actual task text if the trusted hook delivers it.
+Otherwise ask the user for the original request and constraints. Wait for one
+of those sources before editing. Trusted hook-delivered text qualifies even
+when condensed. If the only remaining text is an agent-authored summary, ask
+the user to confirm the request and constraints before editing.
+
 ## Codex desktop: approve hooks in the current chat
 
 After onboarding, direct the user to **Review hooks** beside the composer. If
 that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
 hooks. Then ask the user to send `Resume after doomer.ai setup` in this chat
-and check for an actual current-session hook callback. When a task was supplied
-to onboarding, that prompt lets the trusted hook restore its saved context. Preserve the original task in the conversation;
-missing its initial prompt capture alone does not require a restart.
+before using **Verify Codex hooks**. This applies to setup-only onboarding as
+well. When onboarding saved a coding task, the resume prompt is required to
+restore that task. Apply **Restore the original task** before any coding edit,
+even when verification returns `ready`. Preserve the original task in the conversation. Missing its initial prompt
+capture alone does not require a restart.
 
 The approval controls belong to Codex. Do not claim that Doomer opened the
 approval dialog, invoke a terminal resume command, or write hook trust settings
