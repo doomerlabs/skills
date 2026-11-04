@@ -171,6 +171,14 @@ Outside an in-flight approved attempt, a newly observed target version begins
 at `not_asked`; approval for an earlier version does not authorize a later one.
 An explicit session-wide skip still wins over a new target.
 
+Also share `adoptionDecision: not_asked | approved | declined | finished` with
+[installation](references/install.md), keyed by canonical skill path,
+destination path, and target CLI version. Keep it in the durable summary
+across turns, restarts, and compaction. It is separate from `updateDecision`;
+its `finished` means the approved replacement succeeded. Consult it before
+replacement offers, retain declines, and keep approvals until that replacement
+completes. A session-wide skip suppresses both decision flows.
+
 The combined offer below covers this active skill and its matching managed CLI
 in either order. If an approved skill update reveals a different pin, carry
 that approval only into completing that same update attempt, then record
