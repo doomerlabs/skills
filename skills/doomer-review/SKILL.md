@@ -334,9 +334,10 @@ location to its hooks.
   missing trust. Follow the shared user-choice rule without inventing a cause.
 
 A missing current session ID leaves activation unverified. Do not borrow an ID
-from another chat. Follow an actual outstanding restart requirement or the
-user's confirmation that hooks are unloaded, or the bounded desktop recovery
-below; missing history alone does not prove a restart is necessary.
+from another chat. Report the missing ID and follow the shared user-choice rule.
+Follow an independently established restart requirement or the user's
+confirmation that hooks are unloaded. A missing ID alone does not qualify for
+the desktop recovery flow, which requires a completed current-session check.
 
 These rules reuse configuration while preserving the activation gate. A
 non-`Watching` checkout uses the repair branch even when the other flags are
@@ -535,17 +536,29 @@ still returns `pending` after its one read-only probe and retry. A command
 error, missing setup, or a reported trust restriction follows its own diagnostic
 path instead. Silence alone does not establish the cause.
 
+Use the standalone read-only `watch status --json` command in **Reuse saved
+setup across chats** to establish the setup prerequisites. Reuse its result
+from this attempt; if absent, run that check once. Its `approved`, `paused`,
+`running`, `hooks_installed`, and `repository_status` fields distinguish setup
+from activation. The prohibition on watcher writes and polling still applies.
+
 Explain that Codex may need to reload hooks installed or approved during an
 existing chat. Offer one app reopen as a recovery step, then guide the user.
 
-1. Preserve the target Git root, CLI pin, confirmed setup and approval, original
-   task or setup-only intent in the conversation summary. Record this recovery
-   attempt for the chat, repository, and CLI pin before handing off to the user.
+1. In this chat's durable summary, record `desktopHookRecovery` under the
+   resolved Git root, with the CLI pin, `attempted: true`, pre-reopen session ID,
+   confirmed setup and approval, and original task or setup-only intent. Keep
+   this entry across turns, app restarts, and compaction. Its lookup key is the
+   Git root within this chat, independent of the session ID. Check for an
+   existing attempted entry before offering a reopen.
 2. Have the user fully quit and reopen Codex, then reopen this same chat.
-3. Ask them to send `Run the Doomer activation check again. Reuse the existing setup.`
-4. In that new turn, use the actual current session ID and target repository
-   with **Verify Codex hooks**. Reuse the existing installation, consent, hooks,
-   watcher, and setup record. Do not repeat onboarding or create another PR.
+3. Ask them to send `Resume after doomer.ai setup` so the hook can also deliver
+   any saved coding task.
+4. In that new turn, consult `desktopHookRecovery` in the durable summary by
+   resolved Git root. Use the actual current session ID with **Verify Codex
+   hooks** and retain the recorded attempt even if this ID changed. Reuse the
+   existing installation, consent, hooks, watcher, and setup record. Do not
+   repeat onboarding or create another PR.
 
 A `ready` result completes activation; apply **Restore the original
 task** before coding, or finish setup-only onboarding. If still `pending` after
