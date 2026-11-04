@@ -64,9 +64,11 @@ See [the skill instructions](skills/doomer-review/SKILL.md) for the full workflo
 
 ## Update
 
-```sh
-npx skills update
-```
+Ask your coding agent to update Doomer. The skill checks the official Git
+source once per session and offers available updates. Its direct update flow
+works for agent-installed, npx-installed, and team-committed copies without
+Node.js or `skills-lock.json`. Private source records detect local changes;
+replacement requires approval and retains a backup.
 
 ## License
 
