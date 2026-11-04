@@ -277,8 +277,11 @@ and again before performing it, compare the proposed resources with all active
 setup records and live worktrees.
 Preserve anything shared with, or needed by, another attempt or the user's
 ongoing work. Offer cleanup only for verified attempt-owned, unshared resources.
-If the second check changes that scope, preserve the resources, report the
-change, and obtain approval for the revised proposal before performing cleanup.
+If the second check finds newly shared, needed, or unowned resources, retain
+them and remove them from the cleanup scope. Report these exclusions. If
+nothing remains, report that cleanup was skipped. Otherwise obtain approval
+for the remaining cleanup subset before performing it. This approval covers
+only a subset of the original cleanup operations, subject to all limits above.
 
 ### 6. Report the result
 
