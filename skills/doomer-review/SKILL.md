@@ -563,11 +563,14 @@ corrections still present in this conversation. The bare
 `Resume after doomer.ai setup` prompt, a setup prompt, a `ready` status, and a
 message saying a task was saved are not the original task.
 
-If neither source contains the original coding request and its constraints,
-ask the user to provide them and wait before making coding edits. Do not infer
-the task from the resume prompt, query other chats, or treat activation as proof
-of successful restoration. For setup-only onboarding, verify hooks and report
-readiness without inventing a coding task.
+If the original request is missing and onboarding saved a coding task, complete
+the applicable Codex resume flow below. In desktop, after any required hook
+approval, ask the user to send `Resume after doomer.ai setup` in this chat once
+and wait for the trusted hook's restored task text. If the resume prompt was
+already sent and the hook supplied no task text, or no saved task is known,
+ask the user for the original request and constraints. Wait for that context
+before editing. For setup-only onboarding, verify hooks and report readiness
+without inventing a coding task.
 
 ## Codex desktop: approve hooks in the current chat
 
