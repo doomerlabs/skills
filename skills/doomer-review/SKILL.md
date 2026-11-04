@@ -275,7 +275,7 @@ known pending restart or failed activation is still pending; status does not
 override it. Missing chat history alone does not create such a pending state.
 
 Install or verify the CLI following [installation](references/install.md), including its managed ownership check.
-Use stable CLI **2026.11.3.6**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.3.7**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
