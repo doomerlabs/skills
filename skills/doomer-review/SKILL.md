@@ -188,9 +188,16 @@ establishes launcher migration. Recheck the installed launcher and its protocol
 before offering a still-needed migration or marking this new decision finished.
 Retain this decision in the shared durable summary across turns, restarts, and
 compaction, and consult it before each offer. Reuse an approved pending attempt
-without asking again. A declined migration routes to the shared compatibility
-choice and is not offered again for that key unless the user explicitly reopens
-it. Mark finished only after verifying the installed launcher and protocol.
+only for its exact recorded key. If its pin or runtime protocol changes, retain
+the old record and report the conflict. The new key begins at `not_asked` and
+inherits neither approval nor decline from the old key.
+
+A declined migration retains the existing installation and routes to the shared
+compatibility choice. Do not repeat the offer for that key. An explicit user
+request such as "try launcher migration again" or "reopen launcher migration"
+resets that selected key to `not_asked`; then offer the migration again. Mention
+this option when explaining that a recorded decline prevents migration. Mark
+`finished` only after verifying the installed launcher and protocol.
 Preserve prior adoption decisions with their original meaning.
 
 Resolve the skill directory's real path before keying either decision. For a
@@ -446,11 +453,16 @@ longer matches on its next reconciliation. The old process may remain available
 for other checkouts using that version. Confirm the new runtime's callback;
 report a stale old checkout assignment as a runtime issue instead of stopping a
 shared version indiscriminately. An unchanged pin with verified active hooks
-reuses its runtime. Legacy runtimes lack this guarantee. The launcher migration
-guard must block until their configured checkouts are migrated to verified
-protocol-1 releases. If a legacy watcher remains, report the affected checkouts
-and obtain explicit approval for targeted retirement through its supported
-repository controls before activating overlapping coverage.
+reuses its runtime.
+
+Legacy runtimes lack this guarantee. For them, the installation reference's
+migration guard is authoritative. If any configured checkout lacks a compatible
+verified release, preserve the existing launcher, hooks, and watchers and do
+not activate overlapping versioned coverage. Report the incompatible checkout
+and the pending migration. If the user declines migration, retain that legacy
+setup and follow the shared compatibility choice for the coding task. Migration
+can resume after an explicit reopen request and verified compatible pins.
+Do not stop legacy watchers or remove their registrations to bypass this guard.
 
 For normal Codex terminal onboarding, add `--restart` if the CLI was installed
 or replaced during this turn, because the prompt may have arrived before its
