@@ -87,9 +87,16 @@ moves from `pr-open` to `complete` only after the PR is merged and original-root
 activation is verified. Retain the last confirmed phase on failure. A cancelled
 attempt becomes `abandoned` and is never automatically resumed.
 
-On restart, select the record matching the active `agent` and current
-`setupRoot`, or a unique non-abandoned record matching `originalRoot` and
-`agent`. Retain its UUID and original root. Reconcile its recorded operations
+An explicit new user choice always supersedes a saved mode. Mark a conflicting
+attempt `abandoned`, preserving its resources and reporting their locations,
+then create a new UUID for the requested mode. Cleanup still needs the approval
+described below. This rule takes precedence over automatic resumption.
+
+On restart, select a nonterminal record matching the active `agent` and current
+`setupRoot`, or a unique nonterminal record matching `originalRoot` and
+`agent`. Both `complete` and `abandoned` are terminal. A matching `complete`
+record is a finished setup to report, never a reason to repeat commits, pushes,
+or PR creation. Retain an in-progress record's UUID and original root. Reconcile its recorded operations
 with the actual local and remote Git state before retrying. Never create a
 second attempt when one can be resumed. A new attempt requires an explicit
 user request and a new UUID, preserving earlier records. If multiple records
@@ -97,11 +104,13 @@ match, required fields are missing, values violate this schema, or recorded
 resources belong to another repository or attempt, ask for clarification.
 Null operation fields are valid only before those operations are confirmed.
 
-Serialize record updates with an exclusive lock beside the file, re-read the
-latest records while holding it, preserve all other UUID entries, and atomically
-replace the JSON. Release the lock after the write. An existing lock means
-another attempt may be active; wait or report it, without bypassing the lock or
-overwriting its data. Store no secrets or consent in this record.
+Serialize record updates with the platform's process-scoped advisory lock on
+a lock file beside the JSON. Hold the lock while re-reading the latest records,
+preserving other UUID entries, and atomically replacing the JSON. The operating
+system must release the lock when its holder exits or crashes. The lock file's
+existence alone never means it is held. If another live process holds the lock,
+wait briefly or report the contention; never bypass a held lock. Store no
+secrets or consent in this record.
 
 Treat the requested team PR as part of setup. After the skill reaches its
 setup-only completion step, finish the authorized publication steps below
