@@ -221,15 +221,19 @@ If you cannot fetch or identify the source, report the failure and stop
 installation.
 
 If the destination already exists, compare its full file inventory and file
-contents with the fetched skill, including `SKILL.md` and `references/install.md`.
-Reuse it only when these match. A different CLI pin, missing file, extra file,
+contents with the fetched skill, including `SKILL.md`, `references/install.md`,
+and `references/updates.md`. Reuse requires an exact match of the entire
+inventory and every file, not just those three named files. A copy missing
+`references/updates.md` requires an approved replacement before reuse or
+baseline creation. A different CLI pin, missing file, extra file,
 or changed content requires explaining the difference and obtaining approval
 before replacing it. Preserve a backup for any approved replacement. Preserve unrelated skills,
 agent settings, and repository changes.
 
 ### 4. Run the installed skill's setup workflow
 
-Read `SKILL.md` and `references/install.md` from the installed destination and
+Read `SKILL.md`, `references/install.md`, and `references/updates.md` from the
+installed destination and
 follow their setup-only instructions in this conversation. You can read and
 follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
@@ -316,9 +320,11 @@ Generate the block for the agents actually installed in this attempt. In the
 example below, replace `INSTALLED_AGENT_SKILL_PATHS` with only their verified
 paths, such as `Codex uses .agents/skills/doomer-review/` for a Codex-only install.
 Do not name a Claude path unless that copy exists, or require a noninstalled
-agent to run this policy. On later setup, preserve verified entries for other
-agents and add the newly installed agent. If a different active agent encounters
-this block without its own installed copy, continue its normal task and explain
+agent to run this policy. On later setup, recheck every existing entry on disk
+for its skill and referenced files before preserving it. Drop entries whose
+copy or required files are missing, and add the newly installed agent. If any
+active agent, including a listed agent, encounters this block without its own
+installed copy, continue its normal task and explain
 how to opt into setup if requested; this block does not authorize installing it.
 Insert the generated contents without the surrounding code fences or placeholder.
 
@@ -328,7 +334,9 @@ Insert the generated contents without the surrounding code fences or placeholder
 
 INSTALLED_AGENT_SKILL_PATHS
 
-For an active agent listed above, before each user turn that will edit
+For an active agent listed above, if its skill or required reference files are missing,
+continue the normal task and report the missing installation. Do not infer
+permission to reinstall it. Otherwise, before each user turn that will edit
 repository files, read its installed doomer-review skill and
 references/install.md from disk. Follow the skill for documentation, configuration,
 tests, and application code, including small edits and requests that do not

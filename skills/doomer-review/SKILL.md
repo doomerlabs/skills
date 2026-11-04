@@ -304,6 +304,10 @@ command for that agent.
 **Codex:** use its current `CODEX_THREAD_ID`. Before constructing a command,
 check that it is nonempty. If unavailable, use the no-session fallback below,
 omitting both `--session` and `--task-stdin`; never pass an empty session.
+The guarded templates below are only for a known session. If a `:?` guard
+fails before execution, remove any temporary task input and use the no-session
+fallback. This is not an onboarding attempt or a reason to repeat setup.
+Install cleanup before command construction so expansion failures are covered.
 Distinguish the desktop app from the terminal using the active client context. `CODEX_INTERNAL_ORIGINATOR_OVERRIDE`
 set to `Codex Desktop` identifies a desktop session. If it is absent, use the
 active client context or the user's statement. Absence alone does not identify

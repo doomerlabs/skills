@@ -18,7 +18,11 @@ For a project-local skill, resolve `git rev-parse --git-common-dir` relative to
 the target checkout and store private records under its `doomer/skill-installs/`.
 Linked worktrees share this record store but have separate installation entries.
 For a global skill, use `${XDG_STATE_HOME:-$HOME/.local/state}/doomer/skill-installs/`.
-Key the record filename by the SHA-256 of the canonical installed directory.
+Key the record filename by SHA-256 of the UTF-8 bytes of the absolute,
+symlink-resolved directory path string, without a trailing slash or newline.
+Never hash directory contents for this key. Distinct canonical paths have
+separate records even when their files are identical; aliases of the same
+canonical path share a record.
 A key is identity, not an executable path. Never take a record path from remote
 content. Keep records and backups outside tracked files and agent skill roots.
 
