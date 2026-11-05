@@ -21,7 +21,13 @@ def render(data, source, revision):
     return marker + data
 
 
-def stage(source_root, destination, revision):
+PROJECT_SKILL_PATHS = (
+    Path(".agents/skills/doomer-review"),
+    Path(".claude/skills/doomer-review"),
+)
+
+
+def stage(source_root, destination, revision, *, both_agents=False):
     root = Path(source_root).resolve()
     actual = subprocess.check_output(["git", "-C", str(root), "rev-parse", "HEAD"], text=True).strip()
     if actual != revision:
@@ -56,11 +62,13 @@ def stage(source_root, destination, revision):
             raise ValueError(f"Missing required source file {required}")
     target = Path(destination)
     target.mkdir(mode=0o700, parents=False, exist_ok=False)
-    for relative, data in files:
-        file = target / relative
-        file.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
-        file.write_bytes(data)
-        file.chmod(0o644)
+    destinations = PROJECT_SKILL_PATHS if both_agents else (Path("."),)
+    for destination in destinations:
+        for relative, data in files:
+            file = target / destination / relative
+            file.parent.mkdir(mode=0o700, parents=True, exist_ok=True)
+            file.write_bytes(data)
+            file.chmod(0o644)
 
 
 if __name__ == "__main__":
@@ -68,5 +76,7 @@ if __name__ == "__main__":
     parser.add_argument("source_root")
     parser.add_argument("revision")
     parser.add_argument("destination", help="New staging directory, never an existing installation")
+    parser.add_argument("--both-agents", action="store_true",
+                        help="Stage matching regular copies at both project skill paths")
     args = parser.parse_args()
-    stage(args.source_root, args.destination, args.revision)
+    stage(args.source_root, args.destination, args.revision, both_agents=args.both_agents)

@@ -2,6 +2,7 @@ import importlib.util
 from pathlib import Path
 import unittest
 import subprocess
+import sys
 import tempfile
 
 spec = importlib.util.spec_from_file_location('stage_managed', Path(__file__).parents[1] / 'scripts/stage-managed-skill.py')
@@ -58,6 +59,56 @@ class ManagedSkillTests(unittest.TestCase):
             (source / "references/install.md").symlink_to(target / "references/install.md")
             with self.assertRaises(ValueError):
                 module.stage(root, root / "symlink", revision)
+
+
+    def test_both_agents_cli_stages_identical_regular_trees(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "skills/doomer-review"
+            (source / "references").mkdir(parents=True)
+            (source / "SKILL.md").write_bytes(b"---\nname: doomer-review\n---\nboth agents\n")
+            for name in ("install.md", "updates.md"):
+                (source / "references" / name).write_bytes(b"reference\n")
+            # An additional non-Markdown resource must be copied to both too.
+            (source / "resource.bin").write_bytes(b"\x00\xff")
+            def git(*args):
+                return subprocess.check_output(
+                    ["git", "-C", str(root), "-c", "core.hooksPath=/dev/null",
+                     "-c", "user.name=Test", "-c", "user.email=test@example.com", *args],
+                    stderr=subprocess.DEVNULL, text=True,
+                ).strip()
+            git("init")
+            git("add", ".")
+            git("commit", "-m", "source")
+            for version in ("old", "new"):
+                if version == "new":
+                    (source / "references/install.md").write_bytes(b"updated pin\n")
+                    git("add", "skills")
+                    git("commit", "-m", "update")
+                revision = git("rev-parse", "HEAD")
+                target = root / version
+                subprocess.run([sys.executable, module.__file__, str(root), revision,
+                                str(target), "--both-agents"], check=True)
+                codex, claude = (target / path for path in module.PROJECT_SKILL_PATHS)
+                inventory = lambda path: {p.relative_to(path).as_posix(): p.read_bytes()
+                                          for p in path.rglob("*") if p.is_file()}
+                self.assertEqual(inventory(codex), inventory(claude))
+                self.assertEqual(set(inventory(codex)),
+                                 {"SKILL.md", "references/install.md", "references/updates.md", "resource.bin"})
+                self.assertIn(revision.encode(), (codex / "SKILL.md").read_bytes())
+                for path in target.rglob("*"):
+                    self.assertFalse(path.is_symlink())
+                before = inventory(codex)
+                with self.assertRaises(FileExistsError):
+                    module.stage(root, target, revision, both_agents=True)
+                self.assertEqual(inventory(codex), before)
+            self.assertNotEqual(inventory(root / "old" / module.PROJECT_SKILL_PATHS[0]),
+                                inventory(root / "new" / module.PROJECT_SKILL_PATHS[0]))
+            self.assertNotIn(b"doomer-managed", (source / "SKILL.md").read_bytes())
+            (source / "references/install.md").write_bytes(b"uncommitted modification\n")
+            with self.assertRaises(ValueError):
+                module.stage(root, root / "invalid", revision, both_agents=True)
+            self.assertFalse((root / "invalid").exists())
 
 
 if __name__ == '__main__':

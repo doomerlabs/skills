@@ -151,6 +151,22 @@ Retain the blocked state across turns without automatic retries or re-prompts.
 Resume only when the user explicitly requests recovery or the stated blocker
 changes; do not loop or bypass it.
 
+## Project skill copies
+
+Repository onboarding installs matching regular copies for both agents:
+`.agents/skills/doomer-review/` for Codex and
+`.claude/skills/doomer-review/` for Claude Code. Do not ask which agents the team
+uses or use symlinks. Honor an explicit single-agent restriction. An explicit
+project setup request includes installing a missing companion from the same
+verified official source revision; use the preflight, staging, baseline, and
+backup rules in [skill updates](references/updates.md), reconciling any existing
+copy before replacement. This also applies when a third-party installer initially
+installed only one copy. Follow that reference to maintain the pair during an
+approved project update, including legacy single-agent installs. Missing
+companion files alone do not authorize a network fetch or replacement during
+normal coding. Read this skill and run onboarding for the active agent only;
+shared skill files do not authorize another agent's hooks, consent, or activation.
+
 ## Check the local pin each turn
 
 At the start of each user turn that uses this skill, reread `SKILL.md` and
@@ -176,13 +192,18 @@ while retaining the local CLI pin check on each editing turn.
 
 Keep `updateCheckAttempted` and `updateDecision` (`not_asked`, `approved`,
 `declined`, `finished`) in the durable conversation summary, keyed by the
-canonical installed skill directory and candidate source commit. Set attempted
+selected installation scope and candidate source commit. For the standard
+project pair, key the shared decision by the canonical checkout root and the
+ordered two destination paths, so changing agents does not repeat the same
+update offer. For a global, custom, or explicitly restricted single-agent
+installation, key by its canonical skill directory. Set attempted
 before network access. A failed or declined check retains the current pin and
 never implies that the skill is current. A session-wide skip suppresses checks
 and offers until the user explicitly resumes Doomer.
 
 Keep an approved `updateAttempt` with the original/candidate source commits,
-resulting pin, backup path, and completed/pending skill and CLI steps. Resume
+resulting pin, all selected destination paths, per-copy baseline and backup
+paths, and completed/pending skill and CLI steps. Resume
 that same attempt across turns and compaction. Approval covers its skill and
 matching managed CLI in either order, without authorizing uploads, hook trust,
 or replacement of an unmanaged executable. A permission interruption retains

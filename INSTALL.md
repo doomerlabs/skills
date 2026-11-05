@@ -51,14 +51,20 @@ skill's **Recover silent desktop hooks** flow only when its prerequisites hold.
 It offers one app reopen and verification in the same chat while reusing the
 existing setup.
 
-Use a repository-local installation for the active agent.
+Install repository-local support for both Codex and Claude Code by default.
+Do not ask which agents the team uses. Honor an explicit request to install
+only one agent, but do not infer that restriction from the agent running setup.
 
 | Agent | Destination relative to the Git root |
 | --- | --- |
 | Codex | `.agents/skills/doomer-review/` |
 | Claude Code | `.claude/skills/doomer-review/` |
 
-Keep the skill project-local. Install for both agents only when requested.
+Keep two regular directory copies of the same staged skill, at the same source
+revision; do not use symlinks. The skill contains both agents' workflows.
+Installing both copies does not configure both local integrations: run CLI
+onboarding, consent, and hook activation only for the active agent. Each teammate
+activates their own agent locally.
 The CLI and its private installation metadata use the locations defined by the
 skill's installation reference.
 
@@ -101,7 +107,7 @@ Each record has the following fields.
 | Field | Allowed value |
 | --- | --- |
 | `agent` | `codex` or `claude`, identifying the agent that started this attempt |
-| `agents` | Nonempty list of requested agents, drawn from `codex` and `claude` |
+| `agents` | `["codex", "claude"]` by default; one agent only if explicitly requested |
 | `mode` | `local` or `team-pr` |
 | `originalRoot`, `setupRoot` | Absolute canonical Git root paths; `setupRoot` may be null until planned |
 | `branch`, `base` | Valid Git branch/ref names, or null before planning; null for local mode |
@@ -224,15 +230,21 @@ Before copying, verify that the source includes `SKILL.md` with the skill name
 `doomer-review`, `references/install.md`, and `references/updates.md`. Read
 these files. Read and inspect the official source's
 `scripts/stage-managed-skill.py`, then run it with the verified source checkout,
-its exact full commit ID, and a new private staging-directory path. This helper
-is the only source-checkout executable permitted by this installation flow.
-It stages the complete skill inventory and marks Markdown files with their
-source revision and path. Validate that staging inventory, then copy it into
-the destination above. Preserve the markers, including their position after
-SKILL.md's YAML frontmatter.
+its exact full commit ID, a new private staging-directory path, and
+`--both-agents` for the default installation. This helper is the only
+source-checkout executable permitted by this installation flow. It stages
+identical regular skill copies under `.agents/skills/doomer-review/` and
+`.claude/skills/doomer-review/`, marking Markdown with its source revision and
+path. Validate both complete staging inventories, then copy them to the
+corresponding destinations in the target checkout. For an explicitly requested
+single-agent installation, omit `--both-agents` and copy its flat staging tree
+only to that agent's destination. Preserve the markers, including their
+position after SKILL.md's YAML frontmatter.
 Validate all relative paths and reject symlinks or special files in the source.
-After verifying the full installed inventory, record its source revision and
-file hashes using `references/updates.md`. Compare installation bytes to the
+After verifying both full installed inventories and byte-for-byte equality,
+record each directory's source revision and file hashes using
+`references/updates.md`. For an explicit single-agent install, verify and record
+only that directory. Compare installation bytes to the
 rendered staging tree, not the unmarked upstream tree. Keep the baseline record in private
 installation metadata, outside the repository's tracked files. Do not create
 or modify `skills-lock.json`; the direct update flow uses Git and this baseline.
@@ -242,21 +254,24 @@ the temporary files you created after installation.
 If you cannot fetch or identify the source, report the failure and stop
 installation.
 
-If the destination already exists, compare its full file inventory and file
-contents with the rendered staging tree, including `SKILL.md`, `references/install.md`,
+Preflight both destinations before changing either. If a destination already
+exists, compare its full file inventory and file contents with the rendered
+staging tree, including `SKILL.md`, `references/install.md`,
 and `references/updates.md`. Reuse requires an exact match of the entire
 inventory and every file, not just those three named files. A copy missing
 `references/updates.md` requires an approved replacement before reuse or
 baseline creation. A different CLI pin, missing file, extra file,
 or changed content requires explaining the difference and obtaining approval
-before replacing it. Preserve a backup for any approved replacement. Preserve unrelated skills,
-agent settings, and repository changes.
+before replacing it. A symlink is a conflict, even if it points at the other
+agent's copy; never follow it for writes. Preserve a backup for any approved
+replacement. If either destination conflicts, do not partially install or
+update the pair. Preserve unrelated skills, agent settings, and repository changes.
 
 ### 4. Run the installed skill's setup workflow
 
 Read `SKILL.md`, `references/install.md`, and `references/updates.md` from the
-installed destination and
-follow their setup-only instructions in this conversation. You can read and
+active agent's installed destination and follow their setup-only instructions
+in this conversation. You can read and
 follow the files directly even if the agent's skill selector has not refreshed.
 Use those files as the source of truth for the CLI version, verified release
 download, existing-installation handling, onboarding commands, and activation.
@@ -340,11 +355,14 @@ separate markers keep the per-turn policy from being overwritten on later
 onboarding runs. Preserve unmarked repository-specific instructions.
 Generate the block for the agents actually installed in this attempt. In the
 example below, replace `INSTALLED_AGENT_SKILL_PATHS` with only their verified
-paths, such as `Codex uses .agents/skills/doomer-review/` for a Codex-only install.
+paths. For the default installation, use these two lines:
+`Codex uses .agents/skills/doomer-review/` and
+`Claude Code uses .claude/skills/doomer-review/`. A single-agent list is only for
+an explicitly restricted installation.
 Do not name a Claude path unless that copy exists, or require a noninstalled
 agent to run this policy. On later setup, recheck every existing entry on disk
 for its skill and referenced files before preserving it. Drop entries whose
-copy or required files are missing, and add the newly installed agent. If any
+copy or required files are missing, and add all newly installed agents. If any
 active agent, including a listed agent, encounters this block without its own
 installed copy, continue its normal task and explain
 how to opt into setup if requested; this block does not authorize installing it.
@@ -393,14 +411,15 @@ including a review with no findings.
 <!-- doomer-review-policy:end -->
 ```
 
-For Claude Code, also ensure the root `CLAUDE.md` loads this shared policy with
+When the Claude skill copy is installed (including every default installation),
+also ensure the root `CLAUDE.md` loads this shared policy with
 an `@AGENTS.md` import on its own line, outside code fences. Create `CLAUDE.md`
 with that import if missing. For an existing file, count only a standalone line
 whose trimmed text is exactly `@AGENTS.md`, outside fenced code blocks and HTML
 comments, as the canonical import. If no such line exists, add it as a new
 top-level line. A mention in prose, a comment, or an import inside another file
 does not satisfy this check. Preserve its existing text and the CLI-owned Doomer block. When both
-agents are requested, keep one shared policy block in `AGENTS.md`.
+agents are installed, keep one shared policy block in `AGENTS.md`.
 
 Preserve the existing permissions of both `AGENTS.md` and `CLAUDE.md`, and
 write their changes atomically. If any existing rule
@@ -426,7 +445,8 @@ end-to-end review delivery only after a hook actually delivers a result.
 
 For the team-PR choice, review the complete diff against the selected base.
 Include the installed skill and its supporting files, plus portable integration
-instructions added to `AGENTS.md` and, for Claude, `CLAUDE.md` by the setup workflow. Include
+instructions added to `AGENTS.md` and `CLAUDE.md` by the default setup workflow.
+For an explicit single-agent setup, include only its required instructions. Include
 other generated configuration only after verifying that it is portable and
 appropriate to share. Inspect any hook configuration for absolute paths,
 usernames, and machine-specific values before including it.
@@ -440,7 +460,9 @@ leave that file out and describe the per-developer setup step in the PR.
 
 Stage only the reviewed setup paths or hunks. Check the staged diff, create one
 focused commit, push the new branch, and open a PR against the selected base.
-Honor the repository's commit and PR conventions. Describe the installed agent,
+Honor the repository's commit and PR conventions. Use the agent-neutral title
+"Set up Doomer reviews" unless repository conventions require another title.
+Describe both installed agents (or the explicit single-agent restriction),
 skill source commit, validation performed, and any per-developer activation
 steps. If activation is pending, state that explicitly. Follow through after
 any required restart without repeating completed commits or opening a second
@@ -481,8 +503,11 @@ only a subset of the original cleanup operations, subject to all limits above.
 
 ### 6. Report the result
 
-Give the installed skill path, source commit ID, verified CLI version, and
-activation status. Include any pending user action or concrete failure.
+Give both installed skill paths (or the explicitly selected single path), source
+commit ID, verified CLI version, and
+activation status for the active agent. Do not claim that installing a teammate's
+skill copy also activated that teammate's hooks. Include any pending user action
+or concrete failure.
 For local setup, list the uncommitted installation paths. For team setup,
 include the branch, commit, PR link, and checkout configured. Distinguish
 completed installation from pending activation or publication.

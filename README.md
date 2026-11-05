@@ -17,7 +17,9 @@ follow the instructions to set up Doomer in this repository.
 `npx` or Node.js, and completes CLI setup, repository consent, and hook
 activation. It creates or updates `AGENTS.md` with the required review workflow
 and per-turn version checks, and connects that policy to `CLAUDE.md` for Claude
-Code. Both choices keep the skill project-local. Local setup leaves the
+Code. It installs matching regular skill copies for both agents by default,
+without asking which the team uses. Only the active agent's local hooks are
+configured. Both choices keep the skill project-local. Local setup leaves the
 changes uncommitted. Team setup opens a focused PR with shareable setup files;
 each developer completes their own local activation.
 
@@ -46,7 +48,11 @@ chat, and send the setup request again.
 You can also invoke the skill with a coding task to set up Doomer and then
 continue that task.
 
-Codex installs under `.agents/skills/`; Claude Code installs under `.claude/skills/`.
+Codex discovers `.agents/skills/doomer-review/`; Claude Code discovers
+`.claude/skills/doomer-review/`. Direct onboarding installs both as regular
+copies from one source revision, without symlinks. An explicit single-agent
+request is honored. The optional third-party installer retains its own agent
+selection; a later approved project update maintains both standard locations.
 
 ## doomer-review
 
@@ -68,7 +74,11 @@ Ask your coding agent to update Doomer. The skill checks the official Git
 source once per session and offers available updates. Its direct update flow
 works for agent-installed, npx-installed, and team-committed copies without
 Node.js or `skills-lock.json`. Private source records detect local changes;
-replacement requires approval and retains a backup.
+replacement requires approval and retains a backup. Project updates preflight
+and update both standard agent copies together from the same source revision,
+including adding a missing companion copy. Local modifications in either copy
+are preserved until explicitly reconciled. Other repositories and global
+installations are outside that paired update.
 
 ## License
 
