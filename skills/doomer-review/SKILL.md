@@ -296,18 +296,25 @@ it with onboarding, updates, or other writes in the same command.
   authorization is required; do not ask for repository upload consent again
   when the CLI reports it valid. A new linked worktree is not proof of missing
   consent: check its own resolved path first.
-- If the check fails, report the actual error. An unreadable result is not a
-  negative consent decision or proof that hooks need reinstalling. Do not
-  blindly invoke onboarding as a diagnostic fallback.
-- A denied status check is an execution-permission problem. Keep its recovery
-  scoped to the standalone local status command through the agent's normal
-  execution-approval mechanism. Explain that it reads saved configuration and
-  sends no repository data. Do not replace that permission request with
-  “Allow Doomer setup and reviews” or ask for upload consent again. Older CLI
-  versions can fail with `chmod ... operation not permitted` while reading
-  credentials; that error does not mean the saved grant was revoked. If
-  execution is still denied, report the status check as blocked and retain the
-  existing grant and hook decisions. Never bypass an execution denial.
+- If execution policy blocks the standalone status command, request only
+  permission to run that command through the coding agent's execution-approval
+  tool. For example, “May I run Doomer's local saved-setup status check?” Do not
+  bundle this request with setup, upload consent, upgrades, or enabling hooks.
+  This rule takes precedence over the onboarding-authorization flow for a
+  blocked status check. Respect a repeated denial and report the check blocked.
+- If the CLI runs but returns an error, report that error and diagnose its
+  cause. Older releases can attempt local permission repair and fail with
+  `chmod ... operation not permitted`; do not describe those releases as
+  strictly read-only. A policy-blocked filesystem operation may use the same
+  scoped execution-approval tool. Corrupt configuration or an ordinary access
+  error does not justify an unchanged retry or permission repair by the agent.
+  The status command sends no repository data. Failure to read saved state
+  never establishes missing or revoked consent, and must not trigger onboarding
+  or another upload-consent question.
+- Preserve saved grant and hook-trust decisions across either failure. Without
+  a current-session callback or successful activation check, record activation
+  as `unverified`; a prior session's verified state does not carry forward.
+  Never bypass execution policy or claim review readiness from saved consent.
 
 Saved configuration does not establish live activation. Retain activation as
 `pending`, `unverified`, or `verified` for the current repository and active
