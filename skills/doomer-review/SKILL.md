@@ -556,14 +556,20 @@ Codex reports those layers active. Include all active sources instead of
 assuming only one representation. Read only Doomer's groups and retain each
 source path, event, group fields, and every configured handler field.
 
-Record those parsed JSON/TOML values with the direct user confirmation in the
-durable summary. After onboarding, read the same active groups again and
-compare the parsed values structurally. Object-key order is insignificant;
-array order, scalar types, and every configured field value are significant.
-Compare configured source data, excluding UI/runtime metadata. Store the
-structured values rather than a serialization-dependent hash. A changed or
-new definition follows Codex's review-and-trust flow. Do not write client trust
-records or copy approval between definitions.
+Compute the fingerprint locally without printing or recording raw handler
+values, commands, arguments, or environment variables, which may contain
+credentials. Build a list of the selected groups in source-path, event-name,
+and original group-index order. Each entry contains `source`, `event`, `index`,
+and the complete parsed configured `group`. Exclude UI/runtime metadata.
+Serialize that list using Python's
+`json.dumps(definitions, sort_keys=True, separators=(",", ":"), ensure_ascii=True, allow_nan=False).encode("utf-8")`
+and take its SHA-256. Preserve array order and scalar types. If a value cannot
+be represented this way, leave the comparison unknown without logging it.
+Record only the digest, source paths, and direct user confirmation in the
+durable summary. After onboarding, compute the same fingerprint from the
+current active sources and compare digests. A changed or new definition follows
+Codex's review-and-trust flow. Do not write client trust records or copy approval
+between definitions.
 
 An unchanged approved definition keeps its approval across skill revisions,
 CLI versions, and watcher restarts. Missing task capture or a pending activation
