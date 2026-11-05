@@ -37,10 +37,12 @@ new version. Keep the existing per-skill update approval and skip decisions.
 Use the existing combined skill-and-CLI update offer when an update is requested.
 
 Before using a release for onboarding, run its `runtime-info` command and require
-JSON with `protocol: 1`. If the command is absent or unsupported, explain that
-this pin predates isolated runtimes and requires a compatible skill/CLI release.
-Retain existing setup and offer troubleshooting or skipping this session. Do
-not run a legacy updater, silently select another pin, or claim migration worked.
+JSON with `protocol: 1`. If the command fails, is absent, or reports another
+protocol, report the exact error as an installation or runtime mismatch with
+this pin. Recheck the selected path, version, and managed integrity, then use
+the recovery and user-choice rules below. Preserve existing setup while the
+failure is unresolved. Do not infer that this release predates isolated runtimes,
+run a legacy updater, silently select another pin, or claim migration worked.
 
 ## Select CLI release 2026.11.5.1
 
