@@ -433,8 +433,11 @@ active agent's hook activation flow. First verify the selected binary's exact
 managed identity and `runtime-info` protocol 1. Reuse hook configuration only
 when the installed dispatcher definition is unchanged. Have the user approve
 any new or changed definition through the active client's hook controls.
-Revalidate activation with the active agent's current-session hook check from the selected runtime
-before claiming readiness.
+Preserve the user's confirmed hook approval across a skill or CLI upgrade when
+the dispatcher definition is unchanged. A stopped watcher or missing task
+capture does not invalidate that approval. Revalidate activation with the
+active agent's current-session hook check from the selected runtime before
+claiming readiness.
 
 For a verified protocol-1 runtime, do not refresh or stop the old version's
 watcher merely because this checkout changed pins. Its checkout filter removes
@@ -529,16 +532,25 @@ of those sources before editing. Trusted hook-delivered text qualifies even
 when condensed. If the only remaining text is an agent-authored summary, ask
 the user to confirm the request and constraints before editing.
 
-## Codex desktop: approve hooks in the current chat
+## Codex desktop: reuse approval and verify hooks
 
-After onboarding, direct the user to **Review hooks** beside the composer. If
-that button is absent, use **Settings > Hooks** to inspect and approve Doomer's
-hooks. Then ask the user to send `Resume after doomer.ai setup` in this chat
-before using **Verify Codex hooks**. This applies to setup-only onboarding as
-well. When onboarding saved a coding task, the resume prompt is required to
-restore that task. Apply **Restore the original task** before any coding edit,
-even when verification returns `ready`. Preserve the original task in the conversation. Missing its initial prompt
-capture alone does not require a restart.
+After onboarding or an upgrade, preserve the user's confirmed approval of an
+unchanged Doomer hook definition. Record that confirmation with the definition
+identity when available in the durable summary. A skill revision, CLI version,
+watcher restart, missing task capture, or pending activation check alone does
+not require renewed hook approval. A user confirmation records their decision.
+Only the current-session hook check establishes live activation.
+
+Direct the user to **Review hooks** beside the composer, or **Settings > Hooks**,
+for approval only when a new or changed definition needs trust or the client
+explicitly reports missing trust. Never write trust records or override a
+client-reported restriction. With unchanged approved hooks, proceed directly
+to **Verify Codex hooks** and its bounded recovery path. If onboarding saved a
+coding task that still needs restoration, ask the user to send
+`Resume after doomer.ai setup` in this chat without repeating the approval
+request. Apply **Restore the original task** before any coding edit, even when
+verification returns `ready`. Preserve the original task in the conversation.
+Missing its initial prompt capture alone does not require a restart.
 
 The approval controls belong to Codex. Do not claim that Doomer opened the
 approval dialog, invoke a terminal resume command, or write hook trust settings
