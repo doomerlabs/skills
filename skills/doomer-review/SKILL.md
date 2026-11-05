@@ -299,6 +299,15 @@ it with onboarding, updates, or other writes in the same command.
 - If the check fails, report the actual error. An unreadable result is not a
   negative consent decision or proof that hooks need reinstalling. Do not
   blindly invoke onboarding as a diagnostic fallback.
+- A denied status check is an execution-permission problem. Keep its recovery
+  scoped to the standalone local status command through the agent's normal
+  execution-approval mechanism. Explain that it reads saved configuration and
+  sends no repository data. Do not replace that permission request with
+  “Allow Doomer setup and reviews” or ask for upload consent again. Older CLI
+  versions can fail with `chmod ... operation not permitted` while reading
+  credentials; that error does not mean the saved grant was revoked. If
+  execution is still denied, report the status check as blocked and retain the
+  existing grant and hook decisions. Never bypass an execution denial.
 
 Saved configuration does not establish live activation. Retain activation as
 `pending`, `unverified`, or `verified` for the current repository and active
