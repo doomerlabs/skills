@@ -53,7 +53,7 @@ once at the start of setup from
 Use `curl --fail --location --proto '=https' --proto-redir '=https' --tlsv1.2`
 or an equivalent HTTPS downloader. No GitHub login or Homebrew is required.
 Before parsing, require the downloaded manifest's SHA-256 to equal
-`389ae2e0aaead2f6580cee66f88a03320667b2d7bc3b1c883c81c1ae8c3b97f5`.
+`b8acfb4ae4a2e44565b510d233cf97a0a8a2cf7a1862226b5ec5df336379509c`.
 This digest is distributed with the skill, separately from the download host.
 A self-consistent replacement manifest and archive cannot satisfy this pin.
 On mismatch stop before extracting or executing anything. Parse the verified
