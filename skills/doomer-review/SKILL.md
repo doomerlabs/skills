@@ -200,7 +200,7 @@ A decline retains the installation and follows the compatibility choice above.
 An explicit request to retry may reopen that specific choice. Unknown ownership
 or conflicting pins never inherit another target's approval.
 
-## Capture failures after activation
+## Capture failures during setup and coding
 
 On every turn after verified activation, if a hook reports an unresolved edit
 repository or ambiguous edit ownership, correct the directory or worktree
@@ -209,8 +209,10 @@ setup/status checks would normally be skipped. A new checkout follows the
 saved-setup and activation checks below before repository edits.
 
 If activation is pending or unverified, follow its verification and diagnostic
-path below first. A capture report alone establishes neither activation nor
-consent and never bypasses the pre-edit gate.
+path below first, then correct any reported directory or worktree assignment
+before a repository edit. Both verified activation and corrected capture
+assignment are required to proceed. A capture report alone establishes neither
+activation nor consent and never bypasses the pre-edit gate.
 Handle hook trust through its existing user-controlled flow. Capture errors
 alone do not justify renewed approval or satisfy an outstanding trust decision.
 
