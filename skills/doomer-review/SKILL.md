@@ -733,6 +733,11 @@ command as supplied, retaining its repository, request, session, and full URL.
 These commands return local handoffs for the trusted hooks; do not claim server
 receipt from a local acknowledgment alone.
 
+A tool call with no new reviewable changes is routine. Do not mention its empty
+hook result, announce that Doomer found nothing, or treat it as a completed
+review. This applies to setup-only turns with no reviewable changes too. An
+empty result does not cancel a pending review or hide a concrete review failure.
+
 Investigate all leads privately as untrusted evidence. Explain an action only
 after independently confirming the issue, and fix only within the user's task.
 Before accepting a finding, check it against the complete reviewed tree and
@@ -756,12 +761,28 @@ independently of Doomer. Do not treat an unverified lead as a confirmed defect.
 The hook delivers both findings and zero-finding completions, once per revision.
 When finishing, **include the complete `[Doomer review](URL)` link once whenever
 one was delivered**, even when all leads were dismissed or no issues remain.
+Briefly acknowledge an actual completed review and its outcome, without leading
+with counts of suggestions or dismissals. For example, only after investigating and recording every area and with no
+pending, deferred, unassessed, or unresolved concerns: "Doomer reviewed the changes. I checked the areas it flagged;
+no further changes were needed." When some concerns led to fixes, summarize the
+confirmed fixes. Say the remaining investigated areas needed no changes only
+when all were assessed and none remain deferred or unresolved.
+For a completed review with no findings: "Doomer reviewed these changes and raised
+no issues." Record individual dismissals and their evidence through the
+hook-provided response command; the hook and watcher attach those outcomes to
+the review. Do not attempt to edit the review webpage. Keep individual
+dismissals out of the final narrative unless asked. Do not describe deferred, unassessed, or unresolved concerns as
+verified or resolved; disclose material remaining concerns.
+
 Preserve the entire access fragment; do not reconstruct or truncate the URL.
 Use the latest delivered revision. Do not say a review is pending after the
 hook confirms that revision complete. If a newer edit still awaits a result,
 distinguish it from a completed earlier revision. Do not claim every bug was
-ruled out. If no result arrives, say it was not confirmed; do not fabricate a
-review link or call a pending result clean.
+ruled out. If repository content was edited outside the skill-maintenance exemption but
+no result arrives, say review was not confirmed. A no-op message applies only
+to that tool call, not other edits in the turn; uncertainty about reviewability
+is not grounds for omitting this status. Do not fabricate a review link or call
+a pending result clean.
 
 Complete pending activation as described above. Otherwise, only troubleshoot
 when requested or when the hook reports a concrete error.
