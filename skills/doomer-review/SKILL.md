@@ -200,15 +200,23 @@ A decline retains the installation and follows the compatibility choice above.
 An explicit request to retry may reopen that specific choice. Unknown ownership
 or conflicting pins never inherit another target's approval.
 
+## Capture failures after activation
+
+On every turn after verified activation, if a hook reports an unresolved edit
+repository or ambiguous edit ownership, correct the directory or worktree
+assignment before continuing the task. This also applies on later turns when
+setup/status checks would normally be skipped. A new checkout follows the
+saved-setup and activation checks below before repository edits.
+
+If activation is pending or unverified, follow its verification and diagnostic
+path below first. A capture report alone establishes neither activation nor
+consent and never bypasses the pre-edit gate.
+
 ## Set up once
 
 For organization-level chats, run repository commands with the selected child
 checkout as the tool's working directory and use absolute paths for file edits.
 Use separate worktrees for parallel coding chats that edit the same repository.
-If a hook reports an unresolved edit repository or ambiguous edit ownership,
-correct that directory or worktree assignment before continuing the task.
-Keep capture failures distinct from activation and hook-trust decisions.
-
 Resolve the Git root of the repository being edited, not the org directory that
 contains the chat. After the per-turn local pin check, if this conversation
 already verified its saved setup and no update replaced the CLI, continue
