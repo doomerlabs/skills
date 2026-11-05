@@ -50,7 +50,7 @@ Codex installs under `.agents/skills/`; Claude Code installs under `.claude/skil
 
 ## doomer-review
 
-The skill supports Codex and Claude Code on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.4.3**, sets up the active agent's hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
+The skill supports Codex and Claude Code on macOS and Linux (Intel and ARM). It installs Doomer CLI **2026.11.4.4**, sets up the active agent's hooks, and delivers free initial code-review feedback in your coding conversation. No Doomer account is required.
 
 The CLI owns onboarding and saved task context. Trusted hooks deliver assessments, including zero-finding results, and review links; the skill does not poll internal state or require Python helpers.
 

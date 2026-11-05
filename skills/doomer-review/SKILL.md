@@ -200,8 +200,27 @@ A decline retains the installation and follows the compatibility choice above.
 An explicit request to retry may reopen that specific choice. Unknown ownership
 or conflicting pins never inherit another target's approval.
 
+## Capture failures during setup and coding
+
+On every turn after verified activation, if a hook reports an unresolved edit
+repository or ambiguous edit ownership, correct the directory or worktree
+assignment before continuing the task. This also applies on later turns when
+setup/status checks would normally be skipped. A new checkout follows the
+saved-setup and activation checks below before repository edits.
+
+If activation is pending or unverified, follow its verification and diagnostic
+path below first, then correct any reported directory or worktree assignment
+before a repository edit. Both verified activation and corrected capture
+assignment are required to proceed. A capture report alone establishes neither
+activation nor consent and never bypasses the pre-edit gate.
+Handle hook trust through its existing user-controlled flow. Capture errors
+alone do not justify renewed approval or satisfy an outstanding trust decision.
+
 ## Set up once
 
+For organization-level chats, run repository commands with the selected child
+checkout as the tool's working directory and use absolute paths for file edits.
+Use separate worktrees for parallel coding chats that edit the same repository.
 Resolve the Git root of the repository being edited, not the org directory that
 contains the chat. After the per-turn local pin check, if this conversation
 already verified its saved setup and no update replaced the CLI, continue
@@ -345,7 +364,7 @@ true. A pending restart, failed activation, or configured-but-unverified state
 always follows the activation path; saved status never overrides it.
 
 Install or verify the checkout-pinned CLI following [installation](references/install.md), including its managed ownership and runtime-protocol checks.
-Use stable CLI **2026.11.4.3**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.4.4**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
