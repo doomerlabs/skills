@@ -211,6 +211,8 @@ saved-setup and activation checks below before repository edits.
 If activation is pending or unverified, follow its verification and diagnostic
 path below first. A capture report alone establishes neither activation nor
 consent and never bypasses the pre-edit gate.
+Handle hook trust through its existing user-controlled flow. Capture errors
+alone do not justify renewed approval or satisfy an outstanding trust decision.
 
 ## Set up once
 
