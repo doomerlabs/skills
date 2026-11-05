@@ -741,21 +741,27 @@ The hook delivers both findings and zero-finding completions, once per revision.
 When finishing, **include the complete `[Doomer review](URL)` link once whenever
 one was delivered**, even when all leads were dismissed or no issues remain.
 Briefly acknowledge an actual completed review and its outcome, without leading
-with counts of suggestions or dismissals. For example, after investigating and
-recording every area: "Doomer reviewed the changes. I checked the areas it flagged;
+with counts of suggestions or dismissals. For example, only after investigating and recording every area and with no
+pending, deferred, unassessed, or unresolved concerns: "Doomer reviewed the changes. I checked the areas it flagged;
 no further changes were needed." When some concerns led to fixes, summarize the
-confirmed fixes and say the remaining investigated areas needed no changes.
+confirmed fixes. Say the remaining investigated areas needed no changes only
+when all were assessed and none remain deferred or unresolved.
 For a completed review with no findings: "Doomer reviewed these changes and raised
-no issues." Keep individual dismissals and their evidence in the linked review
-unless asked. Do not describe deferred, unassessed, or unresolved concerns as
+no issues." Record individual dismissals and their evidence through the
+hook-provided response command; the hook and watcher attach those outcomes to
+the review. Do not attempt to edit the review webpage. Keep individual
+dismissals out of the final narrative unless asked. Do not describe deferred, unassessed, or unresolved concerns as
 verified or resolved; disclose material remaining concerns.
 
 Preserve the entire access fragment; do not reconstruct or truncate the URL.
 Use the latest delivered revision. Do not say a review is pending after the
 hook confirms that revision complete. If a newer edit still awaits a result,
 distinguish it from a completed earlier revision. Do not claim every bug was
-ruled out. If reviewable changes were made but no result arrives, say review was
-not confirmed; do not fabricate a review link or call a pending result clean.
+ruled out. If repository content was edited outside the skill-maintenance exemption but
+no result arrives, say review was not confirmed. A no-op message applies only
+to that tool call, not other edits in the turn; uncertainty about reviewability
+is not grounds for omitting this status. Do not fabricate a review link or call
+a pending result clean.
 
 Complete pending activation as described above. Otherwise, only troubleshoot
 when requested or when the hook reports a concrete error.
