@@ -1,0 +1,21 @@
+INSTALL.md
+  s_19d08b7f01e7fd::t_dea534e73359ed 257-258,268-270,362-363,367-369
+tests/test_managed_skill.py
+  s_19d08b7f01e7fd::t_dea534e73359ed 101-106
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c56634e66971fadab7629794aaf0a6942d519ce2",
+  "prompts": {},
+  "sessions": {
+    "s_19d08b7f01e7fd": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1a863-607c-7ca3-a1c8-8150542b758a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
