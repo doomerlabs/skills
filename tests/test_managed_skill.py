@@ -98,6 +98,12 @@ class ManagedSkillTests(unittest.TestCase):
                 self.assertIn(revision.encode(), (codex / "SKILL.md").read_bytes())
                 for path in target.rglob("*"):
                     self.assertFalse(path.is_symlink())
+                single = root / (version + "-single")
+                subprocess.run([sys.executable, module.__file__, str(root), revision,
+                                str(single)], check=True)
+                self.assertEqual(inventory(single), inventory(codex))
+                self.assertFalse((single / ".agents").exists())
+                self.assertFalse((single / ".claude").exists())
                 before = inventory(codex)
                 with self.assertRaises(FileExistsError):
                     module.stage(root, target, revision, both_agents=True)

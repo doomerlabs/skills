@@ -254,7 +254,8 @@ the temporary files you created after installation.
 If you cannot fetch or identify the source, report the failure and stop
 installation.
 
-Preflight both destinations before changing either. If a destination already
+Preflight all selected destinations before changing any: both for the default
+installation, or only the requested path for an explicit single-agent install. If a destination already
 exists, compare its full file inventory and file contents with the rendered
 staging tree, including `SKILL.md`, `references/install.md`,
 and `references/updates.md`. Reuse requires an exact match of the entire
@@ -264,8 +265,9 @@ baseline creation. A different CLI pin, missing file, extra file,
 or changed content requires explaining the difference and obtaining approval
 before replacing it. A symlink is a conflict, even if it points at the other
 agent's copy; never follow it for writes. Preserve a backup for any approved
-replacement. If either destination conflicts, do not partially install or
-update the pair. Preserve unrelated skills, agent settings, and repository changes.
+replacement. If a selected destination conflicts, do not partially install or update the
+selected set. An out-of-scope companion does not block an explicit single-agent
+installation and must remain untouched. Preserve unrelated skills, agent settings, and repository changes.
 
 ### 4. Run the installed skill's setup workflow
 
@@ -357,12 +359,14 @@ Generate the block for the agents actually installed in this attempt. In the
 example below, replace `INSTALLED_AGENT_SKILL_PATHS` with only their verified
 paths. For the default installation, use these two lines:
 `Codex uses .agents/skills/doomer-review/` and
-`Claude Code uses .claude/skills/doomer-review/`. A single-agent list is only for
-an explicitly restricted installation.
+`Claude Code uses .claude/skills/doomer-review/`. A newly created single-agent list is only for an explicitly restricted
+installation with no existing companion entry to preserve.
 Do not name a Claude path unless that copy exists, or require a noninstalled
 agent to run this policy. On later setup, recheck every existing entry on disk
 for its skill and referenced files before preserving it. Drop entries whose
-copy or required files are missing, and add all newly installed agents. If any
+copy or required files are missing, and add all newly installed agents. Preserve
+every healthy existing entry even when this attempt installs only one agent;
+limiting installation scope does not authorize removing the companion policy. If any
 active agent, including a listed agent, encounters this block without its own
 installed copy, continue its normal task and explain
 how to opt into setup if requested; this block does not authorize installing it.
