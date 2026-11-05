@@ -202,6 +202,13 @@ or conflicting pins never inherit another target's approval.
 
 ## Set up once
 
+For organization-level chats, run repository commands with the selected child
+checkout as the tool's working directory and use absolute paths for file edits.
+Use separate worktrees for parallel coding chats that edit the same repository.
+If a hook reports an unresolved edit repository or ambiguous edit ownership,
+correct that directory or worktree assignment before continuing the task.
+Keep capture failures distinct from activation and hook-trust decisions.
+
 Resolve the Git root of the repository being edited, not the org directory that
 contains the chat. After the per-turn local pin check, if this conversation
 already verified its saved setup and no update replaced the CLI, continue
@@ -345,7 +352,7 @@ true. A pending restart, failed activation, or configured-but-unverified state
 always follows the activation path; saved status never overrides it.
 
 Install or verify the checkout-pinned CLI following [installation](references/install.md), including its managed ownership and runtime-protocol checks.
-Use stable CLI **2026.11.4.3**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.4.4**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
