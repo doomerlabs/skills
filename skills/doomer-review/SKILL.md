@@ -28,28 +28,39 @@ Reuse it across chats, agent sessions, restarts, skill updates, and CLI versions
 until the user revokes it. Ask for upload consent only when the selected
 repository, account, and service have no valid grant.
 
-After resolving the checkout and verifying its CLI, inspect `has-permission --help`.
+At the start of each editing turn, resolve the checkout, verify its CLI, and
+inspect `has-permission --help` if support is unknown for that release.
 When supported, run this standalone local check from that checkout:
 
 ```sh
 "${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api has-permission "${doomer_repo_root:?Set the target Git root}" --json
 ```
 
+Accept a decision only after a successful command exit and valid JSON output.
+On any command or output error, discard the entire output and follow the
+unknown-permission rule below, even if it contains `approved: true`.
+
 `approved: true` is authoritative repository permission. Retain the returned
 `repository_id`, checkout, service, profile, and decision in the task summary.
 It authorizes normal review setup and recovery within that existing scope.
 A new chat or worktree requires reading the saved grant, without asking the
 user to repeat their answer. An explicit revocation or pause takes precedence.
+Pass the actual checkout's Git root. The CLI resolves its Git common directory
+to match repository-wide grants across linked worktrees. A legacy grant scoped
+to one checkout remains limited to that checkout.
 
 For an older CLI without `has-permission`, use the standalone `watch status --json`
 check under **Reuse saved setup across chats**. Its `approved` field
 establishes the same consent independently of its other fields. Preserve the
 selected release and its existing update decision.
 
-An unreadable or failed check leaves permission unknown. Retain any previously
-verified grant and report the concrete error once. Never interpret a failed
-check as revocation or use it to repeat the consent question. With no verified
-grant, keep uploads disabled while continuing permitted local work.
+An unreadable or failed check leaves current permission unknown. Preserve the
+previous decision only as history, and report the concrete error once. Keep
+uploads disabled until a successful permission check, including when history
+contains a grant. Continue permitted local work without repeating the consent
+question. A later successful read reuses the user's saved answer. The CLI and
+trusted hooks also validate live consent before submitting reviews; a cached
+conversation decision never overrides revocation.
 
 For a granted repository, inactive or stopped watchers, missing hook receipts,
 missing session IDs, and activation failures are operational states. Attempt
