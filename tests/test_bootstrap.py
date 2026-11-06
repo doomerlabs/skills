@@ -1,3 +1,4 @@
+import hashlib
 import importlib.util
 import io
 from pathlib import Path
@@ -21,6 +22,13 @@ class BootstrapTests(unittest.TestCase):
         self.assertNotIn('self-update', text)
         self.assertNotIn('2026.', text)
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
+
+    def test_installer_is_pinned_and_scope_requires_a_choice(self):
+        guide = (ROOT / 'INSTALL.md').read_text()
+        self.assertIn('334ed87f2d7b793386e3f9eefaad22fcd76f545e/scripts/install.py', guide)
+        self.assertIn(hashlib.sha256((ROOT / 'scripts/install.py').read_bytes()).hexdigest(), guide)
+        self.assertIn('ask personal versus team and wait', guide)
+        self.assertIn('returns another protocol', guide)
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):

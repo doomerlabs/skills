@@ -2,20 +2,27 @@
 
 Follow this guide when the user asks to install Doomer. Determine whether the
 user wants a team/repository or personal installation. Honor an already stated
-choice. Work in the environment that actually edits the target checkout.
+choice. If the choice is unstated, ask personal versus team and wait for the
+answer before writing any installation files. Work in the environment that actually edits the target checkout.
 
 ## Verified first installation
 
 1. If a managed-protocol-2 Doomer CLI is already installed, use it. Check
-   `doomer runtime-info` and require `managed_protocol: 2`.
+   `doomer runtime-info` and require `managed_protocol: 2`. If the command fails
+   or returns another protocol, use the verified installer in step 2. Do not
+   run installation commands through that unsupported executable.
 2. Otherwise inspect the installer at
-   `https://raw.githubusercontent.com/doomerlabs/skills/main/scripts/install.py`.
-   Download it to a private temporary directory and run it with Python 3. The
+   `https://raw.githubusercontent.com/doomerlabs/skills/334ed87f2d7b793386e3f9eefaad22fcd76f545e/scripts/install.py`.
+   Download it once to a private temporary directory. Require SHA-256
+   `80be9cfd655a2720c2c8381ab9ebe30c4fd280fed96bba2348f115bc6d367a07`.
+   Inspect that same local file, verify the digest again immediately before
+   execution, and run that exact file with Python 3. Stop on a digest mismatch;
+   never fetch an alternative script or execute a second download. The
    installer gets the official GitHub release manifest, verifies the archive,
    and runs the verified CLI to install the signed runtime and bootstraps.
    Use `--personal` for a personal install or `--repo ABSOLUTE_PATH` for a team
    install. Preserve normal download and execution approval controls.
-3. With an existing CLI, run `doomer install --runtime --personal` or
+3. Only with an existing CLI verified as protocol 2 in step 1, run `doomer install --runtime --personal` or
    `doomer install --runtime --repo ABSOLUTE_PATH` as appropriate.
 4. Existing conflicting bootstrap files or unmanaged launchers require explicit
    reconciliation. Never silently overwrite them or add `--adopt` without the
