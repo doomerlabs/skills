@@ -40,17 +40,20 @@ Accept a decision only after a successful command exit and valid JSON output.
 On any command or output error, discard the entire output and follow the
 unknown-permission rule below, even if it contains `approved: true`.
 
-`approved: true` is authoritative repository permission. Retain the returned
-`repository_id`, checkout, service, profile, and decision in the task summary.
+`approved: true` is authoritative permission for the checked checkout and
+existing upload scope. Retain the returned `repository_id`, checkout, service,
+profile, and decision as history in the task summary. A fresh successful check
+authorizes the current editing turn; saved conversation results never replace
+that check, including results from the older-CLI fallback.
 It authorizes normal review setup and recovery within that existing scope.
 A new chat or worktree requires reading the saved grant, without asking the
 user to repeat their answer. An explicit revocation or pause takes precedence.
 Pass the actual checkout's Git root. The CLI resolves its Git common directory
 to match repository-wide grants across linked worktrees. A legacy grant scoped
 to one checkout remains limited to that checkout. Record each result for the
-checked checkout. `approved: false` immediately disables uploads there and
-invalidates cached positive results for the same `repository_id`. Recheck any
-other selected checkout before using it; only a fresh `approved: true` permits
+checked checkout. `approved: false` immediately disables uploads there. A
+denied or failed permission read cannot be overridden by any cached result.
+Recheck each selected checkout before using it; only a fresh `approved: true` permits
 uploads there. A repository-wide revocation makes every linked checkout fail
 this check. With a legacy checkout-only grant, the originally approved path
 can still pass while other paths remain unapproved.
@@ -58,7 +61,8 @@ can still pass while other paths remain unapproved.
 For a denied checkout, report unavailable review coverage and continue the
 user's permitted local work with uploads disabled. Follow initial setup only
 if the user wants to authorize that currently unapproved scope. Never prompt
-again for a scope whose current check already returns `approved: true`.
+again for an unchanged upload scope whose current check returns `approved: true`.
+Broader or first-time upload scopes still follow their consent flow below.
 
 For an older CLI without `has-permission`, use the standalone `watch status --json`
 check under **Reuse saved setup across chats**. Its `approved` field
