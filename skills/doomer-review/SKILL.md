@@ -376,6 +376,33 @@ location to its hooks.
   Before any coding edit, apply **Restore the original task** below. A receipt
   for a setup or resume prompt alone never proves that the coding task was
   restored.
+Before using the generic `pending` retry below, handle a missed upgrade prompt
+only when all of these are established for the same checkout and chat:
+
+- The CLI was upgraded in this chat and the current session ID is known.
+- The saved-setup check reports valid consent, an unpaused running watcher,
+  installed Codex hooks, and `repository_status: "Watching"`.
+- The current-session activation check returned either the exact legacy detail
+  `The current task prompt was not captured by a hook.` or the pending detail
+  beginning `A tool hook is active, but the current task prompt is missing.`
+- The original coding request and constraints are available in this chat.
+
+For that case, use the documented `onboard --task-stdin` command once to preserve
+the original request, unless the durable handoff summary already records its
+successful save for this checkout/session. Record success only from a successful
+command result. If its outcome is unknown or the command fails, diagnose that
+outcome and stop this recovery rather than repeating the write. Reuse existing
+consent and follow any execution-approval requirement. This is a narrow
+exception to the saved-setup shortcut, not another consent or hook-trust flow.
+
+Then run one read-only tool in this checkout and retry verification once. This
+uses the same probe/retry budget as `pending` below, never an additional budget.
+Record the attempt in the durable summary. If that budget was already used,
+do not repeat it. On success apply **Restore the original task** and continue.
+Otherwise report activation unverified and request the resume message once.
+Unknown session IDs, missing consent, setup-only requests, unrelated errors,
+and absent upgrade history follow their normal paths instead.
+
 - `pending` permits one read-only tool call in the target repository followed by
   one retry. Choose a tool matched by the Doomer tool hooks. The installer uses
   `.*` for Codex tool hooks, so a shell tool running `git status --short` works
@@ -387,20 +414,9 @@ location to its hooks.
   **Recover silent desktop hooks** below when its prerequisites hold. Inspect
   approval controls when the client reports missing trust or the user confirms
   unloaded hooks.
-- If a real tool hook is active but its current task prompt is missing after
-  an upgrade, preserve the original coding request and its corrections using
-  the documented `onboard --task-stdin` command once, reusing existing consent.
-  Skip that save if it already succeeded for this repository/session. Run one
-  read-only tool in the target checkout and retry verification once. The hook
-  can recover the saved request even when the new runtime missed the initial
-  user prompt. This recovery does not establish hook trust or consent. Follow
-  **Restore the original task** before editing. Request another user message
-  only if this bounded recovery still cannot verify activation. For releases
-  that report this particular missing-prompt condition as `error`, use the same
-  recovery. Other errors follow the diagnostic rule below.
 - `error`, a command failure, or malformed output requires reporting the actual
   diagnostic. Preserve Git stderr, including license or executable errors.
-  Except for the missing-prompt recovery above, missing task capture,
+  Except for the missed upgrade prompt handled above, missing task capture,
   unavailable setup, and failed hooks are distinct from
   missing trust. Follow the shared user-choice rule without inventing a cause.
 
