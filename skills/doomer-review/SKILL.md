@@ -339,6 +339,20 @@ assignment before continuing the task. This also applies on later turns when
 setup/status checks would normally be skipped. A new checkout follows the
 saved-setup and activation checks below before repository edits.
 
+Run each edit from its target checkout, including shell scripts that write files.
+Split commands that edit different repositories into separate tool calls with
+explicit working directories. Paths inside a Python or other script do not
+reliably establish the tool's repository. For patch tools, use absolute paths.
+
+Track an unresolved capture by its tool operation and checkout when known.
+A later successful capture or completed review only establishes coverage for
+its captured changes. If the hook confirms that the same operation recovered
+before editing, retire its earlier diagnostic. Otherwise report the unresolved
+operation separately from any completed reviews, including when the checkout
+could not be identified. Do not describe the whole session as a failed review
+because one operation could not be attributed. Temporary-file work and exempt
+skill maintenance do not establish a repository review failure.
+
 If activation is pending or unverified, follow its verification and diagnostic
 path below first, then correct any reported directory or worktree assignment
 before relying on a review. For a granted repository, unresolved activation
