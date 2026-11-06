@@ -64,6 +64,10 @@ class ManagedSkillTests(unittest.TestCase):
     def test_both_agents_cli_stages_identical_regular_trees(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            target_checkout = root / "target-checkout"
+            target_checkout.mkdir()
+            self.assertFalse((target_checkout / "scripts/stage-managed-skill.py").exists())
+            helper = str(Path(module.__file__).resolve())
             source = root / "skills/doomer-review"
             (source / "references").mkdir(parents=True)
             (source / "SKILL.md").write_bytes(b"---\nname: doomer-review\n---\nboth agents\n")
@@ -87,8 +91,8 @@ class ManagedSkillTests(unittest.TestCase):
                     git("commit", "-m", "update")
                 revision = git("rev-parse", "HEAD")
                 target = root / version
-                subprocess.run([sys.executable, module.__file__, str(root), revision,
-                                str(target), "--both-agents"], check=True)
+                subprocess.run([sys.executable, helper, str(root), revision,
+                                str(target), "--both-agents"], cwd=target_checkout, check=True)
                 codex, claude = (target / path for path in module.PROJECT_SKILL_PATHS)
                 inventory = lambda path: {p.relative_to(path).as_posix(): p.read_bytes()
                                           for p in path.rglob("*") if p.is_file()}
@@ -99,8 +103,8 @@ class ManagedSkillTests(unittest.TestCase):
                 for path in target.rglob("*"):
                     self.assertFalse(path.is_symlink())
                 single = root / (version + "-single")
-                subprocess.run([sys.executable, module.__file__, str(root), revision,
-                                str(single)], check=True)
+                subprocess.run([sys.executable, helper, str(root), revision,
+                                str(single)], cwd=target_checkout, check=True)
                 self.assertEqual(inventory(single), inventory(codex))
                 self.assertFalse((single / ".agents").exists())
                 self.assertFalse((single / ".claude").exists())

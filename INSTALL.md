@@ -237,8 +237,10 @@ record the resolved commit ID. The source directory is
 Before copying, verify that the source includes `SKILL.md` with the skill name
 `doomer-review`, `references/install.md`, and `references/updates.md`. Read
 these files. Read and inspect the official source's
-`scripts/stage-managed-skill.py`, then run it with the verified source checkout,
-its exact full commit ID, a new private staging-directory path, and
+`scripts/stage-managed-skill.py`, then invoke it through its absolute path inside
+the verified source clone, for example
+`python3 "$source_clone/scripts/stage-managed-skill.py"`. Pass the verified
+source checkout's absolute path, its exact full commit ID, a new private staging-directory path, and
 `--both-agents` for the default installation. This helper is the only
 source-checkout executable permitted by this installation flow. It stages
 identical regular skill copies under `.agents/skills/doomer-review/` and

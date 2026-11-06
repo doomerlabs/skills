@@ -7,12 +7,14 @@ installation entry point remains supported.
 
 ## Identify the installation
 
-Resolve the target checkout's absolute Git root before creating a source clone
-or staging directory. Retain that root separately from the temporary upstream
+For a project-local installation, resolve the target checkout's absolute Git
+root before creating a source clone or staging directory. Retain that root separately from the temporary upstream
 clone. Run installation discovery, replacement, verification, and Git publication
 with the target checkout as the tool's working directory and absolute destination
-paths. Pass the source clone's absolute path to staging commands. Never let a
-temporary working directory replace the selected installation scope.
+paths. Invoke the staging helper by its absolute path inside the source clone,
+for example `python3 "$source_clone/scripts/stage-managed-skill.py"`, and pass
+the source clone's absolute path as its first argument. Never let a temporary
+working directory replace the selected installation scope.
 
 Keep the discovery path and canonical directory separate. A discovery path
 under the target repository is project-local even if it is a symlink. A global
@@ -150,11 +152,21 @@ all selected installed files, aliases, and baselines under their installation
 locks. A concurrent change invalidates the prepared replacement and must be
 reconciled. Update both standard project copies together unless the user
 explicitly restricted the scope. Do not update other independent copies,
-global installations, or another worktree. For tracked project copies, an explicit
-request to update the installed skill includes publishing the verified update
-as a pull request by default. Honor an explicit local-only request or a repository
-rule requiring a different delivery workflow. An automatic update check or an
-accepted update offer alone does not authorize publication.
+global installations, or another worktree. Before choosing delivery, read the
+target repository's applicable `AGENTS.md` or `CLAUDE.md`, `CONTRIBUTING` guidance,
+and any documented publication requirements or remote restrictions. Apply any
+issue-first, local-only, or agent-publication rule before preparing a PR. Ask
+only if a discovered conflict or ambiguous remote leaves delivery unresolved.
+
+For tracked project copies, a user-initiated request to update the installed
+skill includes publishing the verified update as a pull request by default,
+subject to those rules and explicit user restrictions. A reply accepting an
+agent-initiated update offer is a separate case, even if it says "yes, update
+it". That reply authorizes local replacement only unless the user also asks
+for publication or has already established a standing PR-delivery preference.
+An automatic check never authorizes publication. Preserve this distinction
+and the selected delivery mode across retries and compaction, without asking
+again for a delivery choice the user has already made.
 
 Before changing tracked files for a requested PR, inspect the target checkout's
 status, branch, remote, and intended base. Fetch that base from the target
@@ -219,7 +231,12 @@ not inherit update approval, credentials, consent, or activation state.
 After verifying the skill pair, shared instructions, and matching CLI step,
 complete the target repository's delivery workflow. For a PR, review and stage
 only the skill update and its required portable instructions, commit, push the
-branch, and create or update its pull request. Follow repository commit and PR
+branch, and create or update its pull request. A standard paired update includes
+both verified skill paths and their shared instructions in the same commit.
+For an explicit user or repository single-agent restriction, publish only the
+selected copy and its applicable instructions, and state that restriction in
+the PR description. Keep its single-directory decision and baseline keys;
+never silently widen it to a paired update. Follow repository commit and PR
 conventions. Exclude private baselines, backups, journals, downloaded binaries,
 temporary source clones, credentials, consent, and machine-specific hook files.
 Before reporting completion, refresh the target base again, inspect the full PR
