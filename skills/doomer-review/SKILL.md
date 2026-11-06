@@ -400,11 +400,15 @@ uses the same probe/retry budget as `pending` below, never an additional budget.
 Record the attempt in the durable summary. If that budget was already used,
 do not repeat it. On success apply **Restore the original task** and continue.
 Otherwise report activation unverified and request the resume message once.
+Record that request in the durable handoff summary before asking. Reuse the
+existing record across turns and compaction, never requesting it again for the
+same checkout/session.
 Unknown session IDs, missing consent, setup-only requests, unrelated errors,
 and absent upgrade history follow their normal paths instead.
 
 - `pending` permits one read-only tool call in the target repository followed by
-  one retry. Choose a tool matched by the Doomer tool hooks. The installer uses
+  one retry. Record use of this shared probe/retry budget in the durable summary
+  before invoking it, and consult that record before any recovery attempt. Choose a tool matched by the Doomer tool hooks. The installer uses
   `.*` for Codex tool hooks, so a shell tool running `git status --short` works
   with the standard configuration. If customized matchers exclude all
   available read-only tools, explain the mismatch and have the user restore
