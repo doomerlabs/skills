@@ -29,7 +29,7 @@ until the user revokes it. Ask for upload consent only when the selected
 repository, account, and service have no valid grant.
 
 At the start of each editing turn, resolve the checkout, verify its CLI, and
-inspect `has-permission --help` if support is unknown for that release.
+inspect that executable's `has-permission --help`.
 When supported, run this standalone local check from that checkout:
 
 ```sh
@@ -47,12 +47,17 @@ A new chat or worktree requires reading the saved grant, without asking the
 user to repeat their answer. An explicit revocation or pause takes precedence.
 Pass the actual checkout's Git root. The CLI resolves its Git common directory
 to match repository-wide grants across linked worktrees. A legacy grant scoped
-to one checkout remains limited to that checkout.
+to one checkout remains limited to that checkout. Record each result for the
+checked checkout. `approved: false` means that checkout lacks permission;
+it does not revoke or invalidate permission for another checkout, even when
+they share a `repository_id`. Check each selected checkout before using it.
 
 For an older CLI without `has-permission`, use the standalone `watch status --json`
 check under **Reuse saved setup across chats**. Its `approved` field
 establishes the same consent independently of its other fields. Preserve the
-selected release and its existing update decision.
+selected release and its existing update decision. Apply the same successful
+exit and valid JSON requirements to this fallback. Any fallback command or
+output error leaves permission unknown, regardless of an `approved` fragment.
 
 An unreadable or failed check leaves current permission unknown. Preserve the
 previous decision only as history, and report the concrete error once. Keep
