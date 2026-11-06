@@ -202,7 +202,9 @@ uncommitted. Report the changed paths when finished.
 
 For team setup, inspect the working tree, current branch, remote, and PR base
 before editing. Create a fresh, uniquely named branch such as
-`chore/setup-doomer` from the intended PR base. Use the repository's default
+`chore/setup-doomer` from the freshly fetched remote-tracking PR base. Fetch the
+target repository's base branch before creating the branch; fetching the skills
+source does not refresh it. Use the repository's default
 branch unless the user or repository instructions specify another base. Keep
 the PR limited to Doomer setup. If the current checkout has unrelated changes
 or commits, use a separate worktree from that base and preserve the original
@@ -220,6 +222,12 @@ and update their original checkout, then resume this guide there to complete
 that activation. A PR alone does not activate reviews for other developers.
 
 ### 3. Download and install the skill
+
+Keep the selected target Git root as the tool's working directory throughout
+download, staging, installation, and verification. Use absolute paths for the
+temporary source clone, staging tree, and both installed destinations. Run Git
+commands for the source clone with `git -C` so its temporary directory never
+replaces the target checkout used by review hooks or publication commands.
 
 Fetch the public repository `https://github.com/doomerlabs/skills.git` into a
 new temporary directory using Git over HTTPS. Use its default branch and
@@ -472,7 +480,10 @@ steps. If activation is pending, state that explicitly. Follow through after
 any required restart without repeating completed commits or opening a second
 PR. Reuse an existing PR for this setup branch.
 An isolated checkout or a local commit does not finish a requested PR. Verify
-the published PR URL and include it in the result.
+the published PR URL and include it in the result. Refresh the target base and
+check the complete diff and mergeability before reporting completion. Resolve
+conflicts caused by an advancing base, revalidate the setup files, and update
+the same PR. Do not claim conflict-free status while mergeability is unknown.
 
 If there is no shareable diff, report that outcome instead of creating an empty
 commit or PR. If pushing or creating the PR is blocked, preserve the local

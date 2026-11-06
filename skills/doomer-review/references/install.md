@@ -278,7 +278,15 @@ one pin leaves other installed versions in place. A launcher reporting
 workers. It suspends idle workers while retaining pending work, and resumes the
 selected worker on an actual edit. `Idle` is a healthy stopped-worker state,
 not a user pause or missing setup. Do not restart workers just to clear it.
-Older launchers do not guarantee this retirement behavior. Verify current-session activation in the selected runtime through the
+Older launchers do not guarantee this retirement behavior.
+
+The `watch_supervisor: 1` contract includes CLI-side pause checks before
+supervisor startup and runtime resume. The CLI reads the shared profile pause
+and runtime pause markers through `userPaused`, `ensureWatchSupervisorBinary`,
+and `prepareHookRuntime` in `cmd/watch_supervisor.go`; `resumeIdleRuntime`
+clears only an automatic idle suspension. The agent does not edit or enumerate
+private runtime state to perform these checks. A selected checkout reporting
+`paused: true` still follows SKILL.md's explicit-pause rule. Verify current-session activation in the selected runtime through the
 active agent’s hook check or the scoped callback criteria in SKILL.md. Reuse existing
 repository consent independently of installation and version selection.
 
