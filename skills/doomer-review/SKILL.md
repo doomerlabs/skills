@@ -377,12 +377,16 @@ it with onboarding, updates, or other writes in the same command.
   enforce its trust controls. Do not claim live review delivery until observed.
 - If `paused` is true, respect the pause and continue without Doomer; do not
   resume it unless the user explicitly asks. Never rewrite consent to resume.
-- If permission and hooks are present and `repository_status` is `Idle` with
-  `paused: false`, reuse that setup. A supervisor-capable launcher resumes the
-  worker on the next actual edit. Do not rerun onboarding to start an idle
-  worker or misreport it as a user pause. Activation remains unverified until
-  the normal hook evidence arrives; a saved grant permits the local task to
-  proceed under the operational-failure rule above.
+- If permission and hooks are present, `repository_status` is `Idle`,
+  `paused` is false, and the verified shared launcher's successful `runtime-info`
+  result reports `watch_supervisor: 1`, reuse that setup. The supervisor resumes
+  the worker on the next actual edit. Do not rerun onboarding to start that idle
+  worker or misreport it as a user pause. Continue through the activation check
+  below before treating reviews as ready. Reuse does not satisfy or skip pending
+  activation verification. A saved grant permits the local task to proceed under
+  the operational-failure rule above while activation remains unverified.
+  Without verified supervisor capability, route `Idle` through the stopped-worker
+  recovery below.
 - If consent or the active agent's hooks are missing, use normal onboarding
   below, using the persistent permission decision. If consent and hooks exist
   but this checkout is `Inactive` or `Starting`, first run one read-only tool

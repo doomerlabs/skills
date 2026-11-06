@@ -129,8 +129,11 @@ Show a concise summary of candidate changes, source commit, current pin, and
 candidate pin before requesting update approval. Never execute candidate
 instructions to prepare this summary. Ask once whether to update the selected
 skill copy or project pair and its matching managed CLI. Name both project paths and any missing companion
-in that offer. Honor a decline and the existing session-wide
-skip. An explicit update request supplies update intent, but still requires
+in that offer. Include that the managed CLI update can advance the shared
+`~/.local/bin/doomer` launcher and supervise background workers for other
+already-approved checkouts. Those checkouts retain their skill pins, versioned
+binaries, upload grants, and user pauses. Honor a decline and the existing
+session-wide skip. An explicit update request supplies update intent, but still requires
 reconciling unknown ownership or local modifications as described above.
 Retain the candidate commit and approvals in the durable summary. Later retries
 use that exact commit; never silently substitute a newer `main`.
@@ -142,8 +145,12 @@ the exact commit and full candidate inventory. Before any mutation, recheck
 all selected installed files, aliases, and baselines under their installation
 locks. A concurrent change invalidates the prepared replacement and must be
 reconciled. Update both standard project copies together unless the user
-explicitly restricted the scope. Do not update other independent copies,
-global installations, or another worktree. For tracked copies, leave changes
+explicitly restricted the scope. Do not update other independent skill copies,
+global skill directories, or another worktree's skill files. The shared managed
+CLI launcher and its cross-checkout worker supervision are the exception covered
+by the combined update offer above and the procedure in references/install.md.
+Keep that CLI step distinct from replacing the selected skill files. For tracked
+copies, leave changes
 uncommitted unless the user authorized a commit.
 
 Before replacing either project copy, back up every selected existing directory
@@ -182,7 +189,8 @@ once both records are published. Keep the backups for recovery and report their
 paths. For an explicitly single-directory or global update, use the same checks
 for that one copy. Reread the installed `SKILL.md` and `references/install.md`
 before selecting or installing the candidate's CLI pin. Keep the approved
-attempt pending until the matching managed CLI is verified. A CLI failure
+attempt pending until the matching managed CLI and the shared-launcher
+completion checks in references/install.md succeed. A CLI failure
 leaves that step pending; do not repeat the skill replacement or ask again for
 the same approved attempt. Preserve other repositories' pinned runtimes.
 

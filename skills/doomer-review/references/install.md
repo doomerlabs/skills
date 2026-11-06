@@ -26,7 +26,10 @@ If the selected version is present, use that executable for the local check:
 ```
 
 Inspect the JSON result. `ready` means the bytes match the managed record and
-exact pin. Reuse that path. `missing` requires the verified bootstrap below.
+exact pin. Reuse that path. During an approved update, this verifies only the
+checkout binary. Continue through the shared-launcher section even when it
+reports `ready`, including retries of an interrupted update. `missing` requires
+the verified bootstrap below.
 A modified, unmanaged, symlinked, or unsupported version path requires reporting
 the conflict. Preserve it for inspection rather than replacing immutable
 release files. A newer version elsewhere never satisfies this checkout's pin.
@@ -166,17 +169,28 @@ A newer managed launcher is reusable and must never be downgraded. An
 `update_available` result requires completing the approved launcher upgrade;
 protocol compatibility alone does not complete that update.
 
-Inspect the selected CLI's `runtime-info` capabilities. When it reports
-`managed_upgrade: 1`, run the following during an approved update, including a
-retry where the immutable release already reports `ready`:
+Inspect the selected CLI's successful `runtime-info` JSON. The capability
+fields are top-level fields in that result. An absent or zero `managed_upgrade`
+field in a valid `protocol: 1` result uses the explicit launcher-install fallback
+below. A failed invocation or malformed result follows the installation failure
+rules above, even if stdout contains a protocol fragment.
+
+Record the current managed global version from the local launcher check before
+updating. When the selected CLI reports `managed_upgrade: 1`, run the following
+during an approved update, including a retry where the immutable release already
+reports `ready` or the global check reports `newer_installed`. The command also
+reconciles supervision while preserving a newer launcher.
 
 ```sh
 "${doomer_cli:?Set the verified pinned CLI path}" self-update --side-by-side --version "${doomer_version:?Read the current release pin}"
 ```
 
 Require a successful result with the selected release `ready` and a
-`launcher_version` at least as new as the selected pin. This command preserves
-older binaries and completes launcher advancement and watcher supervision.
+`launcher_version` at least as new as both the selected pin and the managed
+global version recorded before the command, when one existed. Compare the
+numeric year, month, day, and release components, not strings. A decrease is a
+conflict and leaves the update incomplete. This command preserves older binaries
+and completes launcher advancement and watcher supervision.
 An error can leave the verified release installed with a later step incomplete.
 Retain that progress and retry the same approved operation after resolving its
 reported failure. Do not claim the upgrade complete from the release check alone.
@@ -188,8 +202,17 @@ managed protocol-1 launcher requires the explicit launcher-install step:
 "${doomer_cli:?Set the verified pinned CLI path}" self-update --side-by-side --install-launcher --version "${doomer_version:?Read the current release pin}"
 ```
 
-A matching or newer managed launcher needs no replacement. For a legacy
-launcher without protocol 1, follow the migration decision below first.
+After the fallback command succeeds, repeat the global
+`self-update --check --version "${doomer_version:?Read the current release pin}"`
+check and require managed `ready` or `newer_installed`. Its reported `version`
+must be at least the selected pin and the pre-update global version, if present.
+Older launcher-install commands report `version`, so do not require their
+output to contain the newer `launcher_version` field. A failed check, older
+version, or unexpected ownership leaves launcher completion pending.
+
+A matching or newer managed launcher needs no replacement on this fallback
+path. For a legacy launcher without protocol 1, follow the migration decision
+below first.
 
 If a legacy global installation exists, explain the migration and ask once
 whether to install the checkout-aware launcher while keeping a backup. Preserve
@@ -229,7 +252,15 @@ The launcher-install result names any backup. Record that path. Before invoking
 a newly installed launcher, verify its managed record and compare its bytes
 with the verified immutable binary for the launcher's reported version. An
 automatic upgrade can choose a newer cached release than this checkout's pin.
-A mismatch stops setup and must not be repaired by inventing metadata. Launcher
+For that already-installed release, use the verified pinned CLI to run the
+read-only `self-update --check --side-by-side --version "$launcher_version"`.
+Require `ready`, the exact reported version, and its expected version-cache
+path. Hash that regular cached executable and the global launcher independently
+and require both hashes to match the check's `sha256`. This reuses the existing
+managed-installation trust check without downloading a different release or
+changing the checkout pin. A missing, unverified, or mismatched cached release
+leaves launcher completion pending and must not be repaired by inventing
+metadata. Launcher
 migration alone does not authorize uploads or establish hook trust. Use the
 normal onboarding flow to install the shared dispatcher hook and let the user
 review any changed hook definition.
