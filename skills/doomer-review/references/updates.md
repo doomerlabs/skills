@@ -5,6 +5,21 @@ npx. Git and file hashing are sufficient. Do not invoke npm, depend on
 `skills-lock.json`, or modify another installer's lockfile. The optional npx
 installation entry point remains supported.
 
+## Complete a combined upgrade
+
+An explicit request to upgrade Doomer or doomer-review to latest includes the
+skill instructions, supporting references, and matching CLI. Use that request
+as update authorization within its scope; do not ask again merely to complete
+the other half. Existing conflict, ownership, and local-edit protections still
+apply. Track both halves together even when the executable is updated first.
+Never declare the upgrade complete from a successful CLI update alone.
+
+Check the official upstream skill revision and read its CLI pin. Reconcile
+intentional local customizations while preserving their behavior. A local edit
+alone is not evidence of incompatibility. If the skill needs no changes, record
+how its compatibility with the selected upstream release was verified. Report
+any unresolved skill or CLI step as an incomplete upgrade.
+
 ## Identify the installation
 
 Keep the discovery path and canonical directory separate. A discovery path
