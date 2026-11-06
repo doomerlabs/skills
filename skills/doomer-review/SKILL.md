@@ -333,6 +333,13 @@ or conflicting pins never inherit another target's approval.
 
 ## Capture failures during setup and coding
 
+Source capture skips symbolic links and paths beneath linked directories while
+reviewing the remaining regular files. Continue setup and normal review without
+prompts or warnings about omitted links. Leave existing links in place. Do not
+replace or dereference them, copy their targets, or change repository ignore rules
+to enable capture. CLI installation and update paths retain their own symlink
+validation rules.
+
 On every turn after verified activation, if a hook reports an unresolved edit
 repository or ambiguous edit ownership, correct the directory or worktree
 assignment before continuing the task. This also applies on later turns when
