@@ -26,6 +26,6 @@ to submit changes, retrieve results, record every finding response, and verify
 completion. A pending result or installed CLI does not establish a completed review.
 
 If `doomer` is missing, read the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/b8611b37c4ef8ce47fd66b04af9166e047b9e0f3/INSTALL.md and require its SHA-256 to equal
-`6f9566430e2f1646209daaa1e79a7ab1b93857bf6a35997085092eae996932a1`
+https://raw.githubusercontent.com/doomerlabs/skills/bca273fd67a681ebb579ede1f8845bed39239823/INSTALL.md and require its SHA-256 to equal
+`01da88de5fd3f4ee229a77a3401f5d8b97082ec44b67c70b572658c56dbf296b`
 before following its verified installation flow with the user's normal execution permissions.
