@@ -9,16 +9,31 @@ installation entry point remains supported.
 
 An explicit request to upgrade Doomer or doomer-review to latest includes the
 skill instructions, supporting references, and matching CLI. Use that request
-as update authorization within its scope; do not ask again merely to complete
+as update authorization within its scope. Do not ask again merely to complete
 the other half. Existing conflict, ownership, and local-edit protections still
 apply. Track both halves together even when the executable is updated first.
 Never declare the upgrade complete from a successful CLI update alone.
 
-Check the official upstream skill revision and read its CLI pin. Reconcile
-intentional local customizations while preserving their behavior. A local edit
-alone is not evidence of incompatibility. If the skill needs no changes, record
-how its compatibility with the selected upstream release was verified. Report
-any unresolved skill or CLI step as an incomplete upgrade.
+Use **Check once per session** below to obtain the upstream revision from
+`https://github.com/doomerlabs/skills.git`, retaining its hooks-disabled fetch,
+30-second timeout, and `updateCheckAttempted` guard. Reuse an already verified
+candidate for the same attempt. Read that revision's CLI pin and follow
+[installation](install.md) to verify the selected executable. Its
+`self-update --check --side-by-side --version` command must succeed with
+`state: ready` and the selected version. Its `runtime-info` command must succeed
+with the required protocol. Preserve the resulting pin and record these command
+results, executable path, and protocol in the existing `updateAttempt` in the
+durable task summary alongside its completed/pending skill and CLI steps.
+
+Reconcile intentional local customizations while preserving their behavior.
+For a customized copy, compare its instructions with the selected upstream
+revision and check that every retained CLI command, flag, and expected output
+is supported by the verified executable, using its help and read-only checks.
+Record the relevant results and explain why each behavioral difference remains
+compatible. A byte difference alone is not an incompatibility. Unknown or failed
+checks leave verification incomplete. Keep customized bytes out of official
+baseline records, which retain the exact-source rules below. Report any
+unresolved skill or CLI step as an incomplete upgrade.
 
 ## Identify the installation
 
