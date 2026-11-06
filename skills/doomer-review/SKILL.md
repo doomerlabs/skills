@@ -390,15 +390,16 @@ only when all of these are established for the same checkout and chat:
 For that case, use the documented `onboard --task-stdin` command once to preserve
 the original request, unless the durable handoff summary already records its
 successful save for this checkout/session. Record success only from a successful
-command result. If its outcome is unknown or the command fails, diagnose that
-outcome and stop this recovery rather than repeating the write. Reuse existing
+command result. If its outcome is unknown or the command fails, record activation as unverified,
+report the actual diagnostic, and follow the shared user-choice rule. Stop this
+recovery without repeating the write or requesting its resume message. Reuse existing
 consent and follow any execution-approval requirement. This is a narrow
 exception to the saved-setup shortcut, not another consent or hook-trust flow.
 
-Then run one read-only tool in this checkout and retry verification once. This
-uses the same probe/retry budget as `pending` below, never an additional budget.
-Record the attempt in the durable summary. If that budget was already used,
-do not repeat it. On success apply **Restore the original task** and continue.
+Before invoking the probe, consult the durable summary for the shared
+probe/retry budget. If unused, record it as used first, then run one read-only
+tool in this checkout and retry verification once. This uses the same budget
+as `pending` below, never an additional budget. If already used, do not repeat it. On success apply **Restore the original task** and continue.
 Otherwise report activation unverified and request the resume message once.
 Record that request in the durable handoff summary before asking. Reuse the
 existing record across turns and compaction, never requesting it again for the
