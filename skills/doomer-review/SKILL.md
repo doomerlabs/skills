@@ -4,6 +4,8 @@ description: Use Doomer before repository edits and finish its review before rep
 metadata:
   doomer-protocol: "2"
   doomer-update-policy: stable
+  doomer-bootstrap-version: "2026.11.6.10"
+  doomer-cli-range: ">=2026.11.6.9"
 ---
 
 # Doomer review
@@ -27,6 +29,9 @@ The initial prepare command above works with older launchers. Before approving
 setup or editing in a temporary-home environment, execute the returned
 `portable_setup_command` argument array when present. It invokes the selected
 runtime directly and resumes the same task with portable setup enabled.
+
+If prepare reports a bootstrap upgrade, offer it to the user and apply it only
+after acceptance. Keep the repository's update policy and any local edits.
 
 Resume an existing task with `doomer prepare --task HANDLE` after interruption.
 Never create a replacement task to recover an existing review. If that task's
