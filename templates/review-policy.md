@@ -10,11 +10,21 @@ references/install.md from disk. Follow the skill for documentation, configurati
 tests, and application code, including small edits and requests that do not
 explicitly mention review.
 
+These paths also apply to Claude in Cowork and other remote sessions. If the
+skill is absent from the agent's catalog, read the files directly through the
+file or shell tool that reaches the target checkout. Missing automatic skill
+discovery does not make an installed skill optional.
+
 Run the skill's local CLI version and managed-installation check once per
 editing turn before making changes. Use the current on-disk pin and the skill's
 saved approval decisions. A version remembered from an earlier turn or a
 previously completed setup does not satisfy this check. Keep the online skill
 update check scoped to once per coding session as the skill directs.
+
+Run those checks in the environment that edits the checkout. Report an observed
+coverage failure before editing, then follow the skill's permission and recovery
+rules. Distinguish missing installation or unverified activation from a tested
+runtime restriction. Do not silently skip checks based on an assumed limitation.
 
 Follow the skill's setup and review workflow. Reuse valid repository consent
 and verified hook activation. Keep repository upload consent and agent hook

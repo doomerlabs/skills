@@ -404,11 +404,21 @@ references/install.md from disk. Follow the skill for documentation, configurati
 tests, and application code, including small edits and requests that do not
 explicitly mention review.
 
+These paths also apply to Claude in Cowork and other remote sessions. If the
+skill is absent from the agent's catalog, read the files directly through the
+file or shell tool that reaches the target checkout. Missing automatic skill
+discovery does not make an installed skill optional.
+
 Run the skill's local CLI version and managed-installation check once per
 editing turn before making changes. Use the current on-disk pin and the skill's
 saved approval decisions. A version remembered from an earlier turn or a
 previously completed setup does not satisfy this check. Keep the online skill
 update check scoped to once per coding session as the skill directs.
+
+Run those checks in the environment that edits the checkout. Report an observed
+coverage failure before editing, then follow the skill's permission and recovery
+rules. Distinguish missing installation or unverified activation from a tested
+runtime restriction. Do not silently skip checks based on an assumed limitation.
 
 Follow the skill's setup and review workflow. Reuse valid repository consent
 and verified hook activation. Keep repository upload consent and agent hook
@@ -432,6 +442,16 @@ comments, as the canonical import. If no such line exists, add it as a new
 top-level line. A mention in prose, a comment, or an import inside another file
 does not satisfy this check. Preserve its existing text and the CLI-owned Doomer block. When both
 agents are installed, keep one shared policy block in `AGENTS.md`.
+
+After the import, include this fallback for runtimes that do not load imports:
+
+```text
+Before editing this checkout, read AGENTS.md. If imports or skill discovery are
+unavailable, read the referenced files through the file or shell tool that can
+access this checkout.
+```
+
+Preserve an equivalent existing fallback rather than adding a duplicate.
 
 Preserve the existing permissions of both `AGENTS.md` and `CLAUDE.md`, and
 write their changes atomically. If any existing rule
