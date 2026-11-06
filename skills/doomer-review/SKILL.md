@@ -20,6 +20,35 @@ Requests solely discussing or editing this skill and its supporting files are
 exempt from this review workflow, including setup and update checks. Explicit
 requests to install or update Doomer still use the corresponding flow below.
 
+## Remote editing environments
+
+Read this skill and `references/install.md` through the tool that can access
+the target checkout, including when the agent's skill catalog omits it. For
+Claude sessions, including Cowork, use the checkout's `.claude/skills/doomer-review/`
+copy. Native skill discovery is not required to read these instructions.
+
+Before editing, identify the checkout and the environment where file edits
+execute. Run the required CLI and permission checks there. A remote device
+shell may have a different home directory, operating system, and installation
+from the agent harness or the user's host. An executable or grant on one host
+does not establish availability or permission on another. Do not copy credentials,
+grant records, or hook configuration between hosts to make checks pass.
+
+If the editing environment cannot find the selected CLI or read its permission
+store, report that concrete failure before editing. Permission remains unknown
+and uploads stay disabled under **Persistent repository permission**. Continue
+permitted local work without repeating consent or declaring that the user
+skipped review. A missing executable alone does not authorize installation.
+Explicit setup requests still follow the installation and consent flows.
+
+Hook activation must cover the actual editing tool, checkout, and current
+session. Shell edits through a remote device tool do not establish that hooks
+in another environment receive those edits or deliver results to this chat.
+Use only the documented activation checks and bounded recovery. If delivery
+cannot be verified, report unavailable review coverage rather than assuming
+either support or an execution restriction. A read-only file access does not
+substitute for the Claude skill-session expansion described below.
+
 ## Upgrade the CLI and skill together
 
 Treat a request to upgrade Doomer or doomer-review to the latest release as a

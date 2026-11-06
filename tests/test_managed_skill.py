@@ -11,6 +11,14 @@ spec.loader.exec_module(module)
 
 
 class ManagedSkillTests(unittest.TestCase):
+    def test_install_guide_uses_current_review_policy(self):
+        root = Path(__file__).parents[1]
+        guide = (root / "INSTALL.md").read_text()
+        policy = (root / "templates/review-policy.md").read_text()
+        rendered = guide.split("<!-- doomer-review-policy:start -->\n", 1)[1]
+        rendered = rendered.split("<!-- doomer-review-policy:end -->", 1)[0]
+        self.assertEqual(rendered, policy)
+
     def test_frontmatter_is_preserved(self):
         raw = b'---\nname: doomer-review\n---\nbody\n'
         marked = module.render(raw, 'skills/doomer-review/SKILL.md', 'a' * 40)
