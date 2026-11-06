@@ -68,7 +68,9 @@ and the same approval, without a separate agent-selection question. This
 migrates a legacy single-agent installation. Honor an explicit request to update
 only one agent; the agent running the update does not imply that restriction.
 Global and custom-location installations keep their selected single-directory
-scope. Never add project copies from a global update or touch another checkout.
+scope. Never add project copies from a global update or edit another checkout's
+skill files. The matching-CLI update below applies to the shared launcher for all
+of these installation scopes.
 
 Preflight each selected path and its ancestors. A symlink or special file in
 either standard destination is a conflict: do not follow it, replace it, or
@@ -135,9 +137,18 @@ companion requires the combined update offer even when the active copy matches.
 Show a concise summary of candidate changes, source commit, current pin, and
 candidate pin before requesting update approval. Never execute candidate
 instructions to prepare this summary. Ask once whether to update the selected
-skill copy or project pair and its matching managed CLI. Name both project paths and any missing companion
-in that offer. Honor a decline and the existing session-wide
-skip. An explicit update request supplies update intent, but still requires
+skill installation and its matching managed CLI. This offer applies to every
+supported scope, including a project pair, one directory, a global skill, or a
+custom location. Name the selected paths in that offer. For the standard
+project pair, also identify a missing companion copy. Global, custom-location,
+and explicitly single-directory updates retain their selected directory scope.
+Disclose that the CLI step can advance the shared `~/.local/bin/doomer` launcher. Describe cross-checkout worker supervision only when verified CLI
+capability evidence reports `watch_supervisor: 1`. If that evidence is not yet
+available, state that supervision depends on verifying the supported capability
+during the update. A launcher without the capability provides no automatic
+worker-retirement guarantee. Other checkouts retain their skill pins, versioned
+binaries, upload grants, and user pauses. Honor a decline and the existing
+session-wide skip. An explicit update request supplies update intent, but still requires
 reconciling unknown ownership or local modifications as described above.
 Retain the candidate commit and approvals in the durable summary. Later retries
 use that exact commit; never silently substitute a newer `main`.
@@ -149,12 +160,16 @@ the exact commit and full candidate inventory. Before any mutation, recheck
 all selected installed files, aliases, and baselines under their installation
 locks. A concurrent change invalidates the prepared replacement and must be
 reconciled. Update both standard project copies together unless the user
-explicitly restricted the scope. Do not update other independent copies,
-global installations, or another worktree. For tracked project copies, an explicit
-request to update the installed skill includes publishing the verified update
-as a pull request by default. Honor an explicit local-only request or a repository
-rule requiring a different delivery workflow. An automatic update check or an
-accepted update offer alone does not authorize publication.
+explicitly restricted the scope. Do not update other independent skill copies,
+global skill directories, or another worktree's skill files. The matching-CLI
+portion of the update offer, for every supported scope, covers shared launcher
+advancement and capability-supported worker supervision as described in
+references/install.md. Keep that CLI step distinct from replacing skill files.
+For tracked project copies, an explicit request to update the installed skill
+includes publishing the verified update as a pull request by default. Honor an
+explicit local-only request or a repository rule requiring a different delivery
+workflow. An automatic update check or an accepted update offer alone does not
+authorize publication.
 
 Before changing tracked files for a requested PR, inspect the target checkout's
 status, branch, remote, and intended base. Fetch that base from the target
@@ -206,7 +221,8 @@ once both records are published. Keep the backups for recovery and report their
 paths. For an explicitly single-directory or global update, use the same checks
 for that one copy. Reread the installed `SKILL.md` and `references/install.md`
 before selecting or installing the candidate's CLI pin. Keep the approved
-attempt pending until the matching managed CLI is verified. A CLI failure
+attempt pending until the matching managed CLI and the shared-launcher
+completion checks in references/install.md succeed. A CLI failure
 leaves that step pending; do not repeat the skill replacement or ask again for
 the same approved attempt. Preserve other repositories' pinned runtimes.
 

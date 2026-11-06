@@ -377,6 +377,16 @@ it with onboarding, updates, or other writes in the same command.
   enforce its trust controls. Do not claim live review delivery until observed.
 - If `paused` is true, respect the pause and continue without Doomer; do not
   resume it unless the user explicitly asks. Never rewrite consent to resume.
+- If permission and hooks are present, `repository_status` is `Idle`,
+  `paused` is false, and the verified shared launcher's successful `runtime-info`
+  result reports `watch_supervisor: 1`, reuse that setup. The supervisor resumes
+  the worker on the next actual edit. Do not rerun onboarding to start that idle
+  worker or misreport it as a user pause. Continue through the activation check
+  below before treating reviews as ready. Reuse does not satisfy or skip pending
+  activation verification. A saved grant permits the local task to proceed under
+  the operational-failure rule above while activation remains unverified.
+  Without verified supervisor capability, route `Idle` through the stopped-worker
+  recovery below.
 - If consent or the active agent's hooks are missing, use normal onboarding
   below, using the persistent permission decision. If consent and hooks exist
   but this checkout is `Inactive` or `Starting`, first run one read-only tool
@@ -603,14 +613,15 @@ the active agent's current-session hook check from the selected runtime before
 claiming readiness. Follow the desktop flow below for any pending check or
 client-reported trust restriction.
 
-For a verified protocol-1 runtime, do not refresh or stop the old version's
-watcher merely because this checkout changed pins. Its checkout filter removes
-a checkout whose pin no
-longer matches on its next reconciliation. The old process may remain available
-for other checkouts using that version. Confirm the new runtime's activation;
-report a stale old checkout assignment as a runtime issue instead of stopping a
-shared version indiscriminately. An unchanged pin with verified active hooks
-reuses its runtime.
+Complete the launcher and supervision steps in references/install.md during
+an approved upgrade. Protocol 1 alone does not guarantee that older workers
+retire. With a supervisor-capable launcher, the CLI owns graceful retirement
+and edit-triggered restart across versions. Let it preserve pending work and
+explicit user pauses. Do not manually stop shared workers or remove versioned
+binaries. Confirm the selected runtime's hook activation separately. An
+unchanged pin with verified active hooks reuses its setup, including `Idle`.
+If the installed launcher lacks supervision, report that older workers may
+remain alive; do not claim upgrading one checkout has fixed their lifetime.
 
 Legacy runtimes lack this guarantee. For them, the installation reference's
 migration guard is authoritative. If any configured checkout lacks a compatible
