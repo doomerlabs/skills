@@ -23,6 +23,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertNotIn('2026.', text)
         self.assertNotIn('/main/INSTALL.md', text)
         self.assertIn('9c56e7239974276e16d33f2f2881ae45c40aa775/INSTALL.md', text)
+        self.assertIn(hashlib.sha256((ROOT / 'INSTALL.md').read_bytes()).hexdigest(), text)
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
 
     def test_installer_is_pinned_and_scope_requires_a_choice(self):
