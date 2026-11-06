@@ -1,0 +1,22 @@
+skills/doomer-review/references/updates.md
+  s_e7ab429a96f032::t_88ade516ccb1bf 8-22
+skills/doomer-review/SKILL.md
+  s_e7ab429a96f032::t_2b614a4742f634 35
+  s_e7ab429a96f032::t_88ade516ccb1bf 23-34,36-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "927229e9eaca1b1a9d0bf76570b17bb9fed954e4",
+  "prompts": {},
+  "sessions": {
+    "s_e7ab429a96f032": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b113-2c4e-7cc3-8258-2c3754b496a8",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
