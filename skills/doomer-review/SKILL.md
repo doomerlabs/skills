@@ -387,9 +387,21 @@ location to its hooks.
   **Recover silent desktop hooks** below when its prerequisites hold. Inspect
   approval controls when the client reports missing trust or the user confirms
   unloaded hooks.
+- If a real tool hook is active but its current task prompt is missing after
+  an upgrade, preserve the original coding request and its corrections using
+  the documented `onboard --task-stdin` command once, reusing existing consent.
+  Skip that save if it already succeeded for this repository/session. Run one
+  read-only tool in the target checkout and retry verification once. The hook
+  can recover the saved request even when the new runtime missed the initial
+  user prompt. This recovery does not establish hook trust or consent. Follow
+  **Restore the original task** before editing. Request another user message
+  only if this bounded recovery still cannot verify activation. For releases
+  that report this particular missing-prompt condition as `error`, use the same
+  recovery. Other errors follow the diagnostic rule below.
 - `error`, a command failure, or malformed output requires reporting the actual
   diagnostic. Preserve Git stderr, including license or executable errors.
-  Missing task capture, unavailable setup, and failed hooks are distinct from
+  Except for the missing-prompt recovery above, missing task capture,
+  unavailable setup, and failed hooks are distinct from
   missing trust. Follow the shared user-choice rule without inventing a cause.
 
 A missing current session ID leaves activation unverified. Do not borrow an ID
