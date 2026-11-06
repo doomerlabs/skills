@@ -18,6 +18,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer-update-policy: stable', text)
         self.assertIn('doomer prepare', text)
         self.assertIn('doomer prepare --task HANDLE', text)
+        self.assertIn('doomer task repair HANDLE', text)
         self.assertLess(len(text), 2500)
         self.assertNotIn('self-update', text)
         self.assertNotIn('2026.', text)
