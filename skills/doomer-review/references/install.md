@@ -31,10 +31,11 @@ A modified, unmanaged, symlinked, or unsupported version path requires reporting
 the conflict. Preserve it for inspection rather than replacing immutable
 release files. A newer version elsewhere never satisfies this checkout's pin.
 
-An update installs the new pin alongside existing releases. It does not replace
-another repository's binary, change its skill, or move its running watcher to a
-new version. Keep the existing per-skill update approval and skip decisions.
-Use the existing combined skill-and-CLI update offer when an update is requested.
+An update retains immutable versioned binaries and each checkout's skill pin.
+The managed global launcher advances independently to the newest verified
+installed release. Keep the existing combined skill-and-CLI update approval and
+skip decisions. Launcher advancement is part of an approved managed update;
+unmanaged adoption and initial legacy migration retain their separate choices.
 
 Before using a release for onboarding, run its `runtime-info` command and require
 JSON with `protocol: 1`. If this check fails, report the actual execution error
@@ -155,22 +156,40 @@ user-choice rules for retrying or continuing without reviews.
 
 ## Install or reuse the shared launcher
 
-Check `~/.local/bin/doomer` separately. A managed launcher with `runtime-info`
-protocol 1 can be reused across all compatible release pins. Check ownership
-using its local `self-update --check --version "${doomer_version:?Read the current release pin}"` result. A managed
-`ready`, `newer_installed`, or `update_available` result is acceptable for the
-launcher if protocol 1 is supported. This launcher check omits `--side-by-side`,
-so it reads the global binary and its global ownership record. The version
-argument only selects the comparison result. A valid managed launcher at a
-different version yields `newer_installed` or `update_available`, both reusable;
-it does not yield `missing`. Always use `doomer_cli` for this checkout's
-onboarding and review commands.
+Check `~/.local/bin/doomer` separately using
+`self-update --check --version "${doomer_version:?Read the current release pin}"`
+and verify its `runtime-info` protocol. This check omits `--side-by-side` so it
+inspects the global executable and its ownership record. Continue using the
+absolute `doomer_cli` path for checkout-specific commands.
 
-If the shared launcher is missing, install it from the verified release:
+A newer managed launcher is reusable and must never be downgraded. An
+`update_available` result requires completing the approved launcher upgrade;
+protocol compatibility alone does not complete that update.
+
+Inspect the selected CLI's `runtime-info` capabilities. When it reports
+`managed_upgrade: 1`, run the following during an approved update, including a
+retry where the immutable release already reports `ready`:
+
+```sh
+"${doomer_cli:?Set the verified pinned CLI path}" self-update --side-by-side --version "${doomer_version:?Read the current release pin}"
+```
+
+Require a successful result with the selected release `ready` and a
+`launcher_version` at least as new as the selected pin. This command preserves
+older binaries and completes launcher advancement and watcher supervision.
+An error can leave the verified release installed with a later step incomplete.
+Retain that progress and retry the same approved operation after resolving its
+reported failure. Do not claim the upgrade complete from the release check alone.
+
+For an older CLI without this capability, a missing global command or an older
+managed protocol-1 launcher requires the explicit launcher-install step:
 
 ```sh
 "${doomer_cli:?Set the verified pinned CLI path}" self-update --side-by-side --install-launcher --version "${doomer_version:?Read the current release pin}"
 ```
+
+A matching or newer managed launcher needs no replacement. For a legacy
+launcher without protocol 1, follow the migration decision below first.
 
 If a legacy global installation exists, explain the migration and ask once
 whether to install the checkout-aware launcher while keeping a backup. Preserve
@@ -183,8 +202,8 @@ unmanaged file or symlink, also explain the exact path or link target and use
 `--adopt` only with explicit approval. A symlink's target remains untouched.
 Never change a Homebrew installation or shell startup files.
 
-Before replacing the shared launcher or migrating existing hook registration,
-use the CLI's migration guard over the saved profile configuration. Its
+For initial migration from a legacy launcher or migration of existing hook
+registration, use the CLI's migration guard over the saved profile configuration. Its
 authoritative input is each `watch/<profile-key>/config.json` under
 `DOOMER_CONFIG_DIR`, or the platform's Doomer config directory when that override
 is unset (`~/Library/Application Support/doomer` on macOS, and
@@ -207,8 +226,10 @@ hand or use a manual-copy fallback. A later onboarding or hook-registration
 failure is a separate pending activation step; retain the verified installation
 and backup, report the failure, and resume that step without reinstalling.
 The launcher-install result names any backup. Record that path. Before invoking
-a newly installed launcher, compare its file bytes with the verified selected
-release. A mismatch stops setup and must not be repaired by inventing metadata. Launcher
+a newly installed launcher, verify its managed record and compare its bytes
+with the verified immutable binary for the launcher's reported version. An
+automatic upgrade can choose a newer cached release than this checkout's pin.
+A mismatch stops setup and must not be repaired by inventing metadata. Launcher
 migration alone does not authorize uploads or establish hook trust. Use the
 normal onboarding flow to install the shared dispatcher hook and let the user
 review any changed hook definition.
@@ -221,15 +242,21 @@ If Codex and Claude skills in one checkout declare conflicting pins, report the
 conflict and have the user select a consistent version before proceeding.
 
 The launcher dispatches hook events to version-specific watcher state. Updating
-one pin leaves other installed versions in place. Verify current-session activation in the selected runtime through the
+one pin leaves other installed versions in place. A launcher reporting
+`watch_supervisor: 1` owns their background lifetime, including older protocol-1
+workers. It suspends idle workers while retaining pending work, and resumes the
+selected worker on an actual edit. `Idle` is a healthy stopped-worker state,
+not a user pause or missing setup. Do not restart workers just to clear it.
+Older launchers do not guarantee this retirement behavior. Verify current-session activation in the selected runtime through the
 active agent’s hook check or the scoped callback criteria in SKILL.md. Reuse existing
 repository consent independently of installation and version selection.
 
 After installing the selected release and arranging a compatible launcher,
 return to SKILL.md's onboarding workflow using the absolute `doomer_cli` path.
-Do not independently start or stop watchers, change saved consent, or remove
-old release directories. Do not refresh unrelated repository runtimes as part
-of this checkout's update.
+Let the upgraded CLI reconcile background workers. Do not manually kill
+processes, edit lifecycle files, change saved consent, or remove old release
+directories. Preserve explicit pauses. Review setup and live activation remain
+separate from installation success.
 
 ## Maintaining the release pin
 
