@@ -12,9 +12,9 @@ answer before writing any installation files. Work in the environment that actua
    or returns another protocol, use the verified installer in step 2. Do not
    run installation commands through that unsupported executable.
 2. Otherwise inspect the installer at
-   `https://raw.githubusercontent.com/doomerlabs/skills/334ed87f2d7b793386e3f9eefaad22fcd76f545e/scripts/install.py`.
+   `https://raw.githubusercontent.com/doomerlabs/skills/5c0c3d42d467003228323ddd1e5936cbecfe1457/scripts/install.py`.
    Download it once to a private temporary directory. Require SHA-256
-   `80be9cfd655a2720c2c8381ab9ebe30c4fd280fed96bba2348f115bc6d367a07`.
+   `3d451a6699450a28f1498a29cd6e9593ab2f852fec0e578e2efe4f03eb4d49d3`.
    Inspect that same local file, verify the digest again immediately before
    execution, and run that exact file with Python 3. Stop on a digest mismatch;
    never fetch an alternative script or execute a second download. The
