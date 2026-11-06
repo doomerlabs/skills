@@ -2,7 +2,10 @@
 
 Follow this guide when the user asks to install Doomer. Determine whether the
 user wants a team/repository or personal installation. Honor an already stated
-choice. If the choice is unstated, ask personal versus team and wait for the
+choice. When this skill is already active for a coding task in Cowork and only
+the editing VM lacks the CLI, use a personal installation inside that VM and
+preserve repository files. This is prerequisite setup for the existing skill.
+Otherwise, if the choice is unstated, ask personal versus team and wait for the
 answer before writing any installation files. Work in the environment that actually edits the target checkout.
 
 ## Verified first installation
@@ -33,6 +36,17 @@ answer before writing any installation files. Work in the environment that actua
 Run `doomer prepare --agent codex|claude --repo ABSOLUTE_PATH`. Include the actual
 coding task through `--prompt` if one was provided. Retain the returned handle.
 If setup-only, do not invent a coding task or submit a review.
+
+For a coding task, wait for `state=ready`, `software_ready=true`,
+`authenticated=true`, and `upload_approved=true` before editing repository files.
+Keep the task pending while setup needs a user decision.
+
+For Cowork and other environments with a temporary home, add `--portable`.
+Install and run inside the environment that edits the checkout. The browser
+approval explicitly covers saving account access and the repository grant in
+private Git metadata for reuse by later sessions. An existing approved portable
+setup is restored by the CLI, including after a mount-path change. Do not copy
+credential files or edit grants by hand. A Mac installation is optional.
 
 Use the returned state to decide whether permission is needed. Only for
 `update_permission_required`, explain the requested update policy and ask for
