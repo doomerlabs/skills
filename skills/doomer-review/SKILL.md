@@ -48,9 +48,17 @@ user to repeat their answer. An explicit revocation or pause takes precedence.
 Pass the actual checkout's Git root. The CLI resolves its Git common directory
 to match repository-wide grants across linked worktrees. A legacy grant scoped
 to one checkout remains limited to that checkout. Record each result for the
-checked checkout. `approved: false` means that checkout lacks permission;
-it does not revoke or invalidate permission for another checkout, even when
-they share a `repository_id`. Check each selected checkout before using it.
+checked checkout. `approved: false` immediately disables uploads there and
+invalidates cached positive results for the same `repository_id`. Recheck any
+other selected checkout before using it; only a fresh `approved: true` permits
+uploads there. A repository-wide revocation makes every linked checkout fail
+this check. With a legacy checkout-only grant, the originally approved path
+can still pass while other paths remain unapproved.
+
+For a denied checkout, report unavailable review coverage and continue the
+user's permitted local work with uploads disabled. Follow initial setup only
+if the user wants to authorize that currently unapproved scope. Never prompt
+again for a scope whose current check already returns `approved: true`.
 
 For an older CLI without `has-permission`, use the standalone `watch status --json`
 check under **Reuse saved setup across chats**. Its `approved` field
