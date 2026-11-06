@@ -7,6 +7,13 @@ installation entry point remains supported.
 
 ## Identify the installation
 
+Resolve the target checkout's absolute Git root before creating a source clone
+or staging directory. Retain that root separately from the temporary upstream
+clone. Run installation discovery, replacement, verification, and Git publication
+with the target checkout as the tool's working directory and absolute destination
+paths. Pass the source clone's absolute path to staging commands. Never let a
+temporary working directory replace the selected installation scope.
+
 Keep the discovery path and canonical directory separate. A discovery path
 under the target repository is project-local even if it is a symlink. A global
 agent skill path is global. Resolving a symlink does not change that scope.
@@ -143,8 +150,25 @@ all selected installed files, aliases, and baselines under their installation
 locks. A concurrent change invalidates the prepared replacement and must be
 reconciled. Update both standard project copies together unless the user
 explicitly restricted the scope. Do not update other independent copies,
-global installations, or another worktree. For tracked copies, leave changes
-uncommitted unless the user authorized a commit.
+global installations, or another worktree. For tracked project copies, an explicit
+request to update the installed skill includes publishing the verified update
+as a pull request by default. Honor an explicit local-only request or a repository
+rule requiring a different delivery workflow. An automatic update check or an
+accepted update offer alone does not authorize publication.
+
+Before changing tracked files for a requested PR, inspect the target checkout's
+status, branch, remote, and intended base. Fetch that base from the target
+repository's remote, then create a focused branch from the freshly fetched
+remote-tracking revision. Fetching the upstream skills source does not refresh
+the target repository. Do not start from a stale local default branch or an
+unrelated current branch. If the fetch fails, report the blocker and retain the
+existing checkout without claiming the PR is ready.
+If unrelated changes or commits require isolation, use a linked worktree from
+that fetched base and resolve its Git root and installation paths again before
+staging or replacement. Re-read and compare the skill copies from that checkout;
+the fresh base may already contain some or all of the requested update. Preserve
+the original checkout's changes and keep all private records in the shared Git
+metadata. Do not switch an in-progress replacement to another checkout.
 
 Before replacing either project copy, back up every selected existing directory
 and its prior record in the private record store under one unique attempt ID.
@@ -189,3 +213,28 @@ the same approved attempt. Preserve other repositories' pinned runtimes.
 The new baselines are private per-machine provenance. Other developers obtain
 committed skill updates through Git and establish their own baseline; they do
 not inherit update approval, credentials, consent, or activation state.
+
+## Finish the requested delivery
+
+After verifying the skill pair, shared instructions, and matching CLI step,
+complete the target repository's delivery workflow. For a PR, review and stage
+only the skill update and its required portable instructions, commit, push the
+branch, and create or update its pull request. Follow repository commit and PR
+conventions. Exclude private baselines, backups, journals, downloaded binaries,
+temporary source clones, credentials, consent, and machine-specific hook files.
+Before reporting completion, refresh the target base again, inspect the full PR
+diff, and check mergeability. If the base advanced and conflicts, reconcile the
+update with the new base, revalidate the installed copies, and update the same PR.
+Do not claim conflict-free status while the hosting service is still computing
+mergeability. If the refreshed base already contains the entire update, report
+that outcome instead of publishing an empty or redundant PR.
+Report the verified PR URL, source revision, CLI pin, and validation. A local
+commit alone does not finish publication. If publication fails, retain the
+verified work and report the exact blocked step for resumption.
+
+For local-only delivery, report the changed paths and validation. Skill-only
+maintenance retains its review exemption, including staging and temporary-file
+cleanup. A hook warning from that preparatory work does not establish a failed
+review of the skill update. Do not claim a completed review without a delivered
+result. Any accompanying application edits still follow their normal review
+workflow.
