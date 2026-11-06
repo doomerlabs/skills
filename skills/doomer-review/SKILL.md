@@ -376,8 +376,40 @@ location to its hooks.
   Before any coding edit, apply **Restore the original task** below. A receipt
   for a setup or resume prompt alone never proves that the coding task was
   restored.
+Before using the generic `pending` retry below, handle a missed upgrade prompt
+only when all of these are established for the same checkout and chat:
+
+- The CLI was upgraded in this chat and the current session ID is known.
+- The saved-setup check reports valid consent, an unpaused running watcher,
+  installed Codex hooks, and `repository_status: "Watching"`.
+- The current-session activation check returned either the exact legacy detail
+  `The current task prompt was not captured by a hook.` or the pending detail
+  beginning `A tool hook is active, but the current task prompt is missing.`
+- The original coding request and constraints are available in this chat.
+
+For that case, use the documented `onboard --task-stdin` command once to preserve
+the original request, unless the durable handoff summary already records its
+successful save for this checkout/session. Record success only from a successful
+command result. If its outcome is unknown or the command fails, record activation as unverified,
+report the actual diagnostic, and follow the shared user-choice rule. Stop this
+recovery without repeating the write or requesting its resume message. Reuse existing
+consent and follow any execution-approval requirement. This is a narrow
+exception to the saved-setup shortcut, not another consent or hook-trust flow.
+
+Before invoking the probe, consult the durable summary for the shared
+probe/retry budget. If unused, record it as used first, then run one read-only
+tool in this checkout and retry verification once. This uses the same budget
+as `pending` below, never an additional budget. If already used, do not repeat it. On success apply **Restore the original task** and continue.
+Otherwise report activation unverified and request the resume message once.
+Record that request in the durable handoff summary before asking. Reuse the
+existing record across turns and compaction, never requesting it again for the
+same checkout/session.
+Unknown session IDs, missing consent, setup-only requests, unrelated errors,
+and absent upgrade history follow their normal paths instead.
+
 - `pending` permits one read-only tool call in the target repository followed by
-  one retry. Choose a tool matched by the Doomer tool hooks. The installer uses
+  one retry. Record use of this shared probe/retry budget in the durable summary
+  before invoking it, and consult that record before any recovery attempt. Choose a tool matched by the Doomer tool hooks. The installer uses
   `.*` for Codex tool hooks, so a shell tool running `git status --short` works
   with the standard configuration. If customized matchers exclude all
   available read-only tools, explain the mismatch and have the user restore
@@ -389,7 +421,8 @@ location to its hooks.
   unloaded hooks.
 - `error`, a command failure, or malformed output requires reporting the actual
   diagnostic. Preserve Git stderr, including license or executable errors.
-  Missing task capture, unavailable setup, and failed hooks are distinct from
+  Except for the missed upgrade prompt handled above, missing task capture,
+  unavailable setup, and failed hooks are distinct from
   missing trust. Follow the shared user-choice rule without inventing a cause.
 
 A missing current session ID leaves activation unverified. Do not borrow an ID
@@ -404,7 +437,7 @@ true. A pending restart, failed activation, or configured-but-unverified state
 always follows the activation path; saved status never overrides it.
 
 Install or verify the checkout-pinned CLI following [installation](references/install.md), including its managed ownership and runtime-protocol checks.
-Use stable CLI **2026.11.5.6**, which provides the consolidated onboarding command.
+Use stable CLI **2026.11.5.7**, which provides the consolidated onboarding command.
 Probe `doomer onboard --help` before using the new workflow. If unavailable,
 report that the installed release needs updating; do not invent the command,
 recreate removed helpers, or claim setup succeeded.
