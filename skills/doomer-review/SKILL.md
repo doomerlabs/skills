@@ -20,6 +20,28 @@ Requests solely discussing or editing this skill and its supporting files are
 exempt from this review workflow, including setup and update checks. Explicit
 requests to install or update Doomer still use the corresponding flow below.
 
+## Upgrade the CLI and skill together
+
+Treat a request to upgrade Doomer or doomer-review to the latest release as a
+combined CLI-and-skill upgrade. Updating the executable alone does not complete
+that request. Check the official upstream skill, including its supporting
+references, and update the selected skill installation and its matching CLI as
+one tracked attempt using [skill updates](references/updates.md). For the
+standard project installation, include both Codex and Claude skill copies and
+their managed repository instructions. Honor explicit single-agent restrictions
+and the installation scope rules in that reference.
+
+Reread the updated installation reference before selecting the CLI release.
+Verify both halves before reporting completion. Preserve intentional local
+edits and reconcile conflicts through the update flow. Compatibility does not
+require customized instructions to be byte-for-byte identical to upstream.
+If either half is blocked, report the incomplete upgrade and remaining step.
+A SaaS compatibility finding requires this same upstream verification. Resolve
+it by fixing incompatibilities or submitting an evidence-backed dismissal through
+the existing finding-response workflow in **While coding**. Include the upstream
+skill revision, CLI version, checked commands, and why retained customizations
+remain compatible in that response.
+
 ## Persistent repository permission
 
 A saved repository grant is the user's standing authorization for Doomer
