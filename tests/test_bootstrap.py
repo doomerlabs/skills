@@ -23,13 +23,13 @@ class BootstrapTests(unittest.TestCase):
         self.assertNotIn('self-update', text)
         self.assertNotIn('2026.', text)
         self.assertNotIn('/main/INSTALL.md', text)
-        self.assertIn('9c56e7239974276e16d33f2f2881ae45c40aa775/INSTALL.md', text)
+        self.assertRegex(text, r'skills/[a-f0-9]{40}/INSTALL.md')
         self.assertIn(hashlib.sha256((ROOT / 'INSTALL.md').read_bytes()).hexdigest(), text)
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
 
     def test_installer_is_pinned_and_scope_requires_a_choice(self):
         guide = (ROOT / 'INSTALL.md').read_text()
-        self.assertIn('334ed87f2d7b793386e3f9eefaad22fcd76f545e/scripts/install.py', guide)
+        self.assertRegex(guide, r'skills/[a-f0-9]{40}/scripts/install.py')
         self.assertIn(hashlib.sha256((ROOT / 'scripts/install.py').read_bytes()).hexdigest(), guide)
         self.assertIn('ask personal versus team and wait', guide)
         self.assertIn('returns another protocol', guide)
@@ -40,6 +40,7 @@ class BootstrapTests(unittest.TestCase):
             with tarfile.open(fileobj=data, mode='w:gz') as tar:
                 member = tarfile.TarInfo(name)
                 member.type = kind
+                member.mode = 0o755
                 member.size = 3 if kind == tarfile.REGTYPE else 0
                 member.linkname = '/tmp/untrusted'
                 tar.addfile(member, io.BytesIO(b'bin') if member.size else None)
@@ -50,6 +51,20 @@ class BootstrapTests(unittest.TestCase):
         for data in [archive('../doomer'), archive(kind=tarfile.SYMTYPE), archive(extra=True)]:
             with self.assertRaises(ValueError):
                 installer.extract_binary(data)
+
+    def test_archive_accepts_the_published_documentation_layout(self):
+        data = io.BytesIO()
+        with tarfile.open(fileobj=data, mode='w:gz') as tar:
+            for name in ['./', './docs/']:
+                member = tarfile.TarInfo(name)
+                member.type = tarfile.DIRTYPE
+                tar.addfile(member)
+            for name in ['./LICENSE', './README.md', './docs/release.md', './docs/trust-model.md', './doomer']:
+                member = tarfile.TarInfo(name)
+                member.mode = 0o755 if name == './doomer' else 0o644
+                member.size = 3
+                tar.addfile(member, io.BytesIO(b'bin'))
+        self.assertEqual(installer.extract_binary(data.getvalue()), b'bin')
 
 
 if __name__ == '__main__':
