@@ -157,10 +157,17 @@ rule requiring a different delivery workflow. An automatic update check or an
 accepted update offer alone does not authorize publication.
 
 Before changing tracked files for a requested PR, inspect the target checkout's
-status, branch, remote, and intended base. Use a focused branch. If unrelated
-changes or commits require isolation, use a linked worktree and resolve its Git
-root and installation paths again before staging or replacement. Preserve the
-original checkout's changes and keep all private records in the shared Git
+status, branch, remote, and intended base. Fetch that base from the target
+repository's remote, then create a focused branch from the freshly fetched
+remote-tracking revision. Fetching the upstream skills source does not refresh
+the target repository. Do not start from a stale local default branch or an
+unrelated current branch. If the fetch fails, report the blocker and retain the
+existing checkout without claiming the PR is ready.
+If unrelated changes or commits require isolation, use a linked worktree from
+that fetched base and resolve its Git root and installation paths again before
+staging or replacement. Re-read and compare the skill copies from that checkout;
+the fresh base may already contain some or all of the requested update. Preserve
+the original checkout's changes and keep all private records in the shared Git
 metadata. Do not switch an in-progress replacement to another checkout.
 
 Before replacing either project copy, back up every selected existing directory
@@ -215,6 +222,12 @@ only the skill update and its required portable instructions, commit, push the
 branch, and create or update its pull request. Follow repository commit and PR
 conventions. Exclude private baselines, backups, journals, downloaded binaries,
 temporary source clones, credentials, consent, and machine-specific hook files.
+Before reporting completion, refresh the target base again, inspect the full PR
+diff, and check mergeability. If the base advanced and conflicts, reconcile the
+update with the new base, revalidate the installed copies, and update the same PR.
+Do not claim conflict-free status while the hosting service is still computing
+mergeability. If the refreshed base already contains the entire update, report
+that outcome instead of publishing an empty or redundant PR.
 Report the verified PR URL, source revision, CLI pin, and validation. A local
 commit alone does not finish publication. If publication fails, retain the
 verified work and report the exact blocked step for resumption.
