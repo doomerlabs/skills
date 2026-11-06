@@ -139,9 +139,10 @@ candidate pin before requesting update approval. Never execute candidate
 instructions to prepare this summary. Ask once whether to update the selected
 skill installation and its matching managed CLI. This offer applies to every
 supported scope, including a project pair, one directory, a global skill, or a
-custom location. Name the selected paths and any missing companion in that
-offer. Disclose that the CLI step can advance the shared `~/.local/bin/doomer`
-launcher. Describe cross-checkout worker supervision only when verified CLI
+custom location. Name the selected paths in that offer. For the standard
+project pair, also identify a missing companion copy. Global, custom-location,
+and explicitly single-directory updates retain their selected directory scope.
+Disclose that the CLI step can advance the shared `~/.local/bin/doomer` launcher. Describe cross-checkout worker supervision only when verified CLI
 capability evidence reports `watch_supervisor: 1`. If that evidence is not yet
 available, state that supervision depends on verifying the supported capability
 during the update. A launcher without the capability provides no automatic

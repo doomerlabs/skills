@@ -284,9 +284,16 @@ The `watch_supervisor: 1` contract includes CLI-side pause checks before
 supervisor startup and runtime resume. The CLI reads the shared profile pause
 and runtime pause markers through `userPaused`, `ensureWatchSupervisorBinary`,
 and `prepareHookRuntime` in `cmd/watch_supervisor.go`; `resumeIdleRuntime`
-clears only an automatic idle suspension. The agent does not edit or enumerate
-private runtime state to perform these checks. A selected checkout reporting
-`paused: true` still follows SKILL.md's explicit-pause rule. Verify current-session activation in the selected runtime through the
+clears only an automatic idle suspension after its `userPaused` check. These
+are internal CLI functions, not commands for the agent to invoke. The agent
+does not edit or enumerate private runtime state to perform these checks.
+
+Pause takes precedence over idle reuse. If the CLI reports `paused: true`,
+preserve that pause and follow SKILL.md's explicit-pause rule even if an older
+or cached status also says `Idle`. Healthy idle reuse requires `paused: false`
+and verified supervisor capability. Current CLI status reports user pause
+separately from automatic idle suspension, and its resume path leaves a
+coexisting user pause intact. Verify current-session activation in the selected runtime through the
 active agent’s hook check or the scoped callback criteria in SKILL.md. Reuse existing
 repository consent independently of installation and version selection.
 
