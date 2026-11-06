@@ -52,10 +52,18 @@ Keep the configured `/api` address in CLI arguments and internal state. Require
 both authenticated identity and upload permission before claiming setup ready.
 If the user declines, leave uploads disabled.
 
-The per-call workflow works without hooks. For an environment with reliable
-session IDs and trusted hooks, the user can opt into `doomer hooks --agent AGENT`
-and pass its real session ID to prepare. Configuration is separate from live
-activation. A real scoped hook callback establishes activation.
+## Finish agent integration
+
+For Codex or Claude Code, configure the active agent's hooks during onboarding
+with `doomer hooks --agent AGENT`. Installation authorizes adding Doomer’s hook
+entries while preserving unrelated hooks. Follow the harness's normal trust
+controls and clearly report whether hooks are configured or actually active.
+Do not postpone configuration until the next coding request. When the harness
+cannot load these hooks, explain that limitation and use the per-call workflow.
+
+Pass a real session ID to prepare when starting the next actual coding task.
+A setup-only task is not that coding task. Native hook callbacks or the normal
+per-call commands handle review delivery after edits.
 
 Read and follow the full instructions returned by prepare. They belong to the
 same selected release that implements the task commands. Complete an actual
@@ -63,9 +71,16 @@ review and record finding responses before claiming review delivery works.
 
 ## Team distribution
 
-Team installation creates small project-local bootstraps. Leave them uncommitted
-unless the user requested Git publication. Routine future releases do not change
-those files or require pull requests. Each teammate performs local onboarding.
+Team installation includes opening the initial bootstrap pull request unless
+the user explicitly requested local-only setup. Use a dedicated branch and stage
+only the generated project bootstrap files. Preserve unrelated work, reuse an
+existing setup PR when present, and report the PR link before calling team
+installation complete. If GitHub access is unavailable, leave the prepared
+changes intact and explain what is needed to publish them. Personal installation
+does not create a repository PR.
+
+Routine releases do not change the bootstrap files or require upgrade PRs.
+Each teammate performs local account and repository onboarding.
 
 ## Operational limits
 
