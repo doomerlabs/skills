@@ -221,6 +221,12 @@ that activation. A PR alone does not activate reviews for other developers.
 
 ### 3. Download and install the skill
 
+Keep the selected target Git root as the tool's working directory throughout
+download, staging, installation, and verification. Use absolute paths for the
+temporary source clone, staging tree, and both installed destinations. Run Git
+commands for the source clone with `git -C` so its temporary directory never
+replaces the target checkout used by review hooks or publication commands.
+
 Fetch the public repository `https://github.com/doomerlabs/skills.git` into a
 new temporary directory using Git over HTTPS. Use its default branch and
 record the resolved commit ID. The source directory is
