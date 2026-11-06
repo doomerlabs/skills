@@ -27,6 +27,12 @@ reviews in that repository, including linked worktrees covered by the grant.
 Reuse it across chats, agent sessions, restarts, skill updates, and CLI versions
 until the user revokes it. Ask for upload consent only when the selected
 repository, account, and service have no valid grant.
+The CLI validates service URL, profile, credential identity, and the selected
+repository or checkout against the saved grant. Its content scope includes
+repository snapshots and edited files, including documentation and
+configuration, plus task context and agent review responses. A historical
+user instruction that explicitly restricted this scope still requires the
+broader-scope consent flow before sending additional content.
 
 At the start of each editing turn, resolve the checkout, verify its CLI, and
 inspect that executable's `has-permission --help`.
@@ -64,12 +70,19 @@ if the user wants to authorize that currently unapproved scope. Never prompt
 again for an unchanged upload scope whose current check returns `approved: true`.
 Broader or first-time upload scopes still follow their consent flow below.
 
-For an older CLI without `has-permission`, use the standalone `watch status --json`
-check under **Reuse saved setup across chats**. Its `approved` field
+For an older CLI without `has-permission`, run the following standalone
+permission check at the start of every editing turn for each selected checkout:
+
+```sh
+"${doomer_cli:?Set the verified CLI path}" --profile default --api-url https://doomer.ai/api watch status --json "${doomer_repo_root:?Set the target Git root}"
+```
+
+Its `approved` field
 establishes the same consent independently of its other fields. Preserve the
 selected release and its existing update decision. Apply the same successful
 exit and valid JSON requirements to this fallback. Any fallback command or
 output error leaves permission unknown, regardless of an `approved` fragment.
+The once-per-chat setup checks below never replace this per-turn permission check.
 
 An unreadable or failed check leaves current permission unknown. Preserve the
 previous decision only as history, and report the concrete error once. Keep
@@ -320,7 +333,8 @@ Use separate worktrees for parallel coding chats that edit the same repository.
 Resolve the Git root of the repository being edited, not the org directory that
 contains the chat. After the per-turn local pin check, if this conversation
 already verified its saved setup and no update replaced the CLI, continue
-without repeated setup/status checks.
+without repeated setup or activation checks. Still run the per-turn permission
+check above.
 
 ### Reuse saved setup across chats
 
