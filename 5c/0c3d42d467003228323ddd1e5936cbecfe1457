@@ -1,0 +1,21 @@
+scripts/install.py
+  s_f23d7bc729b5d1::t_03844fe77962c8 35-38,40-58
+tests/test_bootstrap.py
+  s_f23d7bc729b5d1::t_e3060c5dfb5a14 26,32,43,55-68
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "5c0c3d42d467003228323ddd1e5936cbecfe1457",
+  "prompts": {},
+  "sessions": {
+    "s_f23d7bc729b5d1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b193-6f54-7900-bb5a-86cc6a95a69a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
