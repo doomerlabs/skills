@@ -38,15 +38,19 @@ Explain the requested update policy and ask for standing software-update
 permission. After explicit approval, resume the same handle with
 `doomer prepare --task HANDLE --allow-updates`.
 
-For `authentication_required`, run `doomer task login HANDLE`, show its returned
-verification URL and user code, and let the user authenticate. Re-run that same
-command after approval. It resumes the original device request without a local
-browser callback. Never copy credentials from a host into a remote VM.
+For `approval_required`, show the exact returned repository-approval URL and
+ask the user to open it. That page displays this repository and its linked
+worktrees, previous grants, and the upload scope. If needed, the user signs in
+there before choosing Allow. After the browser decision, resume the same handle
+with `doomer prepare --task HANDLE`. Repeat that command when the decision is
+still pending. Approval and sign-in survive separate CLI calls and need no local
+browser callback. Never replace this flow with a generic CLI login page or
+manufacture a grant in chat. Never copy credentials from another environment.
 
-For `consent_required`, explain that Doomer uploads base/current repository
-snapshots, the task prompt, and finding responses to the displayed service.
-Only after the user's explicit approval run `doomer task consent HANDLE --allow`.
-Resume prepare and require authenticated identity and upload permission.
+Use `doomer.ai` as the production service name in user-facing explanations.
+Keep the configured `/api` address in CLI arguments and internal state. Require
+both authenticated identity and upload permission before claiming setup ready.
+If the user declines, leave uploads disabled.
 
 The per-call workflow works without hooks. For an environment with reliable
 session IDs and trusted hooks, the user can opt into `doomer hooks --agent AGENT`
