@@ -16,20 +16,26 @@ Never declare the upgrade complete from a successful CLI update alone.
 
 Use **Check once per session** below to obtain the upstream revision from
 `https://github.com/doomerlabs/skills.git`, retaining its hooks-disabled fetch,
-30-second timeout, and `updateCheckAttempted` guard. Reuse an already verified
-candidate for the same attempt. Read that revision's CLI pin and follow
+30-second timeout, and `updateCheckAttempted` guard for proactive checks. A new
+explicit upgrade or retry request permits one fresh check after an earlier
+failed or declined check, subject to normal execution permissions. Reuse an
+already verified candidate for a pending attempt. Read that revision's CLI pin and follow
 [installation](install.md) to verify the selected executable. Its
 `self-update --check --side-by-side --version` command must succeed with
 `state: ready` and the selected version. Its `runtime-info` command must succeed
 with the required protocol. Preserve the resulting pin and record these command
-results, executable path, and protocol in the existing `updateAttempt` in the
-durable task summary alongside its completed/pending skill and CLI steps.
+results, executable path, and protocol in the
+[shared updateAttempt](../SKILL.md#check-online-for-skill-updates-once-per-coding-session)
+in the durable task summary alongside its completed/pending skill and CLI steps.
 
 Reconcile intentional local customizations while preserving their behavior.
 For a customized copy, compare its instructions with the selected upstream
 revision and check that every retained CLI command, flag, and expected output
-is supported by the verified executable, using its help and read-only checks.
-Record the relevant results and explain why each behavioral difference remains
+is supported by inspecting the verified executable's `--help` output and
+upstream documentation. Use only the local verification commands defined in
+[installation](install.md), including `self-update --check` and `runtime-info`.
+Do not execute retained workflow commands or upload content just to verify
+compatibility. Record the relevant results and explain why each behavioral difference remains
 compatible. A byte difference alone is not an incompatibility. Unknown or failed
 checks leave verification incomplete. Keep customized bytes out of official
 baseline records, which retain the exact-source rules below. Report any
