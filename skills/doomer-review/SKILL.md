@@ -4,7 +4,7 @@ description: Use Doomer before repository edits and finish its review before rep
 metadata:
   doomer-protocol: "2"
   doomer-update-policy: stable
-  doomer-bootstrap-version: "2026.11.6.10"
+  doomer-bootstrap-version: "2026.11.6.11"
   doomer-cli-range: ">=2026.11.6.9"
 ---
 
@@ -19,6 +19,11 @@ Treat preparation as an edit gate. Wait for `state=ready`, `software_ready=true`
 `authenticated=true`, and `upload_approved=true` before the first repository edit.
 If setup needs user input, ask before editing and resume the same task afterwards.
 Keep requested work pending while preparation is blocked.
+
+Show setup URLs as clickable Markdown links with a short label, preserving the
+complete URL including its fragment. Use the CLI's returned state to determine
+which approval is needed. An absent executable alone says nothing about saved
+authentication or grants.
 
 Run the CLI in the environment that edits the checkout. In Cowork or another
 environment with a temporary home, execute the returned `portable_setup_command`
@@ -43,6 +48,9 @@ Reading this file directly is sufficient; native skill discovery is optional.
 The selected CLI supplies its matching full instructions. Use its task commands
 to submit changes, retrieve results, record every finding response, and verify
 completion. A pending result or installed CLI does not establish a completed review.
+In per-call mode, the agent runs these commands as part of each coding task.
+Describe that workflow accurately. A missing hook receipt means activation is
+unverified; it does not establish that the harness lacks hook support.
 
 If `doomer` is missing, read the official INSTALL.md at
 https://raw.githubusercontent.com/doomerlabs/skills/6029750bef71c137dedd982a6aea79a26ede7b7a/INSTALL.md and require its SHA-256 to equal
@@ -50,3 +58,7 @@ https://raw.githubusercontent.com/doomerlabs/skills/6029750bef71c137dedd982a6aea
 before following its verified installation flow with the user's normal execution permissions.
 Complete this prerequisite before editing. In Cowork, install into the editing
 VM's personal environment, preserving any existing repository bootstrap.
+Perform the verified prerequisite installation under the host's normal execution
+permissions, then run prepare to discover and reuse saved setup. Ask the user
+only for an actual permission or decision required by that flow. Do not bundle
+installation with speculative requests to sign in again or approve uploads.
