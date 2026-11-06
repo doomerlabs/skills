@@ -2,7 +2,10 @@
 
 Follow this guide when the user asks to install Doomer. Determine whether the
 user wants a team/repository or personal installation. Honor an already stated
-choice. If the choice is unstated, ask personal versus team and wait for the
+choice. When this skill is already active for a coding task in Cowork and only
+the editing VM lacks the CLI, use a personal installation inside that VM and
+preserve repository files. This is prerequisite setup for the existing skill.
+Otherwise, if the choice is unstated, ask personal versus team and wait for the
 answer before writing any installation files. Work in the environment that actually edits the target checkout.
 
 ## Verified first installation
