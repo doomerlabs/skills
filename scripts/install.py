@@ -32,14 +32,30 @@ def download(url, limit):
 
 
 def extract_binary(archive):
+    allowed_files = {'LICENSE', 'README.md', 'docs/release.md', 'docs/trust-model.md', 'doomer'}
+    allowed_directories = {'', '.', 'docs'}
+    seen = set()
+    binary = None
     with tarfile.open(fileobj=io.BytesIO(archive), mode='r:gz') as source:
-        members = source.getmembers()
-        if len(members) != 1 or members[0].name not in ('doomer', './doomer'):
-            raise ValueError('Unexpected release archive members')
-        member = members[0]
-        if not member.isfile() or member.size > MAX_BINARY or member.size <= 0:
-            raise ValueError('Release executable must be a bounded regular file')
-        return source.extractfile(member).read()
+        for member in source:
+            name = member.name.removeprefix('./').rstrip('/')
+            if name in seen:
+                raise ValueError('Duplicate release archive member')
+            seen.add(name)
+            if member.isdir() and name in allowed_directories:
+                continue
+            if name not in allowed_files or not member.isfile():
+                raise ValueError('Unexpected release archive member or file type')
+            limit = MAX_BINARY if name == 'doomer' else 1024 * 1024
+            if member.size > limit or member.size < 0:
+                raise ValueError('Release archive member exceeds its size limit')
+            if name == 'doomer':
+                if member.size == 0 or not member.mode & 0o111:
+                    raise ValueError('Release executable is empty or not executable')
+                binary = source.extractfile(member).read()
+    if binary is None:
+        raise ValueError('Release executable is missing')
+    return binary
 
 
 def main():
