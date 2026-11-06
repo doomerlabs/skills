@@ -48,9 +48,15 @@ private Git metadata for reuse by later sessions. An existing approved portable
 setup is restored by the CLI, including after a mount-path change. Do not copy
 credential files or edit grants by hand. A Mac installation is optional.
 
-Explain the requested update policy and ask for standing software-update
-permission. After explicit approval, resume the same handle with
-`doomer prepare --task HANDLE --allow-updates`.
+Use the returned state to decide whether permission is needed. Only for
+`update_permission_required`, explain the requested update policy and ask for
+standing software-update and version/task-state reporting permission. After
+explicit approval, resume the same handle with
+`doomer prepare --task HANDLE --allow-updates`. Reuse an existing approval for
+that repository and policy across its branches, linked worktrees, and chats.
+When prepare returns ready or another already-authorized state, continue from
+that state without asking again. A changed policy or a missing approval may
+require a new decision; never manufacture an approval to get past that state.
 
 For `approval_required`, show the exact returned repository-approval URL and
 ask the user to open it. That page displays this repository and its linked
@@ -65,6 +71,12 @@ Use `doomer.ai` as the production service name in user-facing explanations.
 Keep the configured `/api` address in CLI arguments and internal state. Require
 both authenticated identity and upload permission before claiming setup ready.
 If the user declines, leave uploads disabled.
+
+Repository approval already covers the repository's linked worktrees. A new
+chat, branch, or linked checkout alone does not require another upload approval.
+Reuse the CLI's saved consent evidence when it reports authenticated identity
+and upload permission; ask again only when the CLI reports missing or revoked
+consent or the requested scope changes.
 
 ## Finish agent integration
 
