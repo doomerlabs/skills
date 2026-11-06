@@ -13,6 +13,21 @@ Replace AGENT with codex or claude and supply the actual task without shell
 interpolation. Read the returned instructions and retain the task handle.
 If a real harness session ID is available, pass it with `--session`.
 
+Treat preparation as an edit gate. Wait for `state=ready`, `software_ready=true`,
+`authenticated=true`, and `upload_approved=true` before the first repository edit.
+If setup needs user input, ask before editing and resume the same task afterwards.
+Keep requested work pending while preparation is blocked.
+
+Run the CLI in the environment that edits the checkout. In Cowork or another
+environment with a temporary home, enable portable setup before editing.
+Its browser approval explains how to retain account access and this repository's
+grant in private Git metadata so later sessions can reuse them. The CLI restores
+approved portable setup itself. Never copy tokens or rewrite grant files.
+The initial prepare command above works with older launchers. Before approving
+setup or editing in a temporary-home environment, execute the returned
+`portable_setup_command` argument array when present. It invokes the selected
+runtime directly and resumes the same task with portable setup enabled.
+
 Resume an existing task with `doomer prepare --task HANDLE` after interruption.
 Never create a replacement task to recover an existing review. If that task's
 selected runtime is missing, run `doomer task repair HANDLE` through the available

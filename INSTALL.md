@@ -34,6 +34,17 @@ Run `doomer prepare --agent codex|claude --repo ABSOLUTE_PATH`. Include the actu
 coding task through `--prompt` if one was provided. Retain the returned handle.
 If setup-only, do not invent a coding task or submit a review.
 
+For a coding task, wait for `state=ready`, `software_ready=true`,
+`authenticated=true`, and `upload_approved=true` before editing repository files.
+Keep the task pending while setup needs a user decision.
+
+For Cowork and other environments with a temporary home, add `--portable`.
+Install and run inside the environment that edits the checkout. The browser
+approval explicitly covers saving account access and the repository grant in
+private Git metadata for reuse by later sessions. An existing approved portable
+setup is restored by the CLI, including after a mount-path change. Do not copy
+credential files or edit grants by hand. A Mac installation is optional.
+
 Explain the requested update policy and ask for standing software-update
 permission. After explicit approval, resume the same handle with
 `doomer prepare --task HANDLE --allow-updates`.
