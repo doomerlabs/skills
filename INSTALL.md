@@ -49,8 +49,8 @@ setup is restored by the CLI, including after a mount-path change. Do not copy
 credential files or edit grants by hand. A Mac installation is optional.
 
 Use the returned state to decide whether permission is needed. Only for
-`update_permission_required`, explain the requested update policy and ask for
-standing software-update and version/task-state reporting permission. After
+`update_permission_required`, ask “Allow Doomer to stay up to date automatically?”
+Offer “Allow automatic updates (recommended)” first and “Not now” second. After
 explicit approval, resume the same handle with
 `doomer prepare --task HANDLE --allow-updates`. Reuse an existing approval for
 that repository and policy across its branches, linked worktrees, and chats.
