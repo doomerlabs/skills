@@ -33,7 +33,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: dec7bfb378840e1f478942c8161e2bc07d90cc3a
+          ref: a239546fdb6db33d183038d025cdfdec92af3440
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -47,7 +47,7 @@ jobs:
         run: scripts/ci-agent-e2e.sh '${{ matrix.harness }}'
       - name: Build recording index
         if: always()
-        run: GITHUB_STEP_SUMMARY= python3 e2e-runner/scripts/ci-agent-e2e-report.py "$E2E_REPORT_DIR" '${{ matrix.harness }}'
+        run: GITHUB_STEP_SUMMARY='' python3 e2e-runner/scripts/ci-agent-e2e-report.py "$E2E_REPORT_DIR" '${{ matrix.harness }}'
       - name: Save HTML recordings and JSON results
         if: always()
         id: recordings
@@ -60,5 +60,5 @@ jobs:
       - name: Link recordings in job summary
         if: always()
         env:
-          E2E_ARTIFACT_URL: ${{ steps.recordings.outputs.artifact-url }}
+          E2E_ARTIFACT_NAME: agent-e2e-${{ matrix.harness }}
         run: python3 e2e-runner/scripts/ci-agent-e2e-report.py "$E2E_REPORT_DIR" '${{ matrix.harness }}'
