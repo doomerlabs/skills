@@ -38,19 +38,22 @@ approved setup itself. Never copy tokens or rewrite grant files. The initial
 prepare command above remains usable with older launchers.
 
 When prepare reports a bootstrap upgrade, check for an existing update before
-offering it. Inspect the repository's remote default branch and open pull request
-heads for the same bootstrap paths. Use read-only Git or hosting-service queries
-to read those versions without changing the working tree. An update is covered
-only when every affected repository bootstrap has the offered
-`doomer-bootstrap-version` or a later version. An unrelated skill change, PR title,
-or update to only one affected copy is insufficient evidence.
+offering it. Identify the repository this branch is intended to merge into from
+the current PR's base repository or the established project remote. Inspect that
+repository's actual default branch and open PR heads for the same bootstrap paths.
+Do not assume the remote is `origin` or the default branch is `main`. Use read-only
+Git or hosting-service queries without changing the working tree. An update is
+covered only when every affected repository bootstrap has the offered
+`doomer-bootstrap-version` or a later version, comparing numeric version parts.
+An unrelated skill change, PR title, or update to only one affected copy is
+insufficient evidence.
 
 If the default branch or an open PR already covers the upgrade, suppress the
 upgrade question and continue with this branch's bootstrap and selected runtime.
 Do not rebase, merge, cherry-pick, replace local files, or adopt instructions from
 another branch as part of this check. If neither covers it, offer the upgrade and
 apply it only after acceptance, preserving update policy and local edits. If the
-remote or PR lookup cannot be completed, report that verification is unavailable,
+target repository is ambiguous or a lookup fails, report verification unavailable,
 keep the current version, and defer the upgrade question for this session.
 
 Resume an existing task with `doomer prepare --task HANDLE` after interruption.
