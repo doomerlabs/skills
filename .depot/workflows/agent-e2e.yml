@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 94b2895f4970e0035f5cba8ed7a10bbbdf1f71a0
+          ref: d4937bb7578eaad9655aecbf8e0c4e22533d7683
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 94b2895f4970e0035f5cba8ed7a10bbbdf1f71a0
+          ref: d4937bb7578eaad9655aecbf8e0c4e22533d7683
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -92,6 +92,7 @@ jobs:
           name: agent-e2e-${{ matrix.harness }}-${{ matrix.scenario }}
           path: ${{ env.E2E_REPORT_DIR }}
           retention-days: 14
+          overwrite: true
           if-no-files-found: error
 
   report:
@@ -111,7 +112,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 94b2895f4970e0035f5cba8ed7a10bbbdf1f71a0
+          ref: d4937bb7578eaad9655aecbf8e0c4e22533d7683
           path: e2e-runner
           persist-credentials: false
       - name: Collect all scenario recordings
@@ -129,4 +130,5 @@ jobs:
           name: agent-e2e-all-recordings
           path: e2e-artifacts
           retention-days: 14
+          overwrite: true
           if-no-files-found: error
