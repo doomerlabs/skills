@@ -38,18 +38,23 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('returns another protocol', guide)
 
     def test_macos_download_loads_system_ca_bundle(self):
+        loaded_contexts = []
+
+        def record_roots(context, **kwargs):
+            loaded_contexts.append((context, kwargs))
+
         response = MagicMock()
         response.url = 'https://example.invalid/file'
         response.read.return_value = b'verified'
         response.__enter__.return_value = response
         with patch.object(installer.platform, 'system', return_value='Darwin'), \
-                patch.object(installer.ssl.SSLContext, 'load_verify_locations') as load_roots, \
+                patch.object(installer.ssl.SSLContext, 'load_verify_locations', new=record_roots), \
                 patch.object(installer.Path, 'is_file', return_value=True), \
                 patch.dict(installer.os.environ, {}, clear=True), \
                 patch.object(installer.urllib.request, 'urlopen', return_value=response) as open_url:
             self.assertEqual(installer.download(response.url, 100), b'verified')
-            load_roots.assert_called_once_with(cafile='/etc/ssl/cert.pem')
             context = open_url.call_args.kwargs['context']
+            self.assertEqual(loaded_contexts, [(context, {'cafile': '/etc/ssl/cert.pem'})])
             self.assertIsInstance(context, ssl.SSLContext)
             self.assertTrue(context.check_hostname)
             self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
