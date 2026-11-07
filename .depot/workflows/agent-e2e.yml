@@ -48,7 +48,7 @@ jobs:
               raise SystemExit("Scenario discovery returned an invalid name")
           print("scenarios=" + json.dumps(scenarios))
           PY
-          release_url=$(curl -fsSL --retry 3 --output /dev/null --write-out '%{url_effective}' https://github.com/doomerlabs/doomer/releases/latest) || {
+          release_url=$(curl -fsSL --connect-timeout 15 --max-time 60 --retry 3 --output /dev/null --write-out '%{url_effective}' https://github.com/doomerlabs/doomer/releases/latest) || {
             echo "Could not resolve the published Doomer release from GitHub" >&2
             exit 1
           }
