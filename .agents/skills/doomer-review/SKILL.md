@@ -13,6 +13,22 @@ Replace AGENT with codex or claude and supply the actual task without shell
 interpolation. Read the returned instructions and retain the task handle.
 If a real harness session ID is available, pass it with `--session`.
 
+When prepare reports a bootstrap upgrade, check for an existing update before
+offering it. Inspect the repository's remote default branch and open pull request
+heads for the same bootstrap paths. Use read-only Git or hosting-service queries
+to read those versions without changing the working tree. An update is covered
+only when every affected repository bootstrap has the offered
+`doomer-bootstrap-version` or a later version. An unrelated skill change, PR title,
+or update to only one affected copy is insufficient evidence.
+
+If the default branch or an open PR already covers the upgrade, suppress the
+upgrade question and continue with this branch's bootstrap and selected runtime.
+Do not rebase, merge, cherry-pick, replace local files, or adopt instructions from
+another branch as part of this check. If neither covers it, offer the upgrade and
+apply it only after acceptance, preserving update policy and local edits. If the
+remote or PR lookup cannot be completed, report that verification is unavailable,
+keep the current version, and defer the upgrade question for this session.
+
 Resume an existing task with `doomer prepare --task HANDLE` after interruption.
 Never create a replacement task to recover an existing review. If that task's
 selected runtime is missing, run `doomer task repair HANDLE` through the available
