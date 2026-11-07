@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import io
+import ssl
 from pathlib import Path
 import tarfile
 import unittest
@@ -37,7 +38,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('returns another protocol', guide)
 
     def test_macos_download_loads_system_ca_bundle(self):
-        context = MagicMock()
+        context = MagicMock(check_hostname=True, verify_mode=ssl.CERT_REQUIRED)
         response = MagicMock()
         response.url = 'https://example.invalid/file'
         response.read.return_value = b'verified'
@@ -50,9 +51,11 @@ class BootstrapTests(unittest.TestCase):
             self.assertEqual(installer.download(response.url, 100), b'verified')
             context.load_verify_locations.assert_called_once_with(cafile='/etc/ssl/cert.pem')
             self.assertIs(open_url.call_args.kwargs['context'], context)
+            self.assertTrue(context.check_hostname)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
 
     def test_explicit_ca_bundle_is_preserved(self):
-        context = MagicMock()
+        context = MagicMock(check_hostname=True, verify_mode=ssl.CERT_REQUIRED)
         response = MagicMock()
         response.url = 'https://example.invalid/file'
         response.read.return_value = b'verified'
@@ -60,9 +63,12 @@ class BootstrapTests(unittest.TestCase):
         with patch.object(installer.platform, 'system', return_value='Darwin'), \
                 patch.object(installer.ssl, 'create_default_context', return_value=context), \
                 patch.dict(installer.os.environ, {'SSL_CERT_FILE': '/custom/roots.pem'}, clear=True), \
-                patch.object(installer.urllib.request, 'urlopen', return_value=response):
+                patch.object(installer.urllib.request, 'urlopen', return_value=response) as open_url:
             installer.download(response.url, 100)
             context.load_verify_locations.assert_not_called()
+            self.assertIs(open_url.call_args.kwargs['context'], context)
+            self.assertTrue(context.check_hostname)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):
