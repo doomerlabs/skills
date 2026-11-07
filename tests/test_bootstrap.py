@@ -4,6 +4,7 @@ import io
 from pathlib import Path
 import tarfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 ROOT = Path(__file__).parents[1]
 spec = importlib.util.spec_from_file_location('installer', ROOT / 'scripts/install.py')
@@ -33,6 +34,34 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn(hashlib.sha256((ROOT / 'scripts/install.py').read_bytes()).hexdigest(), guide)
         self.assertIn('ask personal versus team and wait', guide)
         self.assertIn('returns another protocol', guide)
+
+    def test_macos_download_loads_system_ca_bundle(self):
+        context = MagicMock()
+        response = MagicMock()
+        response.url = 'https://example.invalid/file'
+        response.read.return_value = b'verified'
+        response.__enter__.return_value = response
+        with patch.object(installer.platform, 'system', return_value='Darwin'), \
+                patch.object(installer.ssl, 'create_default_context', return_value=context), \
+                patch.object(installer.Path, 'is_file', return_value=True), \
+                patch.dict(installer.os.environ, {}, clear=True), \
+                patch.object(installer.urllib.request, 'urlopen', return_value=response) as open_url:
+            self.assertEqual(installer.download(response.url, 100), b'verified')
+            context.load_verify_locations.assert_called_once_with(cafile='/etc/ssl/cert.pem')
+            self.assertIs(open_url.call_args.kwargs['context'], context)
+
+    def test_explicit_ca_bundle_is_preserved(self):
+        context = MagicMock()
+        response = MagicMock()
+        response.url = 'https://example.invalid/file'
+        response.read.return_value = b'verified'
+        response.__enter__.return_value = response
+        with patch.object(installer.platform, 'system', return_value='Darwin'), \
+                patch.object(installer.ssl, 'create_default_context', return_value=context), \
+                patch.dict(installer.os.environ, {'SSL_CERT_FILE': '/custom/roots.pem'}, clear=True), \
+                patch.object(installer.urllib.request, 'urlopen', return_value=response):
+            installer.download(response.url, 100)
+            context.load_verify_locations.assert_not_called()
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):
