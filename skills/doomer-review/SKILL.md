@@ -4,7 +4,7 @@ description: Use Doomer before repository edits and finish its review before rep
 metadata:
   doomer-protocol: "2"
   doomer-update-policy: stable
-  doomer-bootstrap-version: "2026.11.6.11"
+  doomer-bootstrap-version: "2026.11.6.13"
   doomer-cli-range: ">=2026.11.6.9"
 ---
 
