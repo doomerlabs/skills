@@ -84,8 +84,12 @@ For Codex or Claude Code, configure the active agent's hooks during onboarding
 with `doomer hooks --agent AGENT`. Installation authorizes adding Doomer’s hook
 entries while preserving unrelated hooks. Follow the harness's normal trust
 controls and clearly report whether hooks are configured or actually active.
-Do not postpone configuration until the next coding request. When the harness
-cannot load these hooks, explain that limitation and use the per-call workflow.
+Do not postpone configuration until the next coding request. A headless or
+noninteractive invocation can still write hook configuration for future sessions.
+Do not skip `doomer hooks` merely because this invocation has no active hook
+receipt or session binding. Configure first, then report activation separately.
+If configuration actually fails or the harness is unsupported, report that
+evidence and use the per-call workflow.
 
 Pass a real session ID to prepare when starting the next actual coding task.
 A setup-only task is not that coding task. Native hook callbacks or the normal
