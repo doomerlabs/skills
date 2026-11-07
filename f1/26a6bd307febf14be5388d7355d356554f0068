@@ -1,0 +1,19 @@
+INSTALL.md
+  s_d6b126657ca74b::t_19efc5c05c8dcc 34,40-47,66-84,87-92,94-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f126a6bd307febf14be5388d7355d356554f0068",
+  "prompts": {},
+  "sessions": {
+    "s_d6b126657ca74b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b836-efba-7c81-a589-7f492085b86e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
