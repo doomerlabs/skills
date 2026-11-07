@@ -56,8 +56,8 @@ Describe that workflow accurately. A missing hook receipt means activation is
 unverified; it does not establish that the harness lacks hook support.
 
 If `doomer` is missing, read the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/6029750bef71c137dedd982a6aea79a26ede7b7a/INSTALL.md and require its SHA-256 to equal
-`82d44c9402c629b94071aeaba3bc24184c8bed03413a2a354726e4405c9c535f`
+https://raw.githubusercontent.com/doomerlabs/skills/feb53ee2d4acd3998cb76fa14fe2da640c8968f8/INSTALL.md and require its SHA-256 to equal
+`982b67cb27fe15c17e709f534cc7597a007976cfeed7a1bcc6cafaf3cfe571f6`
 before following its verified installation flow with the user's normal execution permissions.
 Complete this prerequisite before editing. In Cowork, install into the editing
 VM's personal environment, preserving any existing repository bootstrap.
