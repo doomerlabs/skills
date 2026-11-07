@@ -15,9 +15,9 @@ answer before writing any installation files. Work in the environment that actua
    or returns another protocol, use the verified installer in step 2. Do not
    run installation commands through that unsupported executable.
 2. Otherwise inspect the installer at
-   `https://raw.githubusercontent.com/doomerlabs/skills/5c0c3d42d467003228323ddd1e5936cbecfe1457/scripts/install.py`.
+   `https://raw.githubusercontent.com/doomerlabs/skills/bfca6c0edee445d531440fd6f67fac383af85355/scripts/install.py`.
    Download it once to a private temporary directory. Require SHA-256
-   `3d451a6699450a28f1498a29cd6e9593ab2f852fec0e578e2efe4f03eb4d49d3`.
+   `24e71dce733bdeea4fcffa027061b7139013ffcd265872aa82afc4d2941d2bf8`.
    Inspect that same local file, verify the digest again immediately before
    execution, and run that exact file with Python 3. Stop on a digest mismatch;
    never fetch an alternative script or execute a second download. The
@@ -84,8 +84,12 @@ For Codex or Claude Code, configure the active agent's hooks during onboarding
 with `doomer hooks --agent AGENT`. Installation authorizes adding Doomer’s hook
 entries while preserving unrelated hooks. Follow the harness's normal trust
 controls and clearly report whether hooks are configured or actually active.
-Do not postpone configuration until the next coding request. When the harness
-cannot load these hooks, explain that limitation and use the per-call workflow.
+Do not postpone configuration until the next coding request. A headless or
+noninteractive invocation can still write hook configuration for future sessions.
+Do not skip `doomer hooks` merely because this invocation has no active hook
+receipt or session binding. Configure first, then report activation separately.
+If configuration actually fails or the harness is unsupported, report that
+evidence and use the per-call workflow.
 
 Pass a real session ID to prepare when starting the next actual coding task.
 A setup-only task is not that coding task. Native hook callbacks or the normal

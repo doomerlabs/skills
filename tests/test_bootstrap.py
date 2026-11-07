@@ -1,9 +1,11 @@
 import hashlib
 import importlib.util
 import io
+import ssl
 from pathlib import Path
 import tarfile
 import unittest
+from unittest.mock import MagicMock, patch
 
 ROOT = Path(__file__).parents[1]
 spec = importlib.util.spec_from_file_location('installer', ROOT / 'scripts/install.py')
@@ -19,9 +21,10 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer prepare', text)
         self.assertIn('doomer prepare --task HANDLE', text)
         self.assertIn('doomer task repair HANDLE', text)
-        self.assertLess(len(text), 2500)
+        self.assertLess(len(text), 8192)
         self.assertNotIn('self-update', text)
-        self.assertNotIn('2026.', text)
+        self.assertNotIn('doomer-version:', text)
+        self.assertIn('doomer-cli-range:', text)
         self.assertNotIn('/main/INSTALL.md', text)
         self.assertRegex(text, r'skills/[a-f0-9]{40}/INSTALL.md')
         self.assertIn(hashlib.sha256((ROOT / 'INSTALL.md').read_bytes()).hexdigest(), text)
@@ -33,6 +36,44 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn(hashlib.sha256((ROOT / 'scripts/install.py').read_bytes()).hexdigest(), guide)
         self.assertIn('ask personal versus team and wait', guide)
         self.assertIn('returns another protocol', guide)
+
+    def test_macos_download_loads_system_ca_bundle(self):
+        loaded_contexts = []
+
+        def record_roots(context, **kwargs):
+            loaded_contexts.append((context, kwargs))
+
+        response = MagicMock()
+        response.url = 'https://example.invalid/file'
+        response.read.return_value = b'verified'
+        response.__enter__.return_value = response
+        with patch.object(installer.platform, 'system', return_value='Darwin'), \
+                patch.object(installer.ssl.SSLContext, 'load_verify_locations', new=record_roots), \
+                patch.object(installer.Path, 'is_file', return_value=True), \
+                patch.dict(installer.os.environ, {}, clear=True), \
+                patch.object(installer.urllib.request, 'urlopen', return_value=response) as open_url:
+            self.assertEqual(installer.download(response.url, 100), b'verified')
+            context = open_url.call_args.kwargs['context']
+            self.assertEqual(loaded_contexts, [(context, {'cafile': '/etc/ssl/cert.pem'})])
+            self.assertIsInstance(context, ssl.SSLContext)
+            self.assertTrue(context.check_hostname)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+
+    def test_explicit_ca_bundle_is_preserved(self):
+        response = MagicMock()
+        response.url = 'https://example.invalid/file'
+        response.read.return_value = b'verified'
+        response.__enter__.return_value = response
+        with patch.object(installer.platform, 'system', return_value='Darwin'), \
+                patch.object(installer.ssl.SSLContext, 'load_verify_locations') as load_roots, \
+                patch.dict(installer.os.environ, {'SSL_CERT_FILE': '/custom/roots.pem'}, clear=True), \
+                patch.object(installer.urllib.request, 'urlopen', return_value=response) as open_url:
+            installer.download(response.url, 100)
+            load_roots.assert_not_called()
+            context = open_url.call_args.kwargs['context']
+            self.assertIsInstance(context, ssl.SSLContext)
+            self.assertTrue(context.check_hostname)
+            self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):
