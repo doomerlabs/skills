@@ -31,15 +31,20 @@ answer before writing any installation files. Work in the environment that actua
    reconciliation. Never silently overwrite them or add `--adopt` without the
    user's specific approval.
 
-## Onboard the selected repository
+## Authorize the coding-agent integration
 
 Run `doomer prepare --agent codex|claude --repo ABSOLUTE_PATH`. Include the actual
 coding task through `--prompt` if one was provided. Retain the returned handle.
 If setup-only, do not invent a coding task or submit a review.
 
-For a coding task, wait for `state=ready`, `software_ready=true`,
-`authenticated=true`, and `upload_approved=true` before editing repository files.
-Keep the task pending while setup needs a user decision.
+Attempt preparation before editing so the CLI can retain the starting revision.
+If Doomer is blocked by setup, authentication, network access, or host approval,
+explain the blocker and ask once whether to continue local edits without a
+completed Doomer review or wait for Doomer. Honor the answer for the rest of the
+task. Continuing local edits does not approve a blocked upload or a settings
+change. Retain the task handle and resume it if Doomer becomes available. If no
+task was created, retain the starting commit for the later review. Report any
+incomplete review before finishing.
 
 For Cowork and other environments with a temporary home, add `--portable`.
 Install and run inside the environment that edits the checkout. The browser
@@ -58,25 +63,43 @@ When prepare returns ready or another already-authorized state, continue from
 that state without asking again. A changed policy or a missing approval may
 require a new decision; never manufacture an approval to get past that state.
 
-For `approval_required`, show the exact returned repository-approval URL and
-ask the user to open it. That page displays this repository and its linked
-worktrees, previous grants, and the upload scope. If needed, the user signs in
-there before choosing Allow. After the browser decision, resume the same handle
-with `doomer prepare --task HANDLE`. Repeat that command when the decision is
-still pending. Approval and sign-in survive separate CLI calls and need no local
-browser callback. Never replace this flow with a generic CLI login page or
-manufacture a grant in chat. Never copy credentials from another environment.
+Before presenting the installation approval, explain that Codex setup also saves
+the same authorization in its local approval-reviewer policy so future chats
+can reuse it. Include that settings change in the one installation decision.
+For `approval_required`, show the exact returned approval URL and ask the user
+to open it. The page explicitly authorizes this coding agent to send repository
+snapshots, task context, and finding responses to the displayed Doomer service
+across all current and future repositories. Sign in there if needed, then choose
+Allow. Resume the same handle with `doomer prepare --task HANDLE` after the
+browser decision. Reuse the saved approval across repositories, worktrees, and
+chats with the same coding agent, Doomer account, service, and profile. Changing
+Codex accounts alone does not change the Doomer account or expand this grant.
+Never replace the browser decision with an inferred or fabricated approval.
+
+Existing repository-specific grants remain valid for their original scope.
+During onboarding, if the returned consent lacks `all_repositories: true`,
+explain the integration-wide scope above and ask once to upgrade it. Only after
+explicit approval, run `doomer task consent HANDLE --allow --all-repositories`.
+Ordinary coding tasks reuse existing grants without repeating onboarding.
+An installation request alone does not record upload permission.
 
 Use `doomer.ai` as the production service name in user-facing explanations.
-Keep the configured `/api` address in CLI arguments and internal state. Require
-both authenticated identity and upload permission before claiming setup ready.
-If the user declines, leave uploads disabled.
+Keep the configured `/api` address in CLI arguments and internal state.
+Use `doomer task revoke HANDLE --all-repositories` to revoke the integration-wide
+grant. Respect revoked approval and account, service, profile, or agent changes.
+A new repository, branch, worktree, or chat under the same integration needs no
+additional upload approval. If authentication fails, restore the same account
+and recheck the saved grant before asking for upload permission again.
 
-Repository approval already covers the repository's linked worktrees. A new
-chat, branch, or linked checkout alone does not require another upload approval.
-Reuse the CLI's saved consent evidence when it reports authenticated identity
-and upload permission; ask again only when the CLI reports missing or revoked
-consent or the requested scope changes.
+For Codex, the returned `codex_review_policy` describes the same approved scope.
+After the combined installation decision, persist that exact authorization in
+Codex's approval-reviewer settings using the returned instructions and normal
+settings permissions. Reuse the installation answer without another question
+when it explicitly covered that settings change and the scope matches. Preserve other
+settings. Explain when the host requires a fresh chat or reload before it uses
+the policy. Saving a policy does not prove a running reviewer has loaded it.
+If the host still blocks Doomer, ask whether to continue local edits as described
+above. Report the host limitation and any incomplete review accurately.
 
 ## Finish agent integration
 
