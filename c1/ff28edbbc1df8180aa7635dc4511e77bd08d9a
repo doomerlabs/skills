@@ -1,0 +1,14 @@
+INSTALL.md
+  h_aa44c3b5b60dec 87-92
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "c1ff28edbbc1df8180aa7635dc4511e77bd08d9a",
+  "prompts": {},
+  "humans": {
+    "h_aa44c3b5b60dec": {
+      "author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
