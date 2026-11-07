@@ -10,6 +10,13 @@ answer before writing any installation files. Work in the environment that actua
 
 ## Verified first installation
 
+If a review task is already active, retain its handle and selected runtime.
+Continue with the integration-authorization section using that task. If its
+executable is missing, use `doomer task repair HANDLE` and resume the same handle.
+First-installation and runtime-replacement steps apply when no task is active.
+If the active runtime lacks a required onboarding capability, finish or explicitly
+stop that task before starting setup with a compatible runtime.
+
 1. If a managed-protocol-2 Doomer CLI is already installed, use it. Check
    `doomer runtime-info` and require `managed_protocol: 2`. If the command fails
    or returns another protocol, use the verified installer in step 2. Do not
