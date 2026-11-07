@@ -1,0 +1,19 @@
+tests/test_bootstrap.py
+  s_e99556edc2d439::t_166a7307fefe4f 25-26
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "631ac4bc512f1a84ce4225c60fc31aa570e28a53",
+  "prompts": {},
+  "sessions": {
+    "s_e99556edc2d439": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b472-e638-7680-915b-ed13cde0b007",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
