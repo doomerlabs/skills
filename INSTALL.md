@@ -30,10 +30,8 @@ answer before writing any installation files. Work in the environment that actua
 
 ## Verified first installation
 
-The installer and `doomer install` write local runtime and skill files. The
-coding agent opens the team bootstrap PR in the later Team distribution step.
-For user-requested local-only setup, complete local installation and omit that
-PR step.
+Installation writes local runtime and skill files. Creating a team PR is a
+separate agent step, omitted for local-only setup.
 
 If a review task is already active, retain its handle and selected runtime.
 Continue with the integration-authorization section using that task. If its
