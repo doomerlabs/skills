@@ -1,0 +1,25 @@
+skills/doomer-review/SKILL.md
+  s_f23d7bc729b5d1::t_266e147c2777eb 5,120-121
+.depot/workflows/agent-e2e.yml
+  s_f23d7bc729b5d1::t_266e147c2777eb 31,88,135
+INSTALL.md
+  s_f23d7bc729b5d1::t_266e147c2777eb 72-76,80-81
+tests/test_bootstrap.py
+  s_f23d7bc729b5d1::t_266e147c2777eb 52-55
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b87771d3bf717701f6f737498262c610559eca5f",
+  "prompts": {},
+  "sessions": {
+    "s_f23d7bc729b5d1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b193-6f54-7900-bb5a-86cc6a95a69a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
