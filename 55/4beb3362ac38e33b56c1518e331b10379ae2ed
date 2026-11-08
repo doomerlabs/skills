@@ -1,0 +1,23 @@
+.agents/skills/doomer-review/SKILL.md
+  s_f23d7bc729b5d1::t_0b2d47de3a69c2 117-118,134-135,138
+.claude/skills/doomer-review/SKILL.md
+  s_f23d7bc729b5d1::t_74082cec8cf01c 117-118,134-135,138
+skills/doomer-review/SKILL.md
+  s_f23d7bc729b5d1::t_a2f934469badd2 117-118,134-135,138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "554beb3362ac38e33b56c1518e331b10379ae2ed",
+  "prompts": {},
+  "sessions": {
+    "s_f23d7bc729b5d1": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b193-6f54-7900-bb5a-86cc6a95a69a",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
