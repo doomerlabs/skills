@@ -36,6 +36,8 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('account or authorize uploads', text)
         self.assertIn('Only an explicitly identified sandbox restriction', text)
         self.assertIn('continue authorized local edits and tests by default', text)
+        self.assertEqual(text.count('If review is blocked,'), 1)
+        self.assertEqual(text.count('Show complete clickable'), 1)
         continuation = text.split('If review is blocked,', 1)[1].split('Show complete clickable', 1)[0]
         self.assertIn('Earlier user requirements to wait or require review before editing take precedence.', continuation)
         self.assertIn('Stop the denied transmission; keep uploads blocked.', continuation)
