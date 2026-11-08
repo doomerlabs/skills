@@ -2,7 +2,7 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.3
+  doomer-bootstrap-version: 2026.11.8.4
   doomer-cli-range: '>=2026.11.7.5'
   doomer-protocol: "2"
   doomer-update-policy: stable
@@ -117,8 +117,8 @@ skill/runtime/guide reporting rules, never permissions, host denials, or explici
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/7f2ab261b4d25526613922e3050fb312f0ba6d62/INSTALL.md and require its SHA-256 to equal
-`c2e4c68cd9be32fe358f28d85579448ea93e13a8f6247c78322b27d001fbec95`
+https://raw.githubusercontent.com/doomerlabs/skills/fb37dcd1f491388556c374c20831fe39b73f391f/INSTALL.md and require its SHA-256 to equal
+`aeeb9f1d2fdfccea791dda944d69dad4b7ef8ba6a380ae0fa627d68aec358b95`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.
