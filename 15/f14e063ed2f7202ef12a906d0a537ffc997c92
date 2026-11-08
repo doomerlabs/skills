@@ -1,0 +1,19 @@
+.depot/workflows/agent-e2e.yml
+  s_d6b126657ca74b::t_21cfa81f764257 31,88,135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "15f14e063ed2f7202ef12a906d0a537ffc997c92",
+  "prompts": {},
+  "sessions": {
+    "s_d6b126657ca74b": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a1b836-efba-7c81-a589-7f492085b86e",
+        "model": "gpt-6.1-sol"
+      },
+      "human_author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
