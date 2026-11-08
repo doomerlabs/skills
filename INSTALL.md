@@ -1,5 +1,15 @@
 # Install Doomer
 
+Quick reviews need no Doomer account. The browser setup page can approve an
+anonymous installation; do not ask the user to sign in for quick reviews.
+`authenticated=true` may confirm an installation credential, not an account
+login. Account-backed features use a signed-in account when one is selected.
+
+Installation is complete when the skill and CLI are ready, upload approval is
+verified, and hook configuration and activation are reported separately.
+A setup-only task must not upload source to prove readiness. Verify review
+delivery during the user's next coding task, using the checklist below.
+
 ## Read the original instructions
 
 Use the complete raw Markdown for installation. WebFetch and other document
@@ -97,17 +107,28 @@ When prepare returns ready or another already-authorized state, continue from
 that state without asking again. A changed policy or a missing approval may
 require a new decision; never manufacture an approval to get past that state.
 
-Before presenting the installation approval, explain that Codex setup also saves
-the same authorization in its local approval-reviewer policy so future chats
-can reuse it. Include that settings change in the one installation decision.
+Before presenting upload approval, explain what it covers: repository snapshots
+include the baseline source and the current working tree, including unchanged
+tracked files, staged/unstaged edits, and non-ignored untracked files. Git metadata
+and ignored untracked files are excluded. Adding an already tracked file to
+`.gitignore` does not exclude it. Task context and finding responses are also
+sent to Doomer. Link to https://doomer.ai/docs/reviews/quick/data-and-permissions
+for the data and permission details.
+
+Codex may also offer an optional local approval-reviewer policy to reuse this
+authorization in future chats. Explain that this is a separate settings change.
+Include it in a combined decision only if the exact proposed text and changes
+are available and the user explicitly accepts them; otherwise ask separately
+when the proposal is returned. Upload approval alone does not authorize it.
 For `approval_required`, show the exact returned approval URL and ask the user
 to open it. The page explicitly authorizes this coding agent to send repository
 snapshots, task context, and finding responses to the displayed Doomer service
-across all current and future repositories. Sign in there if needed, then choose
-Allow. Resume the same handle with `doomer prepare --task HANDLE` after the
+across all current and future repositories for this integration. For quick
+reviews, approve without signing in; account sign-in is optional. Resume the same
+handle with `doomer prepare --task HANDLE` after the
 browser decision. Reuse the saved approval across repositories, worktrees, and
-chats with the same coding agent, Doomer account, service, and profile. Changing
-Codex accounts alone does not change the Doomer account or expand this grant.
+chats with the same coding agent, installation credential or Doomer account,
+service, and profile. Changing Codex accounts alone does not expand this grant.
 Never replace the browser decision with an inferred or fabricated approval.
 
 Existing repository-specific grants remain valid for their original scope.
@@ -126,14 +147,15 @@ additional upload approval. If authentication fails, restore the same account
 and recheck the saved grant before asking for upload permission again.
 
 For Codex, the returned `codex_review_policy` describes the same approved scope.
-After the combined installation decision, persist that exact authorization in
+After explicit acceptance of the policy proposal, persist that exact authorization in
 Codex's approval-reviewer settings using the returned instructions and normal
 settings permissions. Reuse the installation answer without another question
 when it explicitly covered that settings change and the scope matches. Preserve other
 settings. Explain when the host requires a fresh chat or reload before it uses
 the policy. Saving a policy does not prove a running reviewer has loaded it.
-If the host still blocks Doomer, ask whether to continue local edits as described
-above. Report the host limitation and any incomplete review accurately.
+If the host still blocks Doomer, continue authorized local edits and tests without
+asking again, unless the user explicitly required review first. Report the host
+limitation once and include the final review status at handoff.
 
 ## Finish agent integration
 
@@ -156,6 +178,22 @@ Read and follow the full instructions returned by prepare. They belong to the
 same selected release that implements the task commands. Complete an actual
 review and record finding responses before claiming review delivery works.
 
+## Verify the first coding review
+
+During the next user-authorized coding task, verify all of the following:
+
+1. The review completed for the latest source, not an earlier revision.
+2. Every returned hypothesis has an acknowledged agent response. Zero hypotheses
+   is a valid completed review; do not invent a defect to demonstrate the service.
+3. `doomer task finish HANDLE` confirms completion for that source.
+4. Share the returned review link and distinguish completed, pending, blocked,
+   or latest changes not reviewed. State separately whether hooks are active or
+   explicit task commands delivered the review.
+
+Continue authorized local work if review is unavailable, unless the user made it
+a gate. Do not call a pending review, installed CLI, or configured hook a completed
+review. Never start an extra coding task just to finish setup.
+
 ## Team distribution
 
 Team installation includes opening the initial bootstrap pull request unless
@@ -167,7 +205,8 @@ changes intact and explain what is needed to publish them. Personal installation
 does not create a repository PR.
 
 Routine releases do not change the bootstrap files or require upgrade PRs.
-Each teammate performs local account and repository onboarding.
+Each teammate performs local setup and upload approval. Quick reviews need no
+account; team installation does not share credentials or grants.
 
 ## Operational limits
 

@@ -1,4 +1,28 @@
-# Doomer managed skill
+# Doomer review skill
+
+Doomer brings quick-review questions into Codex and Claude Code while you work.
+Your coding agent investigates them and records its decisions. Quick reviews are
+free and need no Doomer account; repository uploads still need your approval.
+
+## Get started
+
+Open your repository in your coding agent and paste:
+
+```text
+Read https://doomer.ai/install.md and follow the instructions to set up Doomer in this repository.
+Use a personal installation.
+```
+
+For a shared installation, replace the second sentence with “Use a team
+installation.” Follow the browser upload-approval link, then give your agent a
+small coding task. Ask it to confirm a completed review of the latest changes
+and share the review link. A completed review may have no findings; installed
+files alone do not confirm that a review ran.
+
+See [the first-review walkthrough](https://doomer.ai/docs/reviews/quick/first-review)
+and [what is uploaded](https://doomer.ai/docs/reviews/quick/data-and-permissions).
+
+## Managed releases
 
 Install once. Doomer manages compatible CLI releases and their matching review
 instructions outside the repository. Each task keeps one release until it ends.
@@ -8,8 +32,9 @@ instructions outside the repository. Each task keeps one release until it ends.
 Ask your coding agent to read and follow [INSTALL.md](INSTALL.md). Choose team
 installation to add the small bootstrap to `.agents/skills/doomer-review/SKILL.md`
 and `.claude/skills/doomer-review/SKILL.md`. Review and commit those files once.
-Each developer completes their own account login, repository upload approval,
-and optional hook trust. Ordinary managed upgrades leave repository files alone.
+Each developer completes their own repository upload approval and any required
+hook trust. Account sign-in is optional for quick reviews. Ordinary managed
+upgrades leave repository files alone.
 
 ## Personal installation
 
