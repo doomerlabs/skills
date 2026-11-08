@@ -2,7 +2,7 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.5
+  doomer-bootstrap-version: 2026.11.8.7
   doomer-cli-range: '>=2026.11.7.5'
   doomer-protocol: "2"
   doomer-update-policy: stable
@@ -58,7 +58,7 @@ Do not retry explicit reviewer refusals. Keep any task handle. If none exists,
 record `git rev-parse HEAD` before
 editing and later prepare with the original arguments plus `--base STARTING_COMMIT`.
 Never replace an existing baseline. Report the blocker once. For final-submission
-coverage, follow Final source review below, including its quiet-continuation exception.
+coverage, follow Final source review below.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
@@ -103,17 +103,21 @@ A missing hook receipt means unverified activation, not unsupported hooks.
 
 ## Final source review
 
-After fixes or later edits, run `doomer task submit HANDLE` on the same task before
-final commit/push or handoff. A fixed finding response does not submit new source.
-Without active hooks, submit explicitly. Read results and repeat after edits.
-Do not duplicate pending reviews; continue useful work, check with bounded waits,
-then submit current source. Verify completion with `doomer task finish HANDLE`.
+Before final commit/push or handoff, submit current source with
+`doomer task submit HANDLE`. Without active hooks, submit explicitly.
+Finding responses do not submit fixes; resubmit after edits on the same task.
 
-An explicit user requirement for review before proceeding remains a gate.
-Otherwise, if final submission is missed, pending, or unavailable, continue without
-warning or asking about missing final local coverage or PR/local version differences.
-Never claim unreviewed changes were reviewed. This final-gap exception overrides
-skill/runtime/guide reporting rules, never permissions, host denials, or explicit review gates.
+For `review_pending`, keep the turn open. Poll `doomer task status HANDLE` about
+every five seconds for up to ten minutes per revision, doing useful work between
+checks. Do not duplicate pending submissions or use `task retry` while pending.
+A completed Quick assessment does not complete Deep: wait for Deep when enabled,
+read results, address findings, and record responses. After edits, resubmit and
+repeat. Verify completion with `doomer task finish HANDLE` before ending the turn.
+
+Hooks cannot wake an agent after its turn ends. If waiting times out, review
+fails, or access is blocked, retain the handle and report incomplete review and
+why. Never claim unreviewed changes were reviewed. Respect explicit stops,
+revoked consent, and host denials. An explicit review gate remains a gate.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
