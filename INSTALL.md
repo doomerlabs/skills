@@ -50,7 +50,10 @@ explain the blocker and ask once whether to continue local edits without a
 completed Doomer review or wait for Doomer. Honor the answer for the rest of the
 task. Continuing local edits does not approve a blocked upload or a settings
 change. Retain the task handle and resume it if Doomer becomes available. If no
-task was created, retain the starting commit for the later review. Report any
+task was created, run `git rev-parse HEAD` before local edits and retain that
+starting commit. When preparation becomes available, create the task with
+`doomer prepare --agent AGENT --repo PATH --prompt "USER TASK" --base STARTING_COMMIT`.
+An existing task keeps its original baseline. Report any
 incomplete review before finishing.
 
 For Cowork and other environments with a temporary home, add `--portable`.
