@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import io
+import json
 import ssl
 from pathlib import Path
 import tarfile
@@ -105,6 +106,33 @@ class BootstrapTests(unittest.TestCase):
             self.assertIsInstance(context, ssl.SSLContext)
             self.assertTrue(context.check_hostname)
             self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+
+    def test_latest_manifest_avoids_api_discovery_and_verifies_archive(self):
+        archive = b'fixture archive'
+        version = '2026.11.7.5'
+        name = f'doomer_{version}_linux_amd64.tar.gz'
+        for valid in [True, False]:
+            with self.subTest(valid=valid):
+                manifest = {'schemaVersion': 1, 'version': version, 'artifacts': {
+                    name: 'sha256:' + hashlib.sha256(archive if valid else b'changed').hexdigest()}}
+                with patch.object(installer.platform, 'system', return_value='Linux'), \
+                        patch.object(installer.platform, 'machine', return_value='x86_64'), \
+                        patch('sys.argv', ['install.py', '--repo', '/test/repo']), \
+                        patch.object(installer, 'download', side_effect=[json.dumps(manifest).encode(), archive]) as download, \
+                        patch.object(installer, 'extract_binary', return_value=b'fixture binary'), \
+                        patch.object(installer.subprocess, 'check_output', return_value=b'{"managed_protocol":2}'), \
+                        patch.object(installer.subprocess, 'run') as run:
+                    if valid:
+                        installer.main()
+                        self.assertEqual(run.call_args.args[0][1:], ['install', '--runtime', '--repo', '/test/repo'])
+                    else:
+                        with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
+                            installer.main()
+                        run.assert_not_called()
+                    self.assertEqual([call.args[0] for call in download.call_args_list], [
+                        installer.RELEASE_MANIFEST,
+                        f'https://downloads.doomer.ai/cli/releases/{version}/{name}?download=1'])
+                    self.assertNotIn('api.github.com', installer.RELEASE_MANIFEST)
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):

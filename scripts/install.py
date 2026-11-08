@@ -14,7 +14,7 @@ import tarfile
 import tempfile
 import urllib.request
 
-RELEASES = 'https://api.github.com/repos/doomerlabs/doomer/releases/latest'
+RELEASE_MANIFEST = 'https://github.com/doomerlabs/doomer/releases/latest/download/release-manifest.json'
 MAX_ARCHIVE = 32 * 1024 * 1024
 MAX_BINARY = 64 * 1024 * 1024
 
@@ -78,14 +78,10 @@ def main():
     arch = {'arm64': 'arm64', 'aarch64': 'arm64', 'x86_64': 'amd64', 'AMD64': 'amd64'}.get(platform.machine())
     if not system or not arch:
         raise ValueError('Doomer supports macOS/Linux on arm64/amd64')
-    release = json.loads(download(RELEASES, 2 * 1024 * 1024))
-    version = release.get('tag_name', '')
-    if not re.fullmatch(r'20\d{2}\.\d{1,2}\.\d{1,2}\.[1-9]\d*', version):
-        raise ValueError('Latest release is not a stable Doomer release')
-    manifest_url = f'https://github.com/doomerlabs/doomer/releases/download/{version}/release-manifest.json'
-    manifest = json.loads(download(manifest_url, 1024 * 1024))
-    if manifest.get('schemaVersion') != 1 or manifest.get('version') != version:
-        raise ValueError('Release manifest identity mismatch')
+    manifest = json.loads(download(RELEASE_MANIFEST, 1024 * 1024))
+    version = manifest.get('version', '')
+    if manifest.get('schemaVersion') != 1 or not re.fullmatch(r'20\d{2}\.\d{1,2}\.\d{1,2}\.[1-9]\d*', version):
+        raise ValueError('Latest release manifest is not a stable Doomer release')
     name = f'doomer_{version}_{system}_{arch}.tar.gz'
     expected = manifest.get('artifacts', {}).get(name, '')
     if not re.fullmatch(r'sha256:[0-9a-f]{64}', expected):
