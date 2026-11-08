@@ -1,0 +1,14 @@
+.depot/workflows/agent-e2e.yml
+  h_aa44c3b5b60dec 72-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1d29b0c866086d8c23940dec71f9877fa706c4ba",
+  "prompts": {},
+  "humans": {
+    "h_aa44c3b5b60dec": {
+      "author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
