@@ -30,6 +30,9 @@ answer before writing any installation files. Work in the environment that actua
 
 ## Verified first installation
 
+Installation writes local runtime and skill files. Creating a team PR is a
+separate agent step, omitted for local-only setup.
+
 If a review task is already active, retain its handle and selected runtime.
 Continue with the integration-authorization section using that task. If its
 executable is missing, use `doomer task repair HANDLE` and resume the same handle.
@@ -42,13 +45,13 @@ stop that task before starting setup with a compatible runtime.
    or returns another protocol, use the verified installer in step 2. Do not
    run installation commands through that unsupported executable.
 2. Otherwise inspect the installer at
-   `https://raw.githubusercontent.com/doomerlabs/skills/bfca6c0edee445d531440fd6f67fac383af85355/scripts/install.py`.
+   `https://raw.githubusercontent.com/doomerlabs/skills/270530b0757ddab34ec5ff3a9ea2880ada1074a2/scripts/install.py`.
    Download it once to a private temporary directory. Require SHA-256
-   `24e71dce733bdeea4fcffa027061b7139013ffcd265872aa82afc4d2941d2bf8`.
+   `c156c42a11a08110edd3d0ac0e1837d1886e3f993f6a3ad101b621fb7c26942b`.
    Inspect that same local file, verify the digest again immediately before
    execution, and run that exact file with Python 3. Stop on a digest mismatch;
    never fetch an alternative script or execute a second download. The
-   installer gets the official GitHub release manifest, verifies the archive,
+   installer reads the official stable channel, verifies the archive,
    and runs the verified CLI to install the signed runtime and bootstraps.
    Use `--personal` for a personal install or `--repo ABSOLUTE_PATH` for a team
    install. Preserve normal download and execution approval controls.

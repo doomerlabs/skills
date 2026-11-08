@@ -1,6 +1,7 @@
 import hashlib
 import importlib.util
 import io
+import json
 import ssl
 from pathlib import Path
 import tarfile
@@ -105,6 +106,36 @@ class BootstrapTests(unittest.TestCase):
             self.assertIsInstance(context, ssl.SSLContext)
             self.assertTrue(context.check_hostname)
             self.assertEqual(context.verify_mode, ssl.CERT_REQUIRED)
+
+    def test_stable_channel_avoids_api_discovery_and_verifies_archive(self):
+        archive = b'fixture archive'
+        version = '2026.11.7.5'
+        name = f'doomer_{version}_linux_amd64.tar.gz'
+        for failure in [None, 'checksum', 'version']:
+            with self.subTest(failure=failure):
+                asset_url = f'https://downloads.doomer.ai/cli/releases/{version}/{name}'
+                channel = {'schema_version': 1, 'version': version, 'assets': {'linux_amd64': {
+                    'url': asset_url if failure != 'version' else asset_url.replace(version, '2026.11.7.4'),
+                    'sha256': hashlib.sha256(archive if failure != 'checksum' else b'changed').hexdigest()}}}
+                with patch.object(installer.platform, 'system', return_value='Linux'), \
+                        patch.object(installer.platform, 'machine', return_value='x86_64'), \
+                        patch('sys.argv', ['install.py', '--repo', '/test/repo']), \
+                        patch.object(installer, 'download', side_effect=[json.dumps(channel).encode(), archive]) as download, \
+                        patch.object(installer, 'extract_binary', return_value=b'fixture binary'), \
+                        patch.object(installer.subprocess, 'check_output', return_value=b'{"managed_protocol":2}'), \
+                        patch.object(installer.subprocess, 'run') as run:
+                    if failure is None:
+                        installer.main()
+                        self.assertEqual(run.call_args.args[0][1:], ['install', '--runtime', '--repo', '/test/repo'])
+                    else:
+                        with self.assertRaises(ValueError):
+                            installer.main()
+                        run.assert_not_called()
+                    expected_calls = [(installer.STABLE_CHANNEL, 1024 * 1024)]
+                    if failure != 'version':
+                        expected_calls.append((asset_url + '?download=1', installer.MAX_ARCHIVE))
+                    self.assertEqual([call.args for call in download.call_args_list], expected_calls)
+                    self.assertNotIn('api.github.com', installer.STABLE_CHANNEL)
 
     def test_archive_accepts_only_a_regular_executable(self):
         def archive(name='./doomer', kind=tarfile.REGTYPE, extra=False):

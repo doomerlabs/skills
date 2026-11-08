@@ -2,7 +2,7 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.3
+  doomer-bootstrap-version: 2026.11.8.4
   doomer-cli-range: '>=2026.11.7.5'
   doomer-protocol: "2"
   doomer-update-policy: stable
@@ -64,7 +64,7 @@ Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
 
 Run the CLI where edits happen. In temporary homes, execute returned
-`portable_setup_command` arrays before approving setup or editing. Honor reusable versus
+`portable_setup_command` arrays before approving setup. Honor reusable versus
 this-environment-only access. Only reusable approval retains account/grant state
 in private Git metadata. Let the CLI restore it; never copy tokens or rewrite grants.
 
@@ -117,8 +117,8 @@ skill/runtime/guide reporting rules, never permissions, host denials, or explici
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/7f2ab261b4d25526613922e3050fb312f0ba6d62/INSTALL.md and require its SHA-256 to equal
-`c2e4c68cd9be32fe358f28d85579448ea93e13a8f6247c78322b27d001fbec95`
+https://raw.githubusercontent.com/doomerlabs/skills/bdfe83373aae2d0164eed7780e7efc2dccb2b6a7/INSTALL.md and require its SHA-256 to equal
+`2ef6ee762e86ad02bacd12365faaabd1286801567bb3b59624dbe590100145ba`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.

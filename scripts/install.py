@@ -14,7 +14,7 @@ import tarfile
 import tempfile
 import urllib.request
 
-RELEASES = 'https://api.github.com/repos/doomerlabs/doomer/releases/latest'
+STABLE_CHANNEL = 'https://downloads.doomer.ai/cli/stable.json'
 MAX_ARCHIVE = 32 * 1024 * 1024
 MAX_BINARY = 64 * 1024 * 1024
 
@@ -78,20 +78,20 @@ def main():
     arch = {'arm64': 'arm64', 'aarch64': 'arm64', 'x86_64': 'amd64', 'AMD64': 'amd64'}.get(platform.machine())
     if not system or not arch:
         raise ValueError('Doomer supports macOS/Linux on arm64/amd64')
-    release = json.loads(download(RELEASES, 2 * 1024 * 1024))
-    version = release.get('tag_name', '')
-    if not re.fullmatch(r'20\d{2}\.\d{1,2}\.\d{1,2}\.[1-9]\d*', version):
-        raise ValueError('Latest release is not a stable Doomer release')
-    manifest_url = f'https://github.com/doomerlabs/doomer/releases/download/{version}/release-manifest.json'
-    manifest = json.loads(download(manifest_url, 1024 * 1024))
-    if manifest.get('schemaVersion') != 1 or manifest.get('version') != version:
-        raise ValueError('Release manifest identity mismatch')
+    channel = json.loads(download(STABLE_CHANNEL, 1024 * 1024))
+    version = channel.get('version', '')
+    if channel.get('schema_version') != 1 or not re.fullmatch(r'20\d{2}\.\d{1,2}\.\d{1,2}\.[1-9]\d*', version):
+        raise ValueError('Invalid stable Doomer channel')
     name = f'doomer_{version}_{system}_{arch}.tar.gz'
-    expected = manifest.get('artifacts', {}).get(name, '')
-    if not re.fullmatch(r'sha256:[0-9a-f]{64}', expected):
+    asset = channel.get('assets', {}).get(f'{system}_{arch}', {})
+    archive_url = f'https://downloads.doomer.ai/cli/releases/{version}/{name}'
+    if asset.get('url') != archive_url:
+        raise ValueError('Stable channel archive does not match its release')
+    expected = asset.get('sha256', '')
+    if not re.fullmatch(r'[0-9a-f]{64}', expected):
         raise ValueError('Release archive checksum is missing')
-    archive = download(f'https://downloads.doomer.ai/cli/releases/{version}/{name}?download=1', MAX_ARCHIVE)
-    if 'sha256:' + hashlib.sha256(archive).hexdigest() != expected:
+    archive = download(archive_url + '?download=1', MAX_ARCHIVE)
+    if hashlib.sha256(archive).hexdigest() != expected:
         raise ValueError('Release archive checksum mismatch')
     with tempfile.TemporaryDirectory(prefix='doomer-bootstrap-') as directory:
         binary = Path(directory) / 'doomer'
