@@ -42,10 +42,12 @@ First-installation and runtime-replacement steps apply when no task is active.
 If the active runtime lacks a required onboarding capability, finish or explicitly
 stop that task before starting setup with a compatible runtime.
 
-1. If a managed-protocol-2 Doomer CLI is already installed, use it. Check
-   `doomer runtime-info` and require `managed_protocol: 2`. If the command fails
-   or returns another protocol, use the verified installer in step 2. Do not
-   run installation commands through that unsupported executable.
+1. If a managed-protocol-2 Doomer CLI is already installed, check
+   `doomer runtime-info` and require `managed_protocol: 2`. Also check
+   `doomer hooks --help` for the `--task` option used by current onboarding.
+   If either command fails, returns another protocol, or lacks that option,
+   use the verified installer in step 2. Do not run onboarding through an
+   executable missing those capabilities.
 2. Otherwise inspect the installer at
    `https://raw.githubusercontent.com/doomerlabs/skills/270530b0757ddab34ec5ff3a9ea2880ada1074a2/scripts/install.py`.
    Download it once to a private temporary directory. Require SHA-256
@@ -134,15 +136,25 @@ settings permissions. Reuse the installation answer without another question
 when it explicitly covered that settings change and the scope matches. Preserve other
 settings. Explain when the host requires a fresh chat or reload before it uses
 the policy. Saving a policy does not prove a running reviewer has loaded it.
-If the host still blocks Doomer, ask whether to continue local edits as described
+If the host still blocks Doomer, continue authorized local edits as described
 above. Report the host limitation and any incomplete review accurately.
 
 ## Finish agent integration
 
-For Codex or Claude Code, configure the active agent's hooks during onboarding
-with `doomer hooks --agent AGENT`. Installation authorizes adding Doomer’s hook
-entries while preserving unrelated hooks. Follow the harness's normal trust
-controls and clearly report whether hooks are configured or actually active.
+Configure only the active agent during onboarding. For Codex, run
+`doomer hooks --agent codex`. For Claude Code, after the prepared task has
+current account and upload approval, run
+`doomer hooks --agent claude --task HANDLE` with that task's handle.
+
+Approved Claude onboarding includes the narrow permissions needed for
+`doomer task submit`, `status`, `respond`, and `finish`. Do not ask another
+question for each subcommand. The CLI verifies the task's account and upload
+consent before adding those command rules to the user's Claude settings.
+Installation authorizes adding Doomer's hook entries and these review-command
+rules while preserving unrelated settings. It does not authorize arbitrary
+shell commands, another agent's integration, or bypassing a host denial.
+Follow the harness's normal hook-trust controls and clearly report whether
+hooks are configured or actually active.
 Do not postpone configuration until the next coding request. A headless or
 noninteractive invocation can still write hook configuration for future sessions.
 Do not skip `doomer hooks` merely because this invocation has no active hook
@@ -157,6 +169,9 @@ per-call commands handle review delivery after edits.
 Read and follow the full instructions returned by prepare. They belong to the
 same selected release that implements the task commands. Complete an actual
 review and record finding responses before claiming review delivery works.
+A denied explicit submit does not prove no review ran: a trusted hook may
+already have submitted it. Read task status without retrying the denied upload,
+and distinguish Quick and Deep results before reporting coverage.
 
 ## Team distribution
 
