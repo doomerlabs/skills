@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: agent-e2e-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
+  group: agent-e2e-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 8e9863b1fd1abcdb5b342ee3689db4636646d77c
+          ref: 4ef3f525f4afd7c1986ebec05ec0964a118818e9
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -48,13 +48,12 @@ jobs:
               raise SystemExit("Scenario discovery returned an invalid name")
           print("scenarios=" + json.dumps(scenarios))
           PY
-          release_url=$(curl -fsSL --connect-timeout 15 --max-time 60 --retry 3 --output /dev/null --write-out '%{url_effective}' https://github.com/doomerlabs/doomer/releases/latest) || {
-            echo "Could not resolve the published Doomer release from GitHub" >&2
+          release=$(curl -fsSL --connect-timeout 15 --max-time 60 --retry 3 https://downloads.doomer.ai/cli/stable.json | python3 -c 'import json, sys; print(json.load(sys.stdin)["version"])') || {
+            echo "Could not resolve the published stable Doomer release" >&2
             exit 1
           }
-          release=${release_url##*/}
           if [[ ! $release =~ ^20[0-9]{2}\.[0-9]{1,2}\.[0-9]{1,2}\.[1-9][0-9]*$ ]]; then
-            echo "GitHub returned an unexpected Doomer release tag" >&2
+            echo "Stable channel returned an unexpected Doomer release version" >&2
             exit 1
           fi
           printf 'release=%s\n' "$release" >> "$GITHUB_OUTPUT"
@@ -86,7 +85,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 8e9863b1fd1abcdb5b342ee3689db4636646d77c
+          ref: 4ef3f525f4afd7c1986ebec05ec0964a118818e9
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -133,7 +132,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 8e9863b1fd1abcdb5b342ee3689db4636646d77c
+          ref: 4ef3f525f4afd7c1986ebec05ec0964a118818e9
           path: e2e-runner
           persist-credentials: false
       - name: Collect all scenario recordings

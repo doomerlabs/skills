@@ -117,8 +117,8 @@ skill/runtime/guide reporting rules, never permissions, host denials, or explici
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/55cf4f5b1c8926042c80430931a7e31b9065791e/INSTALL.md and require its SHA-256 to equal
-`27b3f038fc4fa58cd38f75ecd4ebe78665d914a199e86e85aec1a1ee833b3b31`
+https://raw.githubusercontent.com/doomerlabs/skills/bdfe83373aae2d0164eed7780e7efc2dccb2b6a7/INSTALL.md and require its SHA-256 to equal
+`2ef6ee762e86ad02bacd12365faaabd1286801567bb3b59624dbe590100145ba`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.
