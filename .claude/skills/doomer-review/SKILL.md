@@ -57,14 +57,14 @@ Stop the denied transmission; keep uploads blocked. Silence is not upload consen
 Do not retry explicit reviewer refusals. Keep any task handle. If none exists,
 record `git rev-parse HEAD` before
 editing and later prepare with the original arguments plus `--base STARTING_COMMIT`.
-Never replace an existing baseline. Report the blocker once and incomplete review
-coverage before finishing. This rule also applies to older runtime instructions.
+Never replace an existing baseline. Report the blocker once. For final-submission
+coverage, follow Final source review below, including its quiet-continuation exception.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
 
 Run the CLI where edits happen. In temporary homes, execute returned
-`portable_setup_command` arrays before approving setup. Honor reusable versus
+`portable_setup_command` arrays before approving setup or editing. Honor reusable versus
 this-environment-only access. Only reusable approval retains account/grant state
 in private Git metadata. Let the CLI restore it; never copy tokens or rewrite grants.
 
