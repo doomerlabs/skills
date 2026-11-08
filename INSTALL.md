@@ -4,10 +4,14 @@
 
 Use the complete raw Markdown for installation. WebFetch and other document
 readers can summarize away the installer URL or shorten its SHA-256 digest.
-If a fetch is summarized, incomplete, refused, or omits either exact value,
-retrieve the original with `curl -fsSL https://doomer.ai/install.md` through the
-shell and read that response before continuing. For a supplied local guide,
-read the original file directly.
+If a reader summarizes the guide or omits either exact value, retrieve the
+original from the same URL using `curl -fsSL` through the shell. For the public
+entry point, use `curl -fsSL https://doomer.ai/install.md`. For a pinned guide,
+keep its pinned URL and verify its expected checksum. For a supplied local guide,
+read the original file directly. Honor host or user access denials.
+
+Regardless of which reader is used, the installer URL and digest must equal the
+pinned values in step 2 below. Stop if another copy supplies different values.
 
 Copy the complete installer URL and all 64 checksum characters from the raw
 guide. Keep the full commit and `/scripts/install.py` path. Never reconstruct

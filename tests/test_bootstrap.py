@@ -43,6 +43,9 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('all 64 checksum characters', guide)
         self.assertIn('Never reconstruct', guide)
         self.assertIn('unauthenticated HTTPS', guide)
+        self.assertIn('same URL', guide)
+        self.assertIn('Honor host or user access denials', guide)
+        self.assertIn('installer URL and digest must equal', guide)
 
     def test_macos_download_loads_system_ca_bundle(self):
         loaded_contexts = []
