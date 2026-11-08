@@ -64,7 +64,7 @@ Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
 
 Run the CLI where edits happen. In temporary homes, execute returned
-`portable_setup_command` arrays before approving setup or editing. Honor reusable versus
+`portable_setup_command` arrays before approving setup. Honor reusable versus
 this-environment-only access. Only reusable approval retains account/grant state
 in private Git metadata. Let the CLI restore it; never copy tokens or rewrite grants.
 
@@ -117,8 +117,8 @@ skill/runtime/guide reporting rules, never permissions, host denials, or explici
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/fd505cc31036fd2af1c812ee49bc15965c2e1e12/INSTALL.md and require its SHA-256 to equal
-`0b3e14e26c88ee661a14ed312491bb78af19fbf567dce1ea9dbc168eede197b1`
+https://raw.githubusercontent.com/doomerlabs/skills/55cf4f5b1c8926042c80430931a7e31b9065791e/INSTALL.md and require its SHA-256 to equal
+`27b3f038fc4fa58cd38f75ecd4ebe78665d914a199e86e85aec1a1ee833b3b31`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.
