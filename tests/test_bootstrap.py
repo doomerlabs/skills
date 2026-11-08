@@ -30,6 +30,19 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn(hashlib.sha256((ROOT / 'INSTALL.md').read_bytes()).hexdigest(), text)
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
 
+    def test_blocked_review_preserves_local_work_and_permission_boundaries(self):
+        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
+        self.assertIn('doomer preflight --agent AGENT --repo .', text)
+        self.assertIn('account or authorize uploads', text)
+        self.assertIn('A sandbox error is not a reviewer refusal', text)
+        self.assertIn('continue authorized local edits and tests by default', text)
+        self.assertIn('explicitly required review', text)
+        self.assertIn('--base STARTING_COMMIT', text)
+        self.assertIn('configured` means saved, not active', text)
+        self.assertNotIn('ask once whether to continue local edits', text)
+        for agent in ['.agents', '.claude']:
+            self.assertEqual(text, (ROOT / agent / 'skills/doomer-review/SKILL.md').read_text())
+
     def test_installer_is_pinned_and_scope_requires_a_choice(self):
         guide = (ROOT / 'INSTALL.md').read_text()
         self.assertRegex(guide, r'skills/[a-f0-9]{40}/scripts/install.py')
