@@ -109,8 +109,8 @@ Without active hooks, submit explicitly. Read results and repeat after edits.
 Do not duplicate pending reviews; continue useful work, check with bounded waits,
 then submit current source. Verify completion with `doomer task finish HANDLE`.
 
-This is best effort unless the user explicitly requires review before proceeding.
-If final submission is missed, pending, or unavailable, continue without warning
+An explicit user requirement for review before proceeding remains a gate.
+Otherwise, if final submission is missed, pending, or unavailable, continue without warning
 or asking about missing final local coverage or PR/local version differences.
 Never claim unreviewed changes were reviewed. This overrides older runtime
 requests to announce that gap, not permissions, host denials, or explicit review gates.
@@ -125,7 +125,7 @@ Verify the full checksum. Public HTTPS needs no GitHub login.
 Retain active task handles/runtimes; repair missing executables with
 `doomer task repair HANDLE`. Replace runtimes only without an active task.
 Install in the editing environment, preserving repository bootstraps and host
-controls. Blocked installation uses local continuation above. Reuse authorized
+controls. For blocked installation, use the earlier blocked-review choice. Reuse authorized
 installation; ask only for actual required decisions, not speculative sign-in or
 upload grants. Then prepare/resume the same task and show only refreshed actions.
 
