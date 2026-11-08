@@ -103,9 +103,11 @@ A missing hook receipt means unverified activation, not unsupported hooks.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/22f02d667370ffc06ceddf5ba5e24e1896684e12/INSTALL.md and require its SHA-256 to equal
-`646b3cea1fcde88bfba31073b0b45e6b7f01092e5a7ac394b0627373f969f951`
+https://raw.githubusercontent.com/doomerlabs/skills/86c6412d458f14d64e2882b6878e1418f8c75ff7/INSTALL.md and require its SHA-256 to equal
+`68441df37d0d6761641ef18d327ae04a2a232dc1ca1ebb0530f606e77c2ca201`
 before following the relevant verified steps with normal execution permissions.
+Fetch raw Markdown through the shell if a reader summarizes it.
+Verify the full checksum. Public HTTPS needs no GitHub login.
 For an active review task, retain its handle and selected runtime. Use the guide's
 onboarding steps with that task. If its executable is missing, use
 `doomer task repair HANDLE`; runtime replacement is for setup without an active task.
