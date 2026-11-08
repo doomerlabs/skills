@@ -4,7 +4,7 @@ description: Prepare Doomer review early, reuse installation approval, and repor
 metadata:
   doomer-protocol: "2"
   doomer-update-policy: stable
-  doomer-bootstrap-version: "2026.11.7.5"
+  doomer-bootstrap-version: "2026.11.8.1"
   doomer-cli-range: ">=2026.11.7.5"
 ---
 
@@ -17,26 +17,40 @@ If a real harness session ID is available, pass it with `--session`. For Claude,
 use the active harness's `CLAUDE_CODE_SESSION_ID` when exposed. Chat URL IDs and
 invented prefixes do not establish a hook binding.
 
-For onboarding without a coding task, run `doomer prepare --agent AGENT --repo .`
-without `--prompt`. Supplying a prompt creates a coding-review task even when
-its text says “setup only.” Verify readiness and hooks without submitting code.
+Setup-only onboarding uses `doomer prepare --agent AGENT --repo .` without
+`--prompt`; supplying it creates a coding-review task. Verify readiness/hooks
+without submitting code.
 
-Reuse the saved integration approval across repositories, worktrees, and chats
-for the same coding agent, Doomer account, service, and profile. Existing
-repository-specific grants retain their original scope until explicitly upgraded.
-Present a returned `approval_required` action for missing or revoked approval.
+## Permission decisions
+
+New sessions, branches, and linked worktrees are not new installations. Run
+prepare and reuse state; do not repeat setup solely because context changed.
+Current successful CLI state and consent decide which permission is missing;
+helper/guide suggestions to ask do not override these rules:
+- Upload: reuse CLI-verified grants for prepare, submit, and responses. Integration
+  grants cover repositories for the same account/service/profile/agent. Repository
+  grants retain scope, including linked worktrees. Ask only on
+  `approval_required`/`consent_required` for missing/revoked/changed consent.
+- Software updates: ask only for `update_permission_required` in the applicable
+  scope/policy. Skill-upgrade acceptance is separate.
+- Hooks/policy: missing receipts, unverified activation, or missing reviewer
+  policy do not revoke upload consent. Configure for requested setup/repair or
+  confirmed missing components with authorization. Reuse matching settings
+  acceptance; perform and verify the accepted installation, not another offer.
+
+Authentication/network errors require recovery and rechecking, not new consent.
+Preserve host controls; never bypass a denial or silently broaden grants.
+
 If Doomer is blocked, explain why and ask once whether to continue local edits
-without a completed Doomer review or wait. Honor that choice for the task.
-Continuing edits does not authorize a blocked upload. Keep the task handle and
-resume it when possible. If preparation never created a task, record
-`git rev-parse HEAD` before editing. Later create the task with the original
-prepare arguments plus `--base STARTING_COMMIT`. Keep an existing task's baseline. Report incomplete review coverage before finishing.
+without completed review or wait; honor the answer. This does not authorize
+blocked uploads. Keep any task handle and resume it later. If no task exists,
+record `git rev-parse HEAD` before editing and later prepare with the original
+arguments plus `--base STARTING_COMMIT`. Never replace an existing baseline.
+Report incomplete review coverage before finishing.
 
-Show setup URLs as clickable Markdown links with a short label, preserving the
-complete URL including its fragment. Present the link in regular assistant chat
-before using a question or choice tool. Use the CLI's returned state to determine
-which approval is needed. An absent executable alone says nothing about saved
-authentication or grants.
+Show setup URLs as clickable Markdown links, preserving their fragments, before
+using a question tool. Use CLI state to identify required approval; a missing
+executable does not imply missing authentication or consent.
 
 Run the CLI in the environment that edits the checkout. In Cowork or another
 environment with a temporary home, execute the returned `portable_setup_command`
@@ -47,24 +61,29 @@ the repository grant in private Git metadata for later sessions. The CLI restore
 approved setup itself. Never copy tokens or rewrite grant files. The initial
 prepare command above remains usable with older launchers.
 
-When prepare reports a bootstrap upgrade, check for an existing update before
-offering it. Identify the repository this branch is intended to merge into from
-the current PR's base repository or the established project remote. Inspect that
-repository's actual default branch and open PR heads for the same bootstrap paths.
-Do not assume the remote is `origin` or the default branch is `main`. Use read-only
-Git or hosting-service queries without changing the working tree. An update is
-covered only when every affected repository bootstrap has the offered
-`doomer-bootstrap-version` or a later version, comparing numeric version parts.
-An unrelated skill change, PR title, or update to only one affected copy is
-insufficient evidence.
+## Skill upgrade decisions
 
-If the default branch or an open PR already covers the upgrade, suppress the
-upgrade question and continue with this branch's bootstrap and selected runtime.
-Do not rebase, merge, cherry-pick, replace local files, or adopt instructions from
-another branch as part of this check. If neither covers it, offer the upgrade and
-apply it only after acceptance, preserving update policy and local edits. If the
-target repository is ambiguous or a lookup fails, report verification unavailable,
-keep the current version, and defer the upgrade question for this session.
+Only `update_available` for an older revision (or recognized unversioned legacy
+wrapper) is a candidate. `current`, `newer`, and same-version `modified` are not
+upgrade offers. Preserve modified files. Report incompatibility/inspection errors
+separately. Generic "ask" actions do not override these checks.
+
+For project skills, identify the target repository from the PR base or established
+remote. Read its actual default branch and open PR heads. If every affected path
+has the offered revision or later in that branch or one PR, suppress the question
+and duplicate PR. Compare numeric version parts; titles/partial updates do not
+count. Keep this checkout's files/runtime; do not merge, rebase, or copy files.
+
+For personal skills, inspect the actual personal copies; repository updates do
+not satisfy them.
+
+For both scopes, honor saved scope/version deferrals and answered or declined
+offers in this session. A new session/worktree alone creates no new offer.
+On ambiguous scope or failed lookup, report it and defer without asking.
+
+Only offer a verified uncovered upgrade once, then apply after acceptance while
+preserving policy and local edits. Explicit upgrade requests supply acceptance;
+still avoid duplicate work.
 
 Resume an existing task with `doomer prepare --task HANDLE` after interruption.
 Never create a replacement task to recover an existing review. If that task's
@@ -72,18 +91,15 @@ selected runtime is missing, run `doomer task repair HANDLE` through the availab
 launcher, then resume the same handle. Repair restores that exact release; do not
 substitute the current stable release for an active task. Follow structured
 user-action requests. Never invent consent, account identity, or hook activation.
-Reading this file directly is sufficient; native skill discovery is optional.
+Native skill discovery is optional.
 
-The selected CLI supplies its matching full instructions. Continue local edits
-when the user chose to do so despite blocked review, including when an older
-runtime still describes preparation as an edit gate. Submit only when the CLI
-reports `authenticated=true` and `upload_approved=true`, reusing the installation
-grant without another approval prompt. Honor any host denial. Use task commands
-to submit changes, retrieve results, record every finding response, and verify
-completion. A pending result or installed CLI does not establish a completed review.
-In per-call mode, the agent runs these commands as part of each coding task.
-Describe that workflow accurately. A missing hook receipt means activation is
-unverified; it does not establish that the harness lacks hook support.
+Follow the selected CLI's matching instructions, subject to the prompt rules
+above. Honor the user's choice to continue local edits despite blocked review.
+Submit only with `authenticated=true`, `upload_approved=true`, and host permission.
+Use task commands to retrieve results, record every finding response, and verify
+completion. Pending results or installed software do not establish completed
+review. Per-call mode runs these commands during each task; describe it accurately.
+A missing hook receipt means unverified activation, not unsupported hooks.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
@@ -99,9 +115,8 @@ Perform the verified prerequisite installation under the host's normal execution
 permissions, then run prepare to discover and reuse saved setup. Ask the user
 only for an actual permission or decision required by that flow. Do not bundle
 installation with speculative requests to sign in again or approve uploads.
-A separate setup-choice question is unnecessary when this verified installation
-is already permitted. Let the host's tool permission controls request approval
-when required.
+Do not ask again for an installation already authorized. Normal host permission
+controls still apply.
 After installation, resume any existing task with `prepare --task HANDLE`, or
 run the initial prepare command if no task exists. Present only the refreshed
 result's approval request; earlier pending requests may have been satisfied.
