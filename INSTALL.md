@@ -69,15 +69,16 @@ If setup-only, do not invent a coding task or submit a review.
 
 Attempt preparation before editing so the CLI can retain the starting revision.
 If Doomer is blocked by setup, authentication, network access, or host approval,
-explain the blocker and ask once whether to continue local edits without a
-completed Doomer review or wait for Doomer. Honor the answer for the rest of the
-task. Continuing local edits does not approve a blocked upload or a settings
-change. Retain the task handle and resume it if Doomer becomes available. If no
+explain the blocker once and continue authorized local edits and tests by default.
+Do not ask whether to continue. Explicit user requirements to wait or require
+review before editing take precedence. Keep denied uploads and settings changes
+blocked, and do not retry explicit reviewer refusals.
+Retain the task handle and resume it if Doomer becomes available. If no
 task was created, run `git rev-parse HEAD` before local edits and retain that
 starting commit. When preparation becomes available, create the task with
 `doomer prepare --agent AGENT --repo PATH --prompt "USER TASK" --base STARTING_COMMIT`.
-An existing task keeps its original baseline. Report any
-incomplete review before finishing.
+An existing task keeps its original baseline. Follow the skill's final-source
+review rules when reporting coverage; never claim unreviewed changes were reviewed.
 
 For Cowork and other environments with a temporary home, add `--portable`.
 Install and run inside the environment that edits the checkout. The browser
