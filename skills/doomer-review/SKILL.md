@@ -2,7 +2,7 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.5
+  doomer-bootstrap-version: 2026.11.8.6
   doomer-cli-range: '>=2026.11.7.5'
   doomer-protocol: "2"
   doomer-update-policy: stable
@@ -30,7 +30,8 @@ prepare and reuse state; do not repeat setup solely because context changed.
 Current successful CLI state and consent decide which permission is missing;
 helper/guide suggestions to ask do not override these rules:
 - Upload: reuse CLI-verified grants for prepare, submit, and responses. Integration
-  grants cover repositories for the same account/service/profile/agent. Repository
+  grants cover repositories for the same installation credential or
+  account/service/profile/agent. Repository
   grants retain scope, including linked worktrees. Ask only on
   `approval_required`/`consent_required` for missing/revoked/changed consent.
 - Software updates: ask only for `update_permission_required` in the applicable
@@ -58,7 +59,7 @@ Do not retry explicit reviewer refusals. Keep any task handle. If none exists,
 record `git rev-parse HEAD` before
 editing and later prepare with the original arguments plus `--base STARTING_COMMIT`.
 Never replace an existing baseline. Report the blocker once. For final-submission
-coverage, follow Final source review below, including its quiet-continuation exception.
+coverage, follow Final source review below and report its verified status at handoff.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
@@ -95,6 +96,8 @@ Never substitute stable for an active task. Follow structured actions; never
 invent consent, account identity, or hook activation. Native discovery is optional.
 
 Follow the selected CLI's instructions subject to the rules above.
+Quick reviews need no account. `authenticated=true` may confirm an anonymous
+credential; do not require sign-in.
 Submit only with `authenticated=true`, `upload_approved=true`, and host permission.
 Use task commands for results, every finding response, and verified completion.
 Pending results or installed software do not mean reviewed. Per-call mode runs
@@ -109,16 +112,17 @@ Without active hooks, submit explicitly. Read results and repeat after edits.
 Do not duplicate pending reviews; continue useful work, check with bounded waits,
 then submit current source. Verify completion with `doomer task finish HANDLE`.
 
-An explicit user requirement for review before proceeding remains a gate.
-Otherwise, if final submission is missed, pending, or unavailable, continue without
-warning or asking about missing final local coverage or PR/local version differences.
-Never claim unreviewed changes were reviewed. This final-gap exception overrides
-skill/runtime/guide reporting rules, never permissions, host denials, or explicit review gates.
+Honor explicit review gates; otherwise continue authorized local work.
+At handoff, report: latest source reviewed, pending, blocked, or latest changes
+not reviewed. Include the review URL when available. Zero hypotheses can be a
+completed review; missing results or an older revision cannot. Report current
+status without repeating warnings. Never hide missing coverage or claim
+unreviewed changes were reviewed.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/7300bd814da7e8c94a2b7ae0113a449ac43f93f8/INSTALL.md and require its SHA-256 to equal
-`19e120dea9ebfb1455a1cf42fb071d439173f2a3e6c9c85e2c81dcae72ed20d7`
+https://raw.githubusercontent.com/doomerlabs/skills/5af15c3dbc58c5cbf214e135209ce329838666bc/INSTALL.md and require its SHA-256 to equal
+`c434783e53abf6f70add1f711be13262f400969caa36303918b41b6b8ff3b9ff`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.
