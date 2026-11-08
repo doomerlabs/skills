@@ -79,15 +79,13 @@ open PR heads. If every affected path has the offered revision or later in that
 branch or one PR, suppress the offer and duplicate PR. Compare numeric versions,
 not titles/partial updates. Keep local files/runtime; do not merge, rebase, or copy.
 
-For personal skills, inspect the actual personal copies; repository updates do
-not satisfy them.
+For personal skills, inspect personal copies; repository updates do not count.
 
 Honor scope/version deferrals and answered/declined offers. New sessions/worktrees
 alone create no offer. On ambiguous scope or failed lookup, report and defer.
 
-Only offer a verified uncovered upgrade once, then apply after acceptance while
-preserving policy and local edits. Explicit upgrade requests supply acceptance;
-still avoid duplicate work.
+Offer verified uncovered upgrades once; apply after acceptance, preserving
+policy/edits. Explicit upgrade requests count as acceptance. Avoid duplicates.
 
 Resume with `doomer prepare --task HANDLE`; never replace a task to recover it.
 For a missing selected runtime, use `doomer task repair HANDLE` through the
@@ -95,12 +93,11 @@ available launcher to restore that exact release, then resume the same handle.
 Never substitute stable for an active task. Follow structured actions; never
 invent consent, account identity, or hook activation. Native discovery is optional.
 
-Follow the selected CLI's matching instructions, subject to the prompt rules
-above, including default local continuation when review is blocked.
+Follow the selected CLI's instructions subject to the rules above.
 Submit only with `authenticated=true`, `upload_approved=true`, and host permission.
-Use task commands to retrieve results, record every finding response, and verify
-completion. Pending results or installed software do not establish completed
-review. Per-call mode runs these commands during each task; describe it accurately.
+Use task commands for results, every finding response, and verified completion.
+Pending results or installed software do not mean reviewed. Per-call mode runs
+these commands during each task; describe it accurately.
 A missing hook receipt means unverified activation, not unsupported hooks.
 
 ## Final source review
