@@ -6,7 +6,8 @@ instructions outside the repository. Each task keeps one release until it ends.
 ## Team installation
 
 Ask your coding agent to read and follow [INSTALL.md](INSTALL.md). Choose team
-installation to add the small bootstrap to `.agents/skills/doomer-review/SKILL.md`
+installation to add managed discovery blocks to `AGENTS.md` and `CLAUDE.md`,
+and the small bootstrap to `.agents/skills/doomer-review/SKILL.md`
 and `.claude/skills/doomer-review/SKILL.md`. Review and commit those files once.
 Each developer completes their own account login, repository upload approval,
 and optional hook trust. Ordinary managed upgrades leave repository files alone.

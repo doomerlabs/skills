@@ -30,7 +30,9 @@ answer before writing any installation files. Work in the environment that actua
 
 ## Verified first installation
 
-Installation writes local runtime and skill files. Creating a team PR is a
+Installation writes local runtime and skill files. Team installation also adds
+managed Doomer blocks to `AGENTS.md` and `CLAUDE.md`, preserving other instructions.
+Creating a team PR is a
 separate agent step, omitted for local-only setup.
 
 If a review task is already active, retain its handle and selected runtime.
@@ -160,14 +162,25 @@ review and record finding responses before claiming review delivery works.
 
 Team installation includes opening the initial bootstrap pull request unless
 the user explicitly requested local-only setup. Use a dedicated branch and stage
-only the generated project bootstrap files. Preserve unrelated work, reuse an
+the generated project files: both `SKILL.md` files and the managed changes to
+`AGENTS.md` and `CLAUDE.md`. Preserve unrelated work, reuse an
 existing setup PR when present, and report the PR link before calling team
 installation complete. If GitHub access is unavailable, leave the prepared
 changes intact and explain what is needed to publish them. Personal installation
 does not create a repository PR.
 
 Routine releases do not change the bootstrap files or require upgrade PRs.
-Each teammate performs local account and repository onboarding.
+The instruction blocks tell each coding agent to read its installed Doomer skill
+before editing, even when the skill is absent from its catalog. Each teammate's
+agent checks local readiness and completes its own missing installation,
+permissions, and hook setup on first use. Configure only the active agent during
+onboarding; installing through Claude does not activate Codex for anyone.
+Repository files distribute instructions, never credentials, upload grants, or
+hook trust. Reuse valid local setup on subsequent tasks.
+
+Verify that a team install produced both instruction blocks before opening its
+PR. If an older CLI creates only skill files, report the missing capability;
+do not claim team discovery is configured or hand-write substitute instructions.
 
 ## Operational limits
 
