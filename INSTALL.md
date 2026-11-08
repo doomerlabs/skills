@@ -45,13 +45,13 @@ stop that task before starting setup with a compatible runtime.
    or returns another protocol, use the verified installer in step 2. Do not
    run installation commands through that unsupported executable.
 2. Otherwise inspect the installer at
-   `https://raw.githubusercontent.com/doomerlabs/skills/14dbd4730d263d760af13f5d3278d77c2bfb5505/scripts/install.py`.
+   `https://raw.githubusercontent.com/doomerlabs/skills/270530b0757ddab34ec5ff3a9ea2880ada1074a2/scripts/install.py`.
    Download it once to a private temporary directory. Require SHA-256
-   `8929de07ec4eb6d5a272a7bc65b160f36dc2b94e08a2d6fdfc23b287e87fa860`.
+   `c156c42a11a08110edd3d0ac0e1837d1886e3f993f6a3ad101b621fb7c26942b`.
    Inspect that same local file, verify the digest again immediately before
    execution, and run that exact file with Python 3. Stop on a digest mismatch;
    never fetch an alternative script or execute a second download. The
-   installer gets the official GitHub release manifest, verifies the archive,
+   installer reads the official stable channel, verifies the archive,
    and runs the verified CLI to install the signed runtime and bootstraps.
    Use `--personal` for a personal install or `--repo ABSOLUTE_PATH` for a team
    install. Preserve normal download and execution approval controls.
