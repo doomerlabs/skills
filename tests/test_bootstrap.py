@@ -37,6 +37,16 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('ask personal versus team and wait', guide)
         self.assertIn('returns another protocol', guide)
 
+    def test_summarized_instructions_recover_from_original(self):
+        guide = (ROOT / 'INSTALL.md').read_text()
+        self.assertIn('curl -fsSL https://doomer.ai/install.md', guide)
+        self.assertIn('all 64 checksum characters', guide)
+        self.assertIn('Never reconstruct', guide)
+        self.assertIn('unauthenticated HTTPS', guide)
+        self.assertIn('same URL', guide)
+        self.assertIn('Honor host or user access denials', guide)
+        self.assertIn('installer URL and digest must equal', guide)
+
     def test_macos_download_loads_system_ca_bundle(self):
         loaded_contexts = []
 

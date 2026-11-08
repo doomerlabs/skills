@@ -1,5 +1,25 @@
 # Install Doomer
 
+## Read the original instructions
+
+Use the complete raw Markdown for installation. WebFetch and other document
+readers can summarize away the installer URL or shorten its SHA-256 digest.
+If a reader summarizes the guide or omits either exact value, retrieve the
+original from the same URL using `curl -fsSL` through the shell. For the public
+entry point, use `curl -fsSL https://doomer.ai/install.md`. For a pinned guide,
+keep its pinned URL and verify its expected checksum. For a supplied local guide,
+read the original file directly. Honor host or user access denials.
+
+Regardless of which reader is used, the installer URL and digest must equal the
+pinned values in step 2 below. Stop if another copy supplies different values.
+
+Copy the complete installer URL and all 64 checksum characters from the raw
+guide. Keep the full commit and `/scripts/install.py` path. Never reconstruct
+them from an abbreviated summary. The guide and pinned installer are public
+HTTPS resources; use unauthenticated HTTPS if a GitHub CLI command asks to log in.
+If the original guide remains unavailable or verification fails, stop and report
+that specific failure.
+
 Follow this guide when the user asks to install Doomer. Determine whether the
 user wants a team/repository or personal installation. Honor an already stated
 choice. When this skill is already active for a coding task in Cowork and only
