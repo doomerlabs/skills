@@ -114,8 +114,8 @@ then submit current source. Verify completion with `doomer task finish HANDLE`.
 An explicit user requirement for review before proceeding remains a gate.
 Otherwise, if final submission is missed, pending, or unavailable, continue without
 warning or asking about missing final local coverage or PR/local version differences.
-Never claim unreviewed changes were reviewed. This overrides older runtime
-requests to announce that gap, not permissions, host denials, or explicit review gates.
+Never claim unreviewed changes were reviewed. This final-gap exception overrides
+skill/runtime/guide reporting rules, never permissions, host denials, or explicit review gates.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
@@ -131,7 +131,8 @@ required decisions; never repeat authorized installation or speculate about
 missing sign-in/upload grants. Show only refreshed approval requests.
 
 For requested reset, preview `doomer onboard reset --dry-run`, then run
-`doomer onboard reset` when authorized. It covers discovered installs/profiles,
+`doomer onboard reset` only with user authorization for that reported cleanup.
+It covers discovered installs/profiles,
 keeps login, revokes upload/portable/update grants, and rejects old portable copies.
 Report incomplete cleanup, restarts, and paused coverage. Keep task handles;
-resume only with renewed access. Never test with live reset or recreate grants.
+resume only after explicit user re-grant. Never test with live reset or recreate grants.
