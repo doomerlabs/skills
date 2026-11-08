@@ -1,0 +1,18 @@
+.agents/skills/doomer-review/SKILL.md
+  h_aa44c3b5b60dec 60-61,67
+.claude/skills/doomer-review/SKILL.md
+  h_aa44c3b5b60dec 60-61,67
+skills/doomer-review/SKILL.md
+  h_aa44c3b5b60dec 60-61,67
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "1fe92044daf37528cea32e2ac3731d9843bb4899",
+  "prompts": {},
+  "humans": {
+    "h_aa44c3b5b60dec": {
+      "author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
