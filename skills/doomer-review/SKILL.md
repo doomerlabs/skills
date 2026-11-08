@@ -1,6 +1,6 @@
 ---
 name: doomer-review
-description: Prepare Doomer review early, reuse installation approval, and report review coverage before completing coding work.
+description: Review edited source with Doomer and reuse approved setup.
 metadata:
   doomer-bootstrap-version: 2026.11.8.3
   doomer-cli-range: '>=2026.11.7.5'
@@ -60,8 +60,7 @@ Never replace an existing baseline. Report the blocker once and incomplete revie
 coverage before finishing. This rule also applies to older runtime instructions.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
-Use CLI state to
-identify approval; a missing binary does not imply missing consent.
+Use CLI state for approval; a missing binary does not imply missing consent.
 
 Run the CLI where edits happen. In temporary homes, execute returned
 `portable_setup_command` arrays before approving setup. Honor reusable versus
