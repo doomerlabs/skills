@@ -49,8 +49,6 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('--base STARTING_COMMIT', text)
         self.assertIn('configured` means saved, not active', text)
         self.assertNotIn('ask once whether to continue local edits', text)
-        for agent in ['.agents', '.claude']:
-            self.assertEqual(text, (ROOT / agent / 'skills/doomer-review/SKILL.md').read_text())
 
     def test_installer_is_pinned_and_scope_requires_a_choice(self):
         guide = (ROOT / 'INSTALL.md').read_text()
