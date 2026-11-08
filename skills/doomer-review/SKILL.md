@@ -103,8 +103,8 @@ A missing hook receipt means unverified activation, not unsupported hooks.
 
 For requested installation or onboarding, or when the CLI is missing for the
 authorized coding task, fetch the official INSTALL.md at
-https://raw.githubusercontent.com/doomerlabs/skills/898a05441918fd5a6437bfccad4081ca75d04f4b/INSTALL.md and require its SHA-256 to equal
-`68441df37d0d6761641ef18d327ae04a2a232dc1ca1ebb0530f606e77c2ca201`
+https://raw.githubusercontent.com/doomerlabs/skills/7f2ab261b4d25526613922e3050fb312f0ba6d62/INSTALL.md and require its SHA-256 to equal
+`c2e4c68cd9be32fe358f28d85579448ea93e13a8f6247c78322b27d001fbec95`
 before following the relevant verified steps with normal execution permissions.
 Fetch raw Markdown through the shell if a reader summarizes it.
 Verify the full checksum. Public HTTPS needs no GitHub login.
