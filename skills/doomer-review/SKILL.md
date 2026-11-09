@@ -2,8 +2,8 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.9.1
-  doomer-cli-range: '>=2026.11.9.1'
+  doomer-bootstrap-version: 2026.11.9.2
+  doomer-cli-range: '>=2026.11.9.2'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---
@@ -11,13 +11,18 @@ metadata:
 # Doomer review
 
 At task start, run `doomer preflight --agent AGENT --repo .` for local-only
-consent and Codex policy inspection. Saved receipts do not verify the current
-account or authorize uploads. Then run
-`doomer prepare --agent AGENT --repo . --prompt "USER TASK"`.
-If preflight reports pending missing reviewer settings, first offer account
-verification and scoped policy repair. After acceptance run prepare, verify live
-consent, and install the proposal. Respect saved declines and explicit denies.
-For older Claude CLIs, offer the same verification and repair.
+readiness evidence. Saved receipts do not verify the current
+account or authorize uploads. If it returns `setup_decision_required`, present
+its next decision and wait for the answer BEFORE running prepare. Do not treat
+a saved upload grant as proof that this agent profile has its policy installed.
+After acceptance, run `doomer prepare --agent AGENT --repo . --prompt "USER TASK"`.
+If no decision is pending, run prepare immediately. Prepare checks onboarding
+on every task, not just installation. Follow its next readiness action before
+submitting a review or ending the task. For `setup_decision_required`, present
+the one decision in `action`, execute the accepted command (or explicit Never
+ask again command), then rerun prepare with the same task handle. Not now is
+not a permanent refusal. If host approval blocks prepare, use the local preflight
+evidence to offer missing scoped setup; respect the denial until authorized.
 Use codex or claude and the actual task without shell interpolation. Keep the
 returned task handle. An older CLI may lack preflight; continue with prepare.
 If a real harness session ID is available, pass it with `--session`. For Claude,
@@ -26,6 +31,22 @@ invented prefixes do not establish a hook binding.
 
 For setup only, run `doomer prepare --agent AGENT --repo .` without `--prompt`.
 A prompt creates a coding task. Verify readiness/hooks without submitting code.
+
+## Browser upload approval
+
+When the CLI returns `approval_required` and `wait_command`, show its complete
+approval URL and explain that Allow also saves the matching scoped Codex review
+permission. Immediately run `wait_command` and repeat while approval is pending,
+for up to ten minutes. Keep the turn open; the user answers on the web page, not
+with a second chat message. The wait returns verified approval without changing
+policy. Execute `policy_resume_command` to finish the policy installation covered
+by that approval, without another question. If the host explicitly rejects this
+persistent settings change, stop it and ask once for the displayed scoped policy
+in chat; after acceptance resume the same task. Never retry a host refusal
+without new authorization. Do not
+upload source or claim the task finished while setup is pending. Respect Cancel
+and report a timeout as pending. Hooks remain optional and require separate
+installation and native trust decisions.
 
 ## Permission decisions
 
