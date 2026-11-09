@@ -23,8 +23,8 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer prepare --task HANDLE', text)
         self.assertIn('doomer task repair HANDLE', text)
         # Keep the generated bootstrap bounded while allowing the explicit
-        # Quick/Deep completion guidance shared with the CLI.
-        self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 10 * 1024)
+        # Quick/Deep and browser-approval guidance shared with the CLI.
+        self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 12 * 1024)
         self.assertNotIn('self-update', text)
         self.assertNotIn('doomer-version:', text)
         self.assertIn('doomer-cli-range:', text)
@@ -36,8 +36,8 @@ class BootstrapTests(unittest.TestCase):
     def test_quick_completion_and_explicit_deep_guidance(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         metadata = text.split('---', 2)[1]
-        self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.9\.1$')
-        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.9\.1'$")
+        self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.9\.2$')
+        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.9\.2'$")
         final = text.split('## Final source review\n', 1)[1].split('For requested installation', 1)[0]
         final = ' '.join(final.split())
         for requirement in [
