@@ -16,7 +16,7 @@ spec.loader.exec_module(installer)
 
 class BootstrapTests(unittest.TestCase):
     def test_stable_contract_has_no_cli_pin_or_updater_workflow(self):
-        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
+        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('doomer-protocol: "2"', text)
         self.assertIn('doomer-update-policy: stable', text)
         self.assertIn('doomer prepare', text)
@@ -24,7 +24,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer task repair HANDLE', text)
         # Keep the generated bootstrap bounded while allowing the explicit
         # Quick/Deep completion guidance shared with the CLI.
-        self.assertLess(len(text.encode()), 10 * 1024)
+        self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 10 * 1024)
         self.assertNotIn('self-update', text)
         self.assertNotIn('doomer-version:', text)
         self.assertIn('doomer-cli-range:', text)
@@ -34,18 +34,28 @@ class BootstrapTests(unittest.TestCase):
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
 
     def test_quick_completion_and_explicit_deep_guidance(self):
-        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
-        self.assertIn('doomer-bootstrap-version: 2026.11.8.10', text)
-        self.assertIn('>=2026.11.7.5', text)
-        self.assertIn('Quick review of the latest submitted changes gates', text)
-        self.assertIn('record every response', text)
-        self.assertIn('current source', text)
-        self.assertIn('Deep only when explicitly requested', text)
-        self.assertIn('doomer review get REVIEW_ID --workspace --format json', text)
-        self.assertNotIn('wait for Deep when enabled', text)
+        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
+        metadata = text.split('---', 2)[1]
+        self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.8\.10$')
+        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.7\.5'$")
+        final = text.split('## Final source review\n', 1)[1].split('For requested installation', 1)[0]
+        final = ' '.join(final.split())
+        for requirement in [
+            'Use task state and Quick readiness, not aggregate review status or `full_review.status`.',
+            'Quick review of the latest submitted changes gates completion.',
+            'Read Quick findings and record every response. After edits, resubmit and repeat.',
+            'Deep continues in the background; its pending or failed status does not block successful Quick review.',
+            'Do not fetch Deep results to finish; wait for Deep only when explicitly requested.',
+            'Verify response delivery and current source with `doomer task finish HANDLE` before ending the turn.',
+            'Only when the user explicitly requests Deep, use `review.id` from task status with `doomer review get REVIEW_ID --workspace --format json`, using the task\'s API URL and profile.',
+            'Do not use this command as a prerequisite for automatic Quick completion.',
+        ]:
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, final)
+        self.assertNotIn('wait for Deep when enabled', final)
 
     def test_blocked_review_preserves_local_work_and_permission_boundaries(self):
-        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
+        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('doomer preflight --agent AGENT --repo .', text)
         self.assertIn('account or authorize uploads', text)
         self.assertIn('For a confirmed sandbox restriction', text)
@@ -62,20 +72,20 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('--base STARTING_COMMIT', text)
         self.assertIn('configured` means saved, not active', text)
         self.assertNotIn('ask once whether to continue local edits', text)
-        guide = (ROOT / 'INSTALL.md').read_text()
+        guide = (ROOT / 'INSTALL.md').read_text(encoding='utf-8')
         self.assertIn('continue authorized local edits and tests by default', guide)
         self.assertIn('Do not ask whether to continue.', guide)
         self.assertNotIn('ask once whether to continue local edits', guide)
 
     def test_installer_is_pinned_and_scope_requires_a_choice(self):
-        guide = (ROOT / 'INSTALL.md').read_text()
+        guide = (ROOT / 'INSTALL.md').read_text(encoding='utf-8')
         self.assertRegex(guide, r'skills/[a-f0-9]{40}/scripts/install.py')
         self.assertIn(hashlib.sha256((ROOT / 'scripts/install.py').read_bytes()).hexdigest(), guide)
         self.assertIn('ask personal versus team and wait', guide)
         self.assertIn('returns another protocol', guide)
 
     def test_summarized_instructions_recover_from_original(self):
-        guide = (ROOT / 'INSTALL.md').read_text()
+        guide = (ROOT / 'INSTALL.md').read_text(encoding='utf-8')
         self.assertIn('curl -fsSL https://doomer.ai/install.md', guide)
         self.assertIn('all 64 checksum characters', guide)
         self.assertIn('Never reconstruct', guide)
