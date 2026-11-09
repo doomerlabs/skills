@@ -2,7 +2,7 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.9
+  doomer-bootstrap-version: 2026.11.8.10
   doomer-cli-range: '>=2026.11.7.5'
   doomer-protocol: "2"
   doomer-update-policy: stable
@@ -97,7 +97,7 @@ invent consent, account identity, or hook activation. Native discovery is option
 Follow the selected CLI's instructions subject to the rules above.
 Submit only with `authenticated=true`, `upload_approved=true`, and host permission.
 Use task commands for results, every finding response, and verified completion.
-Pending results or installed software do not mean reviewed. Per-call mode runs
+Pending Quick results or installed software do not mean reviewed. Per-call mode runs
 these commands during each task; describe it accurately.
 A missing hook receipt means unverified activation, not unsupported hooks.
 
@@ -110,9 +110,20 @@ Finding responses do not submit fixes; resubmit after edits on the same task.
 For `review_pending`, keep the turn open. Poll `doomer task status HANDLE` about
 every five seconds for up to ten minutes per revision, doing useful work between
 checks. Do not duplicate pending submissions or use `task retry` while pending.
-A completed Quick assessment does not complete Deep: wait for Deep when enabled,
-read results, address findings, and record responses. After edits, resubmit and
-repeat. Verify completion with `doomer task finish HANDLE` before ending the turn.
+Use task state and Quick readiness, not aggregate review status or
+`full_review.status`. Quick review of the latest submitted changes gates
+completion. Read Quick findings and record every response. After edits, resubmit
+and repeat. Deep continues in the background; its pending or failed status does
+not block successful Quick review. Do not fetch Deep results to finish; wait for
+Deep only when explicitly requested. Verify response delivery and current source
+with `doomer task finish HANDLE` before ending the turn.
+
+Only when the user explicitly requests Deep, use `review.id` from task status
+with `doomer review get REVIEW_ID --workspace --format json`, using the task's
+API URL and profile. This command fetches full results and works after task
+completion. In that explicit flow, poll `full_review.status` and read
+`full_review.result` when completed; report any Deep failure. Do not use this
+command as a prerequisite for automatic Quick completion.
 
 Hooks cannot wake an agent after its turn ends. If waiting times out, review
 fails, or access is blocked, retain the handle and report incomplete review and
