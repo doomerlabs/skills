@@ -22,7 +22,9 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer prepare', text)
         self.assertIn('doomer prepare --task HANDLE', text)
         self.assertIn('doomer task repair HANDLE', text)
-        self.assertLess(len(text), 8192)
+        # Keep the generated bootstrap bounded while allowing the explicit
+        # Quick/Deep completion guidance shared with the CLI.
+        self.assertLess(len(text.encode()), 10 * 1024)
         self.assertNotIn('self-update', text)
         self.assertNotIn('doomer-version:', text)
         self.assertIn('doomer-cli-range:', text)
@@ -30,6 +32,17 @@ class BootstrapTests(unittest.TestCase):
         self.assertRegex(text, r'skills/[a-f0-9]{40}/INSTALL.md')
         self.assertIn(hashlib.sha256((ROOT / 'INSTALL.md').read_bytes()).hexdigest(), text)
         self.assertFalse((ROOT / 'skills/doomer-review/references').exists())
+
+    def test_quick_completion_and_explicit_deep_guidance(self):
+        text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
+        self.assertIn('doomer-bootstrap-version: 2026.11.8.10', text)
+        self.assertIn('>=2026.11.7.5', text)
+        self.assertIn('Quick review of the latest submitted changes gates', text)
+        self.assertIn('record every response', text)
+        self.assertIn('current source', text)
+        self.assertIn('Deep only when explicitly requested', text)
+        self.assertIn('doomer review get REVIEW_ID --workspace --format json', text)
+        self.assertNotIn('wait for Deep when enabled', text)
 
     def test_blocked_review_preserves_local_work_and_permission_boundaries(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text()
