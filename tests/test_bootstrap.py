@@ -52,7 +52,7 @@ class BootstrapTests(unittest.TestCase):
         ]:
             with self.subTest(requirement=requirement):
                 self.assertIn(requirement, final)
-        self.assertNotIn('wait for Deep when enabled', text)
+        self.assertNotIn('wait for Deep when enabled', ' '.join(text.split()))
 
     def test_blocked_review_preserves_local_work_and_permission_boundaries(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
