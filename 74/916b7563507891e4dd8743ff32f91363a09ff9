@@ -1,0 +1,18 @@
+.depot/workflows/agent-e2e.yml
+  h_aa44c3b5b60dec 31,91,156
+skills/doomer-review/SKILL.md
+  h_aa44c3b5b60dec 5-6,63-70
+tests/test_bootstrap.py
+  h_aa44c3b5b60dec 39-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "74916b7563507891e4dd8743ff32f91363a09ff9",
+  "prompts": {},
+  "humans": {
+    "h_aa44c3b5b60dec": {
+      "author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
