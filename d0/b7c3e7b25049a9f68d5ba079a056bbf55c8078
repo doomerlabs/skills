@@ -1,0 +1,14 @@
+tests/test_bootstrap.py
+  h_aa44c3b5b60dec 19,27,37-55,58,75,81,88
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d0b7c3e7b25049a9f68d5ba079a056bbf55c8078",
+  "prompts": {},
+  "humans": {
+    "h_aa44c3b5b60dec": {
+      "author": "Marc Campbell <marc.e.campbell@gmail.com>"
+    }
+  }
+}
