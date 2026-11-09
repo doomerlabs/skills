@@ -3,7 +3,7 @@ name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
   doomer-bootstrap-version: 2026.11.8.12
-  doomer-cli-range: '>=2026.11.8.6'
+  doomer-cli-range: '>=2026.11.8.7'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---

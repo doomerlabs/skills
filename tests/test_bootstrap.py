@@ -37,7 +37,7 @@ class BootstrapTests(unittest.TestCase):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         metadata = text.split('---', 2)[1]
         self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.8\.12$')
-        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.8\.6'$")
+        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.8\.7'$")
         final = text.split('## Final source review\n', 1)[1].split('For requested installation', 1)[0]
         final = ' '.join(final.split())
         for requirement in [
