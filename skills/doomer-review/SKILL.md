@@ -2,8 +2,8 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.12
-  doomer-cli-range: '>=2026.11.8.7'
+  doomer-bootstrap-version: 2026.11.9.1
+  doomer-cli-range: '>=2026.11.9.1'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---
@@ -59,6 +59,14 @@ record `git rev-parse HEAD` before
 editing and later prepare with the original arguments plus `--base STARTING_COMMIT`.
 Never replace an existing baseline. Report the blocker once. For final-submission
 coverage, follow Final source review below.
+
+Read `hook_setup` and the agent's permission status before offering a skill
+upgrade. Offer missing hook installation or review permissions once unless
+already authorized or explicitly declined. Execute the returned install command
+after acceptance and the decline command only after an explicit refusal. Keep
+installation separate from native hook trust; when the harness reports untrusted
+hooks, guide the user to its native hook review controls in each new session
+until trusted. Preserve explicit deny rules and report blocked review coverage.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
