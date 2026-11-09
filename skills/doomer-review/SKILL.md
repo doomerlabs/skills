@@ -2,8 +2,8 @@
 name: doomer-review
 description: Review edited source with Doomer and reuse approved setup.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.12
-  doomer-cli-range: '>=2026.11.8.7'
+  doomer-bootstrap-version: 2026.11.9.1
+  doomer-cli-range: '>=2026.11.9.1'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---
@@ -14,6 +14,10 @@ At task start, run `doomer preflight --agent AGENT --repo .` for local-only
 consent and Codex policy inspection. Saved receipts do not verify the current
 account or authorize uploads. Then run
 `doomer prepare --agent AGENT --repo . --prompt "USER TASK"`.
+If preflight reports pending missing reviewer settings, first offer account
+verification and scoped policy repair. After acceptance run prepare, verify live
+consent, and install the proposal. Respect saved declines and explicit denies.
+For older Claude CLIs, offer the same verification and repair.
 Use codex or claude and the actual task without shell interpolation. Keep the
 returned task handle. An older CLI may lack preflight; continue with prepare.
 If a real harness session ID is available, pass it with `--session`. For Claude,
@@ -59,6 +63,13 @@ record `git rev-parse HEAD` before
 editing and later prepare with the original arguments plus `--base STARTING_COMMIT`.
 Never replace an existing baseline. Report the blocker once. For final-submission
 coverage, follow Final source review below.
+
+Read `hook_setup` and permission status before skill upgrades. Offer missing
+setup unless already authorized or explicitly declined. Run the returned install
+command after acceptance; record only explicit refusals with the decline command.
+Keep installation separate from native hook trust. For untrusted hooks, guide the
+user to native review controls in each new session until trusted. Preserve deny
+rules and report blocked review coverage.
 
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
