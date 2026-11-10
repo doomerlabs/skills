@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 3bb75fe5bed50d5099a6383672a95f8e358ea27e
+          ref: 9a42e4e778ac54baa3c07f414abcc21cc8c00415
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -92,7 +92,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 3bb75fe5bed50d5099a6383672a95f8e358ea27e
+          ref: 9a42e4e778ac54baa3c07f414abcc21cc8c00415
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -157,7 +157,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: 3bb75fe5bed50d5099a6383672a95f8e358ea27e
+          ref: 9a42e4e778ac54baa3c07f414abcc21cc8c00415
           path: e2e-runner
           persist-credentials: false
       - name: Collect all scenario recordings
