@@ -45,6 +45,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('`codex` for Codex, `claude` for Claude Code', text)
         self.assertIn('Only when no task handle exists', text)
         self.assertIn('otherwise safely shell-quote', text)
+        self.assertIn('Identify the checkout with an absolute `--repo` path', text)
         self.assertIn('continue authorized local edits and tests by default', text)
         self.assertEqual(text.count('If review is blocked,'), 1)
         self.assertEqual(text.count('Show complete clickable'), 1)
