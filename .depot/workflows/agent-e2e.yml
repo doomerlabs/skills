@@ -34,6 +34,9 @@ jobs:
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
         with:
           go-version-file: e2e-runner/go.mod
+      - name: Verify public skill matches CLI bootstrap
+        working-directory: e2e-runner
+        run: go run ./scripts/verify-skill-bootstrap.go --skill ../skills/doomer-review/SKILL.md
       - name: Discover all lifecycle scenarios
         id: scenarios
         working-directory: e2e-runner
@@ -79,6 +82,7 @@ jobs:
     env:
       E2E_CANDIDATE_RELEASE: ${{ needs.plan.outputs.release }}
       E2E_SKILLS_SOURCE: ${{ github.workspace }}
+      E2E_NPX_SKILL_SOURCE: https://github.com/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}/skills/doomer-review
       E2E_REPORT_DIR: ${{ github.workspace }}/e2e-reports
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
