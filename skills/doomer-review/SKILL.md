@@ -7,7 +7,7 @@ description: >-
   when the user does not explicitly request code review.
 metadata:
   doomer-bootstrap-version: 2026.11.10.3
-  doomer-cli-range: '>=2026.11.10.1'
+  doomer-cli-range: '>=2026.11.10.3'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---
