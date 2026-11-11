@@ -22,9 +22,7 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer prepare', text)
         self.assertIn('doomer prepare --task HANDLE', text)
         self.assertIn('doomer task repair HANDLE', text)
-        # Keep the generated bootstrap bounded while allowing the explicit
-        # Quick/Deep and browser-approval guidance shared with the CLI.
-        self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 12 * 1024)
+        self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 18000)
         self.assertNotIn('self-update', text)
         self.assertNotIn('doomer-version:', text)
         self.assertIn('doomer-cli-range:', text)
@@ -36,8 +34,8 @@ class BootstrapTests(unittest.TestCase):
     def test_quick_completion_and_explicit_deep_guidance(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         metadata = text.split('---', 2)[1]
-        self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.10\.2$')
-        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.10\.1'$")
+        self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.10\.3$')
+        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.10\.3'$")
         final = text.split('## Final source review\n', 1)[1].split('For requested installation', 1)[0]
         final = ' '.join(final.split())
         for requirement in [
@@ -59,6 +57,16 @@ class BootstrapTests(unittest.TestCase):
         self.assertIn('doomer preflight --agent AGENT --repo .', text)
         self.assertIn('account or authorize uploads', text)
         self.assertIn('For a confirmed sandbox restriction', text)
+        self.assertIn('state_access_required', text)
+        self.assertIn('stop only that Doomer', text)
+        self.assertIn('exact terminal', text)
+        self.assertIn('For exploration-only or read-only requests', text)
+        self.assertIn('Before any authorized source edit', text)
+        self.assertIn('For coding, setup, or review tasks, start with', text)
+        self.assertIn('`codex` for Codex, `claude` for Claude Code', text)
+        self.assertIn('Only when no task handle exists', text)
+        self.assertIn('otherwise safely shell-quote', text)
+        self.assertIn('Identify the checkout with an absolute `--repo` path', text)
         self.assertIn('continue authorized local edits and tests by default', text)
         self.assertEqual(text.count('If review is blocked,'), 1)
         self.assertEqual(text.count('Show complete clickable'), 1)

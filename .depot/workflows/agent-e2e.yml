@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: d4afd2c862743cfe9d3dc509af0b24b11cb91a89
+          ref: 6064ae2de534c433068dc8a181d47b4cbd7e67ba
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -82,7 +82,7 @@ jobs:
     env:
       E2E_CANDIDATE_RELEASE: ${{ needs.plan.outputs.release }}
       E2E_SKILLS_SOURCE: ${{ github.workspace }}
-      E2E_NPX_SKILL_SOURCE: https://github.com/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}/skills/doomer-review
+      E2E_NPX_SKILL_SOURCE: ${{ github.repository }}#${{ github.head_ref || github.ref_name }}
       E2E_REPORT_DIR: ${{ github.workspace }}/e2e-reports
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -92,7 +92,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: d4afd2c862743cfe9d3dc509af0b24b11cb91a89
+          ref: 6064ae2de534c433068dc8a181d47b4cbd7e67ba
           path: e2e-runner
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
@@ -157,7 +157,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           repository: doomerlabs/doomer
-          ref: d4afd2c862743cfe9d3dc509af0b24b11cb91a89
+          ref: 6064ae2de534c433068dc8a181d47b4cbd7e67ba
           path: e2e-runner
           persist-credentials: false
       - name: Collect all scenario recordings
