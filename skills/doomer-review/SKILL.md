@@ -1,19 +1,37 @@
 ---
 name: doomer-review
-description: Review edited source with Doomer and reuse approved setup.
+description: >-
+  Use Doomer for every coding task that creates or modifies source code, fixes
+  bugs, refactors code, or changes tests or build configuration. Start before
+  editing and complete the review workflow before delivering changes, even
+  when the user does not explicitly request code review.
 metadata:
-  doomer-bootstrap-version: 2026.11.8.9
-  doomer-cli-range: '>=2026.11.7.5'
+  doomer-bootstrap-version: 2026.11.10.3
+  doomer-cli-range: '>=2026.11.10.1'
   doomer-protocol: "2"
   doomer-update-policy: stable
 ---
 
 # Doomer review
 
+Apply this workflow to coding tasks or explicitly requested Doomer setup/review.
+For exploration-only or read-only requests, do not prepare a task or offer
+setup/upgrades merely because the skill or a hook is present. If the user later
+asks for edits, prepare before making them.
+
 At task start, run `doomer preflight --agent AGENT --repo .` for local-only
-consent and Codex policy inspection. Saved receipts do not verify the current
-account or authorize uploads. Then run
-`doomer prepare --agent AGENT --repo . --prompt "USER TASK"`.
+readiness evidence. Saved receipts do not verify the current
+account or authorize uploads. If it returns `setup_decision_required`, present
+its next decision and wait for the answer BEFORE running prepare. Do not treat
+a saved upload grant as proof that this agent profile has its policy installed.
+After acceptance, run `doomer prepare --agent AGENT --repo . --prompt "USER TASK"`.
+If no decision is pending, run prepare immediately. Prepare checks onboarding
+on every task, not just installation. Follow its next readiness action before
+submitting a review or ending the task. For `setup_decision_required`, present
+the one decision in `action`, execute the accepted command (or explicit Never
+ask again command), then rerun prepare with the same task handle. Not now is
+not a permanent refusal. If host approval blocks prepare, use the local preflight
+evidence to offer missing scoped setup; respect the denial until authorized.
 Use codex or claude and the actual task without shell interpolation. Keep the
 returned task handle. An older CLI may lack preflight; continue with prepare.
 If a real harness session ID is available, pass it with `--session`. For Claude,
@@ -22,6 +40,22 @@ invented prefixes do not establish a hook binding.
 
 For setup only, run `doomer prepare --agent AGENT --repo .` without `--prompt`.
 A prompt creates a coding task. Verify readiness/hooks without submitting code.
+
+## Browser upload approval
+
+When the CLI returns `approval_required` and `wait_command`, show its complete
+approval URL and explain that Allow also saves the matching scoped Codex review
+permission. Immediately run `wait_command` and repeat while approval is pending,
+for up to ten minutes. Keep the turn open; the user answers on the web page, not
+with a second chat message. The wait returns verified approval without changing
+policy. Execute `policy_resume_command` to finish the policy installation covered
+by that approval, without another question. If the host explicitly rejects this
+persistent settings change, stop it and ask once for the displayed scoped policy
+in chat; after acceptance resume the same task. Never retry a host refusal
+without new authorization. Do not
+upload source or claim the task finished while setup is pending. Respect Cancel
+and report a timeout as pending. Hooks remain optional and require separate
+installation and native trust decisions.
 
 ## Permission decisions
 
@@ -42,9 +76,18 @@ helper/guide suggestions to ask do not override these rules:
 
 Authentication/network errors require recovery and rechecking, not new consent.
 Do not retry a stated reviewer/user refusal. Diagnose ambiguous errors read-only.
-For a confirmed sandbox restriction, request normal host approval once for
-private-state access/account checks. Saved scope is context, not current
-consent. Never bypass host controls or broaden grants.
+A filesystem permission error is not an explicit user/reviewer denial.
+For a confirmed sandbox restriction or `state_access_required`, request normal
+host approval once for the same command with private-state access/account checks.
+Use `retry_command`, `retry_env`, and `retry_cwd` when supplied; preserve stdin when
+required. Saved scope is context, not current consent. Never bypass host controls
+or broaden grants. If that approval is explicitly denied, stop only that Doomer
+operation; continue permitted coding and tests. Report the operation and path,
+who denied it and their actual reason if available, and the exact terminal
+recovery command. Do not invent a reason or re-request a refused approval.
+Preserve any task handle and baseline so the user can run the command in their
+terminal and ask you to resume. A recovery command requiring stdin is incomplete
+without its original payload; say so without exposing it in shell arguments.
 During onboarding, complete any accepted Codex policy installation and inspect
 `codex_policy_status`. `configured` means saved, not active. Reload/restart Codex
 as needed and verify a permitted Doomer operation in a fresh reviewer session
@@ -60,6 +103,18 @@ editing and later prepare with the original arguments plus `--base STARTING_COMM
 Never replace an existing baseline. Report the blocker once. For final-submission
 coverage, follow Final source review below.
 
+Read `hook_setup` and permission status before skill upgrades. Offer missing
+setup unless already authorized or explicitly declined. Run the returned install
+command after acceptance; record only explicit refusals with the decline command.
+Keep installation separate from native hook trust. For untrusted hooks, guide the
+user to native review controls in each new session until trusted. Preserve deny
+rules and report blocked review coverage.
+For Claude, if the host blocks hook installation as self-modification, stop that
+operation and offer `doomer hooks install --agent claude` for the user to run
+directly in their terminal. This installs hooks only, not review permissions or
+native trust. Recheck with preflight afterward; do not disguise the mutation or
+retry through another tool to bypass the host block.
+
 Show complete clickable setup URLs, preserving fragments, before question tools.
 Use CLI state for approval; a missing binary does not imply missing consent.
 
@@ -69,6 +124,10 @@ this-environment-only access. Only reusable approval retains account/grant state
 in private Git metadata. Let the CLI restore it; never copy tokens or rewrite grants.
 
 ## Skill upgrade decisions
+
+Read each `bootstrap_updates` entry's complete action and command fields before
+summarizing it. If output is saved to a file, read those fields in full; do not
+truncate away the commands or treat a preview as the full instructions.
 
 Only `update_available` for an older revision (or recognized unversioned legacy
 wrapper) is a candidate. `current`, `newer`, and same-version `modified` are not
@@ -82,8 +141,13 @@ not titles/partial updates. Keep local files/runtime; do not merge, rebase, or c
 
 For personal skills, inspect personal copies; repository updates do not count.
 
-Honor scope/version deferrals and answered/declined offers. New sessions/worktrees
-alone create no offer. On ambiguous scope or failed lookup, report and defer.
+Honor scope/version deferrals and answered/declined offers. When the user chooses
+“Maybe later”, execute the returned `defer_command` before finishing. For older
+CLIs, use the exact executable and `bootstrap defer` command from the complete
+action; the PATH launcher may be older. Verify `bootstrap_deferred`; a verbal
+acknowledgement does not save the choice. Preserve the skill files and policy.
+New sessions/worktrees alone create no offer. On ambiguous scope or failed lookup,
+report and defer.
 
 Offer verified uncovered upgrades once; apply after acceptance, preserving
 policy/edits. Explicit upgrade requests count as acceptance. Avoid duplicates.
@@ -97,7 +161,7 @@ invent consent, account identity, or hook activation. Native discovery is option
 Follow the selected CLI's instructions subject to the rules above.
 Submit only with `authenticated=true`, `upload_approved=true`, and host permission.
 Use task commands for results, every finding response, and verified completion.
-Pending results or installed software do not mean reviewed. Per-call mode runs
+Pending Quick results or installed software do not mean reviewed. Per-call mode runs
 these commands during each task; describe it accurately.
 A missing hook receipt means unverified activation, not unsupported hooks.
 
@@ -110,9 +174,20 @@ Finding responses do not submit fixes; resubmit after edits on the same task.
 For `review_pending`, keep the turn open. Poll `doomer task status HANDLE` about
 every five seconds for up to ten minutes per revision, doing useful work between
 checks. Do not duplicate pending submissions or use `task retry` while pending.
-A completed Quick assessment does not complete Deep: wait for Deep when enabled,
-read results, address findings, and record responses. After edits, resubmit and
-repeat. Verify completion with `doomer task finish HANDLE` before ending the turn.
+Use task state and Quick readiness, not aggregate review status or
+`full_review.status`. Quick review of the latest submitted changes gates
+completion. Read Quick findings and record every response. After edits, resubmit
+and repeat. Deep continues in the background; its pending or failed status does
+not block successful Quick review. Do not fetch Deep results to finish; wait for
+Deep only when explicitly requested. Verify response delivery and current source
+with `doomer task finish HANDLE` before ending the turn.
+
+Only when the user explicitly requests Deep, use `review.id` from task status
+with `doomer review get REVIEW_ID --workspace --format json`, using the task's
+API URL and profile. This command fetches full results and works after task
+completion. In that explicit flow, poll `full_review.status` and read
+`full_review.result` when completed; report any Deep failure. Do not use this
+command as a prerequisite for automatic Quick completion.
 
 Hooks cannot wake an agent after its turn ends. If waiting times out, review
 fails, or access is blocked, retain the handle and report incomplete review and
