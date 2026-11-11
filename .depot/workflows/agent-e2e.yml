@@ -82,7 +82,7 @@ jobs:
     env:
       E2E_CANDIDATE_RELEASE: ${{ needs.plan.outputs.release }}
       E2E_SKILLS_SOURCE: ${{ github.workspace }}
-      E2E_NPX_SKILL_SOURCE: https://github.com/${{ github.repository }}/tree/${{ github.head_ref || github.ref_name }}/skills/doomer-review
+      E2E_NPX_SKILL_SOURCE: ${{ github.repository }}#${{ github.head_ref || github.ref_name }}
       E2E_REPORT_DIR: ${{ github.workspace }}/e2e-reports
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
