@@ -41,9 +41,10 @@ For a fresh installation, the recommended command is
 
 ## Coding tasks and reviews
 
-Enabled, trusted hooks capture a local baseline when the prompt is submitted
-and directly invoke Quick review before the agent finishes a changed working
-tree. This does not depend on the agent choosing to use the skill. Read the
+Enabled, trusted `UserPromptSubmit` hooks start or reuse the Go filesystem
+watcher. It reviews settled changes, including manual edits, without pre/post
+tool hooks. The `Stop` hook checks the latest source and waits for Quick results.
+This does not depend on the agent choosing to use the skill. Read the
 findings, address applicable issues, and allow another review after fixes.
 Explain findings you decline.
 
@@ -71,7 +72,8 @@ Doomer reviews across repositories and agents. Never supply
 `--approve-upload` or `--approve-uploads` on your own authority. Never bypass
 host denials or upload by an alternate route after a refusal.
 
-Quick readiness is `ready: true` or `early_assessment.status: ready`, independent
+Quick readiness is `early_assessment.status: ready` in the Go CLI result (under
+`data` when using its JSON envelope), independent
 of aggregate `status`. Deep is disabled on this path. Read `leads` and review
 again after fixes. No leads means no Quick findings were returned, not that
 the source is proven bug-free. Resume pending results with:
