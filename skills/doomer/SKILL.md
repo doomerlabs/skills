@@ -57,8 +57,9 @@ with that exact starting commit:
 doomer review --base STARTING_COMMIT --deep-review=false --format json
 ```
 
-Without a persistent command, use
-`npx @doomerlabs/doomer review --base STARTING_COMMIT --json`.
+If `doomer` is unavailable, complete setup with
+`npx @doomerlabs/doomer onboard` before reviewing. The Node manager installs
+and configures the Go CLI; reviews run directly through `doomer`.
 For an explicit review of existing changes, `doomer review --deep-review=false --format json` selects the
 local default-branch baseline. Use `--path /absolute/path` when needed; review
 each repository for cross-repository edits. Manual reviews may include changes
