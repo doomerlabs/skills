@@ -15,16 +15,16 @@ spec.loader.exec_module(installer)
 
 
 class BootstrapTests(unittest.TestCase):
-    def test_stable_contract_has_no_cli_pin_or_updater_workflow(self):
+    def test_legacy_contract_pins_cli_without_updater_workflow(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('doomer-protocol: "2"', text)
-        self.assertIn('doomer-update-policy: stable', text)
+        self.assertIn('doomer-update-policy: pinned', text)
         self.assertIn('doomer prepare', text)
         self.assertIn('doomer prepare --task HANDLE', text)
         self.assertIn('doomer task repair HANDLE', text)
         self.assertLess(len((ROOT / 'skills/doomer-review/SKILL.md').read_bytes()), 18000)
         self.assertNotIn('self-update', text)
-        self.assertNotIn('doomer-version:', text)
+        self.assertIn('doomer-version: 2026.11.10.3', text)
         self.assertIn('doomer-cli-range:', text)
         self.assertNotIn('/main/INSTALL.md', text)
         self.assertRegex(text, r'skills/[a-f0-9]{40}/INSTALL.md')
@@ -35,7 +35,7 @@ class BootstrapTests(unittest.TestCase):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         metadata = text.split('---', 2)[1]
         self.assertRegex(metadata, r'(?m)^  doomer-bootstrap-version: 2026\.11\.10\.3$')
-        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '>=2026\.11\.10\.3'$")
+        self.assertRegex(metadata, r"(?m)^  doomer-cli-range: '=2026\.11\.10\.3'$")
         final = text.split('## Final source review\n', 1)[1].split('For requested installation', 1)[0]
         final = ' '.join(final.split())
         for requirement in [
