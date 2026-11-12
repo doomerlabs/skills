@@ -30,11 +30,11 @@ noninteractive setup, use `--agent claude`, `--agent codex`, or
 `--agent claude,codex` only for agents the user selected. Use `--no-hooks` for
 standalone reviews. Do not commit skill copies or discovery files to a project.
 
-Use `doomer doctor --json` to check an existing installation without changing
+Use `npx @doomerlabs/doomer doctor --json` to check an existing installation without changing
 it. Follow its next action if setup is incomplete. Hook configuration does not
 prove activation: the user must review/trust hooks through native controls and
 may need to restart the agent. Never modify trust records.
-`doomer install-hooks --agent AGENT` repairs hooks when requested.
+`npx @doomerlabs/doomer install-hooks --agent AGENT` repairs hooks when requested.
 
 For a fresh installation, the recommended command is
 `npx @doomerlabs/doomer install`. Onboarding reuses this directly installed skill.
@@ -52,13 +52,13 @@ Without active hooks, record `git rev-parse HEAD` before editing, then review
 with that exact starting commit:
 
 ```sh
-doomer review --base STARTING_COMMIT --json
+doomer review --base STARTING_COMMIT --deep-review=false --format json
 ```
 
 Without a persistent command, use
 `npx @doomerlabs/doomer review --base STARTING_COMMIT --json`.
-For an explicit review of existing changes, `doomer review --json` selects the
-local default-branch baseline. Use `--repo /absolute/path` when needed; review
+For an explicit review of existing changes, `doomer review --deep-review=false --format json` selects the
+local default-branch baseline. Use `--path /absolute/path` when needed; review
 each repository for cross-repository edits. Manual reviews may include changes
 that predate this task; do not represent them as exclusively your edits.
 
@@ -79,10 +79,11 @@ again after fixes. No leads means no Quick findings were returned, not that
 the source is proven bug-free. Resume pending results with:
 
 ```sh
-doomer review get REVIEW_ID --json
+doomer review get REVIEW_ID --workspace --format json
 ```
 
 Do not claim completion after a timeout, denial, network failure, or missing
 hooks. Report the blocker and continue authorized local work unless the user
-explicitly required waiting. `doomer update` updates the CLI and skill and
-repairs configured hooks when requested.
+explicitly required waiting. `npx @doomerlabs/doomer update` updates the CLI and skill and
+repairs configured hooks when requested. `npx @doomerlabs/doomer uninstall`
+removes the managed hooks, skill, CLI and local installation data when requested.
