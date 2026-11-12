@@ -65,7 +65,9 @@ that predate this task; do not represent them as exclusively your edits.
 
 Review uploads baseline and current source snapshots and the diff. The skill
 and hook installation do not grant upload permission. Reuse a valid saved
-repository/service/agent approval; otherwise ask the user. Never supply
+global service approval (or an existing approval limited to this repository and
+agent); otherwise ask the user. Onboarding offers one global permission for all
+Doomer reviews across repositories and agents. Never supply
 `--approve-upload` or `--approve-uploads` on your own authority. Never bypass
 host denials or upload by an alternate route after a refusal.
 
