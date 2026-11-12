@@ -32,8 +32,10 @@ standalone reviews. Do not commit skill copies or discovery files to a project.
 
 Use `npx @doomerlabs/doomer doctor --json` to check an existing installation without changing
 it. Follow its next action if setup is incomplete. Hook configuration does not
-prove activation: the user must review/trust hooks through native controls and
-may need to restart the agent. Never modify trust records.
+prove activation: the user must review/trust hooks through native controls.
+The manager reloads hooks in a compatible running local Codex server; use
+`npx @doomerlabs/doomer refresh-hooks` if needed. Restart only when the manager
+reports that live reload is unavailable. Never modify trust records.
 `npx @doomerlabs/doomer install-hooks --agent AGENT` repairs hooks when requested.
 
 For a fresh installation, the recommended command is
