@@ -17,12 +17,12 @@ Node handles setup; Go performs reviews and watches. This skill governs only
 this workflow. The separate managed `doomer-review` skill governs its own
 installation; this skill does not use `prepare`, `task`, or `install.md`.
 
-The Node package is not published yet. For authorized source testing, use the
+Registry commands require the requested Node package version to be available.
+If npm reports it unavailable, report the blocker; do not substitute another
+package or change a live installation. For authorized source testing, use the
 user-provided checkout of `https://github.com/doomerlabs/doomer-node` or a
-tarball built from that reviewed source, and only with the user's authorization.
-Do not substitute a third-party checkout, URL, or package. Registry commands below apply once
-the package is published. If npm reports it unavailable, report the blocker;
-do not substitute another package or change a live installation.
+tarball built from that reviewed source. Do not substitute a third-party
+checkout, URL, or package.
 
 ## Setup
 

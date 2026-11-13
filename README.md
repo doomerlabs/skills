@@ -1,6 +1,6 @@
 # Doomer skill
 
-**Pre-release:** the Node package is not published yet. The registry commands below apply only after publication. Until then, use only an authorized, reviewed local checkout for testing. If the package is unavailable, report the blocker; never substitute another package, URL, or checkout.
+Registry commands require the requested Node package version to be published. If it is unavailable, report the blocker; never substitute another package, URL, or checkout. For pre-release testing, use only an authorized, reviewed local checkout.
 
 For authorized source testing with an already compiled, verified candidate:
 
