@@ -18,7 +18,9 @@ this workflow. The separate managed `doomer-review` skill governs its own
 installation; this skill does not use `prepare`, `task`, or `install.md`.
 
 The Node package is not published yet. For authorized source testing, use the
-provided local manager checkout or tarball. Registry commands below apply once
+user-provided checkout of `https://github.com/doomerlabs/doomer-node` or a
+tarball built from that reviewed source, and only with the user's authorization.
+Do not substitute a third-party checkout, URL, or package. Registry commands below apply once
 the package is published. If npm reports it unavailable, report the blocker;
 do not substitute another package or change a live installation.
 
@@ -48,8 +50,11 @@ native trust or proof that hooks have run.
 
 The user must review/trust hooks through native controls. For Codex, setup's
 `codexReload.reloaded` and `codexReload.restartRequired` report live reload;
-`npx @doomerlabs/doomer refresh-hooks --json` returns those same fields at the
-top level. When `restartRequired` is true, start a new Codex session. For Claude
+`npx @doomerlabs/doomer refresh-hooks --json` returns top-level `reloaded` and
+`restartRequired`. Identify which command produced the JSON before reading it:
+for setup read `codexReload.restartRequired`; for refresh-hooks read
+`restartRequired`. A missing field is unknown, not false. When that field is
+true, start a new Codex session. For Claude
 Code, start a new session after trusting newly installed hooks if the running
 session has not loaded them. Verify that a permitted coding change actually
 starts a review before claiming automatic reviews are active. A reload response
@@ -64,10 +69,11 @@ the official skills CLI.
 ## Coding tasks and reviews
 
 Before using an existing `doomer` command, check the Node manager's
-`doctor --json` result. Require a ready installation and the current watcher
-capability; a legacy executable with the same name is not proof of readiness.
-If repair would replace an existing installation, explain that change and
-obtain setup authorization before proceeding.
+`doctor --json` result. Require both `ready: true` and
+`capabilities.watchAgentHook: true`; a legacy executable with the same name is
+not proof of readiness. If either is false or missing, report the installation
+blocker and obtain setup authorization before repairing or replacing it.
+Do not use the legacy binary merely because `ready` is true.
 
 Enabled, trusted `UserPromptSubmit` hooks start or reuse the Go filesystem
 watcher. It reviews settled changes, including manual edits, without pre/post
