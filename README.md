@@ -1,5 +1,17 @@
 # Doomer skill
 
+**Pre-release:** the Node package is not published yet. The registry commands below apply only after publication. Until then, use only an authorized, reviewed local checkout for testing. If the package is unavailable, report the blocker; never substitute another package, URL, or checkout.
+
+For authorized source testing with an already compiled, verified candidate:
+
+```sh
+DOOMER_NATIVE_BINARY=/absolute/path/to/candidate/doomer node /absolute/path/to/doomer-node/bin/doomer.js install
+```
+
+Use that checkout's `bin/doomer.js` for subsequent manager commands too. This installs into the selected test environment; it is not a publication step.
+
+## After publication
+
 Install Doomer in the environment where Codex or Claude Code edits your files:
 
 ```sh
@@ -9,8 +21,6 @@ npx @doomerlabs/doomer install
 Requires Node.js 22+ and Git on macOS or Linux. Choose your agents, review source-upload permission, then open `/hooks` in each selected agent to review and trust Doomer. Start a new session if the hooks have not loaded. Give the agent a small coding task; a completed review confirms that the integration works.
 
 The manager installs the native Go CLI, global `doomer` skill and direct review hooks. No generated skill files or account credentials need to be committed to your project. Each developer chooses their own upload permission and hook trust.
-
-These commands describe the new release. Until the Node package is published, use only a reviewed local checkout for authorized testing; do not substitute a similarly named package.
 
 ## Already installed the skill?
 
