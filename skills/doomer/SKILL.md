@@ -63,6 +63,12 @@ the official skills CLI.
 
 ## Coding tasks and reviews
 
+Before using an existing `doomer` command, check the Node manager's
+`doctor --json` result. Require a ready installation and the current watcher
+capability; a legacy executable with the same name is not proof of readiness.
+If repair would replace an existing installation, explain that change and
+obtain setup authorization before proceeding.
+
 Enabled, trusted `UserPromptSubmit` hooks start or reuse the Go filesystem
 watcher. It reviews settled changes, including manual edits, without pre/post
 tool hooks. The `Stop` hook checks the latest source and waits for Quick results.
