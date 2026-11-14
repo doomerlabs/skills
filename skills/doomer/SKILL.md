@@ -75,12 +75,65 @@ not proof of readiness. If either is false or missing, report the installation
 blocker and obtain setup authorization before repairing or replacing it.
 Do not use the legacy binary merely because `ready` is true.
 
-Enabled, trusted `UserPromptSubmit` hooks start or reuse the Go filesystem
-watcher. It reviews settled changes, including manual edits, without pre/post
-tool hooks. The `Stop` hook checks the latest source and waits for Quick results.
-This does not depend on the agent choosing to use the skill. Read the
-findings, address applicable issues, and allow another review after fixes.
-Explain findings you decline.
+Enabled, trusted hooks call `doomer watch agent`. This is an internal hook
+entry point, not a command the coding agent should invoke to create a substitute
+watcher. The prompt hook starts or reuses a watcher for the current request.
+It discovers all repositories beneath the supplied working directory, including
+nested repositories. Starting a watcher establishes a baseline; it does not
+upload or review pre-existing changes. Later settled file changes trigger reviews.
+The Stop hook checks the latest source and waits for Quick results.
+
+### Editing another repository
+
+The hook provides the watch root and a control key for this request. Repositories
+under that root are already included: do not register nested repositories again.
+Before your first edit in a repository outside that root, run:
+
+```sh
+doomer watch add /absolute/path/to/repository --control CONTROL_KEY
+```
+
+Use the hook's exact executable path and control key. Never guess a key or reuse
+one from another request, session, or agent. Wait for success before editing.
+Registration establishes the new repository's baseline without uploading source
+or starting a review. Repeating it preserves pending changes and reviews. The
+extra directory belongs only to that running watcher; register it again if a
+later request needs it. Existing source-upload permission still applies. If
+registration is denied or fails, do not bypass it or claim the repository is
+reviewed; explain the blocker.
+
+`watch rm` changes older persistent configuration, not the scope of this running
+watcher. Do not use it to remove a directory from a request. `watch start`,
+`watch stop`, and `watch ls` are not part of this workflow; the agent hooks own
+the watcher lifecycle.
+
+### Reading and responding to reviews
+
+Follow the current hook's instructions. For Codex, before the final answer run:
+
+```sh
+doomer watch results --control CONTROL_KEY
+```
+
+This waits for the current reviews and returns their results. If findings need
+a response, read the details and the exact response command:
+
+```sh
+doomer watch findings ls --control CONTROL_KEY
+```
+
+Investigate each finding and submit decisions through
+`doomer watch findings respond --control CONTROL_KEY`, using the JSON shape
+provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
+`dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
+unresolved finding, with an honest reason. A failed submission is not recorded.
+Then run `watch results` again so any resulting edits are reviewed. Deliver and
+acknowledge pending service advisories as described below. Do not claim the
+review is complete while findings, advisories, or errors remain unresolved.
+
+Claude's Stop hook delivers its report directly; do not run an extra results
+command when that hook says it is unnecessary. Investigate and respond using the
+commands it supplies. Respect normal host permissions for every command.
 
 Without active hooks, record `git rev-parse HEAD` before editing, then review
 with that exact starting commit:
@@ -119,7 +172,7 @@ Doomer reviews across repositories and agents. Never supply
 `--approve-upload` or `--approve-uploads` on your own authority. Never bypass
 host denials or upload by an alternate route after a refusal.
 
-This workflow requires the Go CLI with direct `watch agent-hook` support; the
+This workflow requires the Go CLI with direct `watch agent` support; the
 manager checks that capability. It does not support the old managed CLI output.
 Quick readiness is `early_assessment.status: ready` in the Go CLI result (under
 `data` when using its JSON envelope), independent

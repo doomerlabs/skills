@@ -47,6 +47,24 @@ For manual reviews or private adversary publishing without the skill, install th
 
 See [installation and first review](https://doomer.ai/docs/getting-started) and [troubleshooting](https://doomer.ai/docs/troubleshooting).
 
+## Working across repositories
+
+The fixed `doomer watch agent` hook watches the agent's working directory and
+all repositories beneath it. Opening a common parent includes nested repositories
+automatically. Before editing a sibling outside the watch root, the agent uses
+`doomer watch add /absolute/path/to/repo --control CONTROL_KEY` with the key from
+that request's hook. Registration is temporary and establishes a baseline; it
+does not submit existing changes. Other sessions are unaffected.
+
+The review commands are `watch results`, `watch findings ls`, and
+`watch findings respond`, with the control key supplied by the hook. The skill
+explains when to call them and how Claude receives results directly from its
+Stop hook. The old persistent `watch rm` does not remove a repository from a
+running request. Agents must not use it for that purpose.
+
+These command names require the matching Go CLI and Node installer update;
+merge and release them together before distributing this skill change.
+
 ## Legacy installations
 
 The older `doomer-review` skill remains pinned to its compatible Go CLI. Its [legacy installation guide](INSTALL.md) is retained for existing installations; it is not the setup path above. Do not run both sets of automatic review hooks in the same session. Legacy policy, bootstrap and task commands do not apply to the new `doomer` skill.
