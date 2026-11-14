@@ -1,50 +1,55 @@
-# Doomer managed skill
+# Doomer skill
 
-Install once. Doomer manages compatible CLI releases and their matching review
-instructions outside the repository. Each task keeps one release until it ends.
+Registry commands require the requested Node package version to be published. If it is unavailable, report the blocker; never substitute another package, URL, or checkout. For pre-release testing, use only an authorized, reviewed local checkout.
 
-## Team installation
+For authorized source testing with an already compiled, verified candidate:
 
-Ask your coding agent to read and follow [INSTALL.md](INSTALL.md). Choose team
-installation to add managed discovery blocks to `AGENTS.md` and `CLAUDE.md`,
-and the small bootstrap to `.agents/skills/doomer-review/SKILL.md`
-and `.claude/skills/doomer-review/SKILL.md`. Review and commit those files once.
-Each developer completes their own account login, repository upload approval,
-and optional hook trust. Ordinary managed upgrades leave repository files alone.
+```sh
+DOOMER_NATIVE_BINARY=/absolute/path/to/candidate/doomer node /absolute/path/to/doomer-node/bin/doomer.js install
+```
 
-## Personal installation
+Use that checkout's `bin/doomer.js` for subsequent manager commands too. This installs into the selected test environment; it is not a publication step.
 
-Choose personal installation. The same bootstrap is installed in the user's
-agent directories, making it available across projects. Repository policy wins
-when both personal and project bootstraps exist. Runtime files and credentials
-are local to the environment that actually edits the checkout.
+## After publication
 
-## Upgrade policy
+Install Doomer in the environment where Codex or Claude Code edits your files:
 
-Policy is string-valued metadata inside SKILL.md. Keep both project copies in
-agreement. There is no separate committed configuration file.
+```sh
+npx @doomerlabs/doomer install
+```
 
-- `doomer-protocol: "2"` selects this bootstrap contract.
-- `doomer-update-policy: stable` uses verified eligible stable releases.
-- `doomer-update-policy: delayed` also requires `doomer-delay-hours: "24"` (or another delay).
-- `doomer-update-policy: pinned` requires `doomer-version: YYYY.M.D.N`.
-- `doomer-update-policy: manual` requires approval to advance beyond the selected release.
+Requires Node.js 22+ and Git on macOS or Linux. Choose your agents, review source-upload permission, then open `/hooks` in each selected agent to review and trust Doomer. Start a new session if the hooks have not loaded. Give the agent a small coding task; a completed review confirms that the integration works.
 
-The developer explicitly authorizes software updates during onboarding. This is
-separate from permission to upload repository content and trust agent hooks.
-Doomer downloads signed releases side by side. Tasks retain their selected
-release even when another task or repository upgrades. Team policy changes are
-intentional repository edits; ordinary product releases require no PR.
+The manager installs the native Go CLI, global `doomer` skill and direct review hooks. No generated skill files or account credentials need to be committed to your project. Each developer chooses their own upload permission and hook trust.
 
-## Remote and ephemeral environments
+## Already installed the skill?
 
-The bootstrap can be read directly even when absent from a native skill catalog.
-`doomer prepare` returns a durable task handle. Its task commands work across
-separate invocations without a persistent watcher or localhost browser callback.
-Device login runs in the editing environment and can resume after a tool exits.
-Task state needs persistent storage between calls. A destroyed VM without its
-state cannot resume a local handle; do not claim otherwise or copy credentials
-from another machine.
+Installing the skill alone does not install the CLI or hooks. Complete setup with:
+
+```sh
+npx @doomerlabs/doomer onboard
+```
+
+## Diagnose or maintain
+
+```sh
+npx @doomerlabs/doomer doctor
+npx @doomerlabs/doomer install-hooks --agent codex
+doomer upgrade --check
+doomer upgrade
+```
+
+Doctor gives a specific repair action for missing installation files, broken or disabled hooks, PATH conflicts and missing upload approval. Use `--json` for structured results. It does not change settings, upload source or grant hook trust.
+
+`doomer upgrade` updates only the Go CLI. Use `npx @doomerlabs/doomer update` to update the manager, CLI and skill together. `doomer support bundle` saves diagnostics locally; uploading requires `--upload`.
+
+For manual reviews or private adversary publishing without the skill, install the CLI with `brew install doomerlabs/tap/doomer` on macOS. Use `doomer review --help` or `doomer adversary --help`.
+
+See [installation and first review](https://doomer.ai/docs/getting-started) and [troubleshooting](https://doomer.ai/docs/troubleshooting).
+
+## Legacy installations
+
+The older `doomer-review` skill remains pinned to its compatible Go CLI. Its [legacy installation guide](INSTALL.md) is retained for existing installations; it is not the setup path above. Do not run both sets of automatic review hooks in the same session. Legacy policy, bootstrap and task commands do not apply to the new `doomer` skill.
 
 ## License
 

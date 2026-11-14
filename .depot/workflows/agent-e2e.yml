@@ -1,189 +1,91 @@
 name: agent-e2e
-
 on:
   pull_request:
     branches: [main]
+    types: [opened, synchronize, reopened, edited, ready_for_review]
   workflow_dispatch:
-
 permissions:
   contents: read
-
 concurrency:
-  group: agent-e2e-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.pull_request.number || github.ref }}
+  group: agent-e2e-${{ github.event_name }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: true
-
 jobs:
-  plan:
+  onboarding:
     if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    outputs:
-      scenarios: ${{ steps.scenarios.outputs.scenarios }}
-      release: ${{ steps.scenarios.outputs.release }}
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Check out pinned lifecycle runner
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          repository: doomerlabs/doomer
-          ref: 8fd3b9ff844b789cbbc462f09db532f64ea2274d
-          path: e2e-runner
-          persist-credentials: false
-      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
-        with:
-          go-version-file: e2e-runner/go.mod
-      - name: Test pinned bootstrap verification
-        run: python3 -m unittest discover -s tests
-      - name: Verify pinned public skill matches CLI bootstrap
-        run: >-
-          python3 scripts/verify_pinned_bootstrap.py
-          --runner e2e-runner
-          --skill skills/doomer-review/SKILL.md
-          --pinned-version 2026.11.10.3
-      - name: Test lifecycle policy fixtures
-        working-directory: e2e-runner
-        run: go test ./tests/codexinstall -run '^(TestGlobalRuntimeInstallHonorsSkillPolicy|TestUpgradeFixturePreservesHistoricalStablePolicy)$' -count=1
-      - name: Discover all lifecycle scenarios
-        id: scenarios
-        working-directory: e2e-runner
-        run: |
-          go run ./tests/codexinstall --scenario list > "$RUNNER_TEMP/e2e-scenarios.txt"
-          python3 - "$RUNNER_TEMP/e2e-scenarios.txt" >> "$GITHUB_OUTPUT" <<'PY'
-          import json, pathlib, re, sys
-          scenarios = [line.strip() for line in pathlib.Path(sys.argv[1]).read_text().splitlines() if line.strip()]
-          if not scenarios or len(set(scenarios)) != len(scenarios):
-              raise SystemExit("Scenario discovery returned an empty or duplicate list")
-          if any(not re.fullmatch(r"[a-z0-9-]+", name) for name in scenarios):
-              raise SystemExit("Scenario discovery returned an invalid name")
-          print("scenarios=" + json.dumps(scenarios))
-          PY
-          release=2026.11.10.3
-          printf 'release=%s\n' "$release" >> "$GITHUB_OUTPUT"
-
-  lifecycle:
-    needs: plan
-    # Fork PRs never run credential-bearing jobs, even after manual run approval.
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
-    name: ${{ matrix.harness }} / ${{ matrix.scenario }}
-    runs-on: ubuntu-24.04
+    timeout-minutes: 60
     environment: agent-e2e
-    timeout-minutes: 40
-    strategy:
-      fail-fast: false
-      # Bound provider request bursts while keeping scenarios parallel.
-      max-parallel: 8
-      matrix:
-        harness: [codex, claude]
-        scenario: ${{ fromJSON(needs.plan.outputs.scenarios) }}
-        exclude:
-          - harness: claude
-            scenario: browser-onboarding
+    defaults:
+      run:
+        working-directory: e2e-runner
     env:
-      E2E_CANDIDATE_RELEASE: ${{ needs.plan.outputs.release }}
-      E2E_SKILLS_SOURCE: ${{ github.workspace }}
-      # Test the legacy runtime, independently of the runner's development branch.
-      E2E_CANDIDATE_SOURCE: ${{ github.workspace }}/e2e-runtime
-      E2E_NPX_SKILL_SOURCE: ${{ github.repository }}#${{ github.head_ref || github.ref_name }}
-      E2E_REPORT_DIR: ${{ github.workspace }}/e2e-reports
+      # Depot bootstrap only; test credentials remain in Doppler doomer/test.
+      DOPPLER_TOKEN: ${{ secrets.DOPPLER_TOKEN }}
+      E2E_REPORT_DIR: /tmp/component-agent-e2e
+      COMPONENT_SOURCE: ${{ github.workspace }}/component
+      CANDIDATE_SOURCE: ${{ github.workspace }}/candidate-cli
+      COMPONENT_BASE: ${{ github.event.pull_request.base.sha }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
+          path: component
+          fetch-depth: 0
           persist-credentials: false
-      - name: Check out pinned lifecycle runner
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check out pinned shared runner
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
-          repository: doomerlabs/doomer
-          ref: 8fd3b9ff844b789cbbc462f09db532f64ea2274d
+          repository: doomerlabs/agent-e2e
+          token: ${{ secrets.AGENT_E2E_READ_TOKEN }}
+          ref: 1d6346abccfd2db96fe2fceb66624fc5a98711c0
           path: e2e-runner
           persist-credentials: false
-      - name: Check out pinned legacy CLI source
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Resolve the pinned CLI candidate
+        id: candidate
+        run: |
+          python3 - <<'PYTHON' >> "$GITHUB_OUTPUT"
+          import json
+          print('ref='+json.load(open('tests/codexinstall/onboarding-inputs.json'))['cli_revision'])
+          PYTHON
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: doomerlabs/doomer
-          ref: 6064ae2de534c433068dc8a181d47b4cbd7e67ba
-          path: e2e-runtime
+          ref: ${{ steps.candidate.outputs.ref }}
+          path: candidate-cli
           persist-credentials: false
-      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6.1.0
+      - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c
         with:
           go-version-file: e2e-runner/go.mod
-      - name: Run lifecycle scenario
-        env:
-          TEST_OPENAI_API_KEY: ${{ matrix.harness == 'codex' && secrets.TEST_OPENAI_API_KEY || '' }}
-          TEST_CLAUDE_CODE_OAUTH_TOKEN: ${{ matrix.harness == 'claude' && secrets.TEST_CLAUDE_CODE_OAUTH_TOKEN || '' }}
-          E2E_SCENARIO: ${{ matrix.scenario }}
-          E2E_HARNESS: ${{ matrix.harness }}
-        working-directory: e2e-runner
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22.20.0
+      - name: Select and run shared agent scenarios
         run: |
-          report_root=$E2E_REPORT_DIR
-          for attempt in 1 2; do
-            export E2E_REPORT_DIR="$report_root/attempt-$attempt"
-            if scripts/ci-agent-e2e.sh "$E2E_HARNESS" "$E2E_SCENARIO"; then
-              status=0
-              break
-            else
-              status=$?
-            fi
-            if [[ $attempt == 1 ]]; then
-              echo "Scenario failed; retrying once with a fresh home."
-            fi
-          done
-          # The gallery reads the final attempt; retain both attempts for debugging.
-          if [[ -d $E2E_REPORT_DIR ]]; then
-            cp -a "$E2E_REPORT_DIR/." "$report_root/"
-          fi
-          exit "$status"
-      - name: Build recording index
+          python3 - <<'PYTHON'
+          import json,os,pathlib,subprocess
+          event=json.loads(pathlib.Path(os.environ['GITHUB_EVENT_PATH']).read_text())
+          description=pathlib.Path(os.environ['RUNNER_TEMP'])/'component-description.txt'
+          description.write_text((event.get('pull_request') or {}).get('body') or '')
+          args=['python3','scripts/with-test-secrets.py','python3','scripts/run.py','--require-cache',
+                '--output',os.environ['E2E_REPORT_DIR'],'--changed-repo',os.environ['COMPONENT_SOURCE'],
+                '--description-file',str(description)]
+          if os.environ.get('COMPONENT_BASE'): args += ['--base',os.environ['COMPONENT_BASE']]
+          if os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch': args.append('--full-suite')
+          args += ['--cli-source',os.environ['CANDIDATE_SOURCE'],'--skills-source',os.environ['COMPONENT_SOURCE']]
+          raise SystemExit(subprocess.call(args))
+          PYTHON
+      - name: Validate selected result evidence
+        run: python3 scripts/verify-results.py "$E2E_REPORT_DIR"
+      - name: Retain selection and recordings
         if: always()
-        env:
-          E2E_SCENARIO: ${{ matrix.scenario }}
-          E2E_HARNESS: ${{ matrix.harness }}
-        run: GITHUB_STEP_SUMMARY='' python3 e2e-runner/scripts/ci-agent-e2e-report.py --single "$E2E_REPORT_DIR" "$E2E_HARNESS" "$E2E_SCENARIO"
-      - name: Save HTML recording and JSON result
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: agent-e2e-${{ matrix.harness }}-${{ matrix.scenario }}
-          path: ${{ env.E2E_REPORT_DIR }}
-          retention-days: 14
-          overwrite: true
+          name: agent-e2e-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            /tmp/component-agent-e2e/selection
+            /tmp/component-agent-e2e/components.json
+            /tmp/component-agent-e2e/cache-plan.json
+            /tmp/component-agent-e2e/verified
+            /tmp/component-agent-e2e/suite-*
+            /tmp/component-agent-e2e/retries
           if-no-files-found: error
-
-  report:
-    name: all lifecycle results
-    needs: [plan, lifecycle]
-    if: always() && !cancelled() && needs.plan.result == 'success'
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    env:
-      E2E_SCENARIOS: ${{ needs.plan.outputs.scenarios }}
-      E2E_ARTIFACT_NAME: agent-e2e-all-recordings
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          persist-credentials: false
-      - name: Check out pinned lifecycle runner
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
-        with:
-          repository: doomerlabs/doomer
-          ref: 8fd3b9ff844b789cbbc462f09db532f64ea2274d
-          path: e2e-runner
-          persist-credentials: false
-      - name: Collect all scenario recordings
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
-        with:
-          pattern: agent-e2e-*
-          path: e2e-artifacts
-      - name: Summarize every scenario including failures
-        if: always()
-        run: python3 e2e-runner/scripts/ci-agent-e2e-report.py --all e2e-artifacts
-      - name: Save combined HTML recording gallery
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: agent-e2e-all-recordings
-          path: e2e-artifacts
           retention-days: 14
-          overwrite: true
-          if-no-files-found: error
