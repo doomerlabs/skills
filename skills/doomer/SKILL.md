@@ -6,7 +6,7 @@ description: >-
   review hooks for Claude Code or Codex when setup is requested.
 metadata:
   author: doomerlabs
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Doomer
@@ -153,7 +153,8 @@ describe an incomplete assessment as a passed review.
 Claude's Stop hook delivers its report directly; do not run an extra results
 command when that hook says it is unnecessary. Investigate and respond using the
 commands it supplies. For scoped Claude permissions, run each supplied Doomer
-command separately using its literal executable path and control key; do not
+command separately using its literal executable path and exact supplied arguments; preserve the
+request ID in the JSON response as well as the control key. Do not
 replace them with shell variables, aliases, functions, or interpreter wrappers.
 Respect normal host permissions for every command.
 
