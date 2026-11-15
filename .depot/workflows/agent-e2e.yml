@@ -36,7 +36,7 @@ jobs:
         with:
           repository: doomerlabs/agent-e2e
           token: ${{ secrets.AGENT_E2E_READ_TOKEN }}
-          ref: 6503c849aac8085a081d852bb2e41fcf34f64ac4
+          ref: d7d14dad3e27c5725b789f8be5cdd79490ee9296
           path: e2e-runner
           persist-credentials: false
       - name: Resolve the pinned CLI candidate
