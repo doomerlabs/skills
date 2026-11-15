@@ -36,20 +36,13 @@ jobs:
         with:
           repository: doomerlabs/agent-e2e
           token: ${{ secrets.AGENT_E2E_READ_TOKEN }}
-          ref: 6503c849aac8085a081d852bb2e41fcf34f64ac4
+          ref: 9bf1aed2d73fe6ffbb222f24cb156d80ca8a95bf
           path: e2e-runner
           persist-credentials: false
-      - name: Resolve the pinned CLI candidate
-        id: candidate
-        run: |
-          python3 - <<'PYTHON' >> "$GITHUB_OUTPUT"
-          import json
-          print('ref='+json.load(open('tests/codexinstall/onboarding-inputs.json'))['cli_revision'])
-          PYTHON
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: doomerlabs/doomer
-          ref: ${{ steps.candidate.outputs.ref }}
+          ref: 9dec510b4e91b28709d52c82774033b4dad5ccd7
           path: candidate-cli
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c
@@ -70,7 +63,8 @@ jobs:
                 '--description-file',str(description)]
           if os.environ.get('COMPONENT_BASE'): args += ['--base',os.environ['COMPONENT_BASE']]
           if os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch': args.append('--full-suite')
-          args += ['--cli-source',os.environ['CANDIDATE_SOURCE'],'--skills-source',os.environ['COMPONENT_SOURCE']]
+          args += ['--cli-source',os.environ['CANDIDATE_SOURCE'],'--skills-source',os.environ['COMPONENT_SOURCE'],
+                   '--node-ref','dceec1d2efa3c87c1346fd4f6eb0f6ca4eabc77a']
           raise SystemExit(subprocess.call(args))
           PYTHON
       - name: Validate selected result evidence

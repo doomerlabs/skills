@@ -6,7 +6,7 @@ description: >-
   review hooks for Claude Code or Codex when setup is requested.
 metadata:
   author: doomerlabs
-  version: "0.1.0"
+  version: "0.1.1"
 ---
 
 # Doomer
@@ -27,8 +27,12 @@ checkout, URL, or package.
 ## Setup
 
 Installing this skill through skills.sh does not install the persistent CLI or
-agent hooks. For fresh setup, run `npx @doomerlabs/doomer install`.
-When this skill is already installed, complete the same setup with:
+agent hooks. Only perform setup when the user requests or authorizes it, and
+preserve any standing installation or hook decline unless the user explicitly
+changes that decision. For authorized fresh setup, run
+`npx @doomerlabs/doomer install`.
+When this skill is already installed and setup is authorized under the same
+conditions, complete it with:
 
 ```sh
 npx @doomerlabs/doomer onboard
@@ -36,8 +40,8 @@ npx @doomerlabs/doomer onboard
 
 This installs `~/.local/bin/doomer` and configures the chosen agents. For
 noninteractive setup, use `--agent claude`, `--agent codex`, or
-`--agent claude,codex` only for agents the user selected. Use `--no-hooks` for
-standalone reviews. This global Node-managed workflow does not require
+`--agent claude,codex` only for agents the user selected. Use `--no-hooks` only when the user wants installation without automatic reviews;
+that mode does not initiate automatic Quick reviews. This global Node-managed workflow does not require
 committing skill copies or discovery files to a project. Do not apply this
 rule to a separate managed team installation governed by `doomer-review`.
 
@@ -127,30 +131,62 @@ Investigate each finding and submit decisions through
 provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
 `dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
 unresolved finding, with an honest reason. A failed submission is not recorded.
+A successful response command exits zero and returns JSON with `recorded` equal
+to the number of submitted decisions. A missing marker, error, or nonzero exit
+is not confirmation. After that acknowledgement, check once in
+`watch findings ls` or the next report. The recorded acknowledgement governs:
+if a stale listing still shows it pending, disclose the discrepancy once, do
+not resubmit or poll, and continue the authorized task.
 Then run `watch results` again so any resulting edits are reviewed. Deliver and
 acknowledge pending service advisories as described below. Do not claim the
 review is complete while findings, advisories, or errors remain unresolved.
 
+When the watcher confirms no settled changes, or you know this was a read-only
+turn, omit review commentary entirely. Missing, malformed, or timed-out results
+after edits are unknown or failed review coverage, not a no-change result.
+Do not announce that no code changed or nothing was reviewed. Still deliver
+required service advisories and report errors. When a review did run, report its
+assessed outcome once without finding counts or internal workflow reminders.
+Disclose material unresolved or deferred concerns and required advisories; never
+describe an incomplete assessment as a passed review.
+
 Claude's Stop hook delivers its report directly; do not run an extra results
 command when that hook says it is unnecessary. Investigate and respond using the
-commands it supplies. Respect normal host permissions for every command.
+commands it supplies. For scoped Claude permissions, run each supplied Doomer
+command separately using its literal executable path and exact supplied arguments; preserve the
+request ID in the JSON response as well as the control key. Do not
+replace them with shell variables, aliases, functions, or interpreter wrappers.
+Respect normal host permissions for every command.
 
-Without active hooks, record `git rev-parse HEAD` before editing, then review
-with that exact starting commit:
+Quick reviews use the current coding agent for all generative work. When the
+hook or `watch results` returns an internal hypothesis request, inspect the
+captured diff and propose concrete concerns using the supplied command. Do not
+narrate this internal handoff. Submit an explicit empty hypotheses array when
+assessment finds no useful concerns; a missing response is not a clean review.
+Use the exact request ID so the response applies only to that captured snapshot.
+Then read results again and investigate the decision models' selected leads.
+Check the submission acknowledgement before considering the handoff recorded.
+If it fails, run `watch results` once and wait for the command's own timeout.
+This single recovery read also applies to Claude after a failed handoff, even
+when routine report retrieval was unnecessary. If the read fails, report the
+incomplete review and stop. If it returns a completed review for this snapshot,
+use that result; a lost acknowledgement does not invalidate a recorded result.
+If it returns a pending hypothesis request for the same snapshot_id and
+diff_hash, retry submission once using its returned request ID. If it instead
+returns a different snapshot, discard the old assessment and assess that
+snapshot once before submitting. This uses the same single recovery attempt,
+not a new retry budget. Never attach old hypotheses to a different snapshot.
+If neither a recorded result nor a pending request for the snapshot is returned,
+report its state as unconfirmed and stop. Any second submission failure or
+permission denial ends recovery: report the incomplete review without another
+refresh, retry, or polling loop. Silence applies to routine narration, not failures.
 
-```sh
-doomer review --base STARTING_COMMIT --deep-review=false --format json
-```
-
-If `doomer` is unavailable, complete setup with
-`npx @doomerlabs/doomer onboard` before reviewing. The Node manager installs
-and configures the Go CLI; reviews run directly through `doomer`. If the user
-declines the persistent installation, do not install it or invent a Node review
-command: report that the review could not run and continue authorized local work.
-For an explicit review of existing changes, `doomer review --deep-review=false --format json` selects the
-local default-branch baseline. Use `--path /absolute/path` when needed; review
-each repository for cross-repository edits. Manual reviews may include changes
-that predate this task; do not represent them as exclusively your edits.
+Standalone Quick review without an agent is not supported. Do not fall back to
+`doomer review` or a server-side generative model when the handoff is unavailable.
+Report the incomplete review without changing the user's task. Deep review
+behavior is unchanged. If the user declined installation, preserve that decline:
+do not install the CLI or hooks or invent an alternative review command. Report
+the blocker and continue the authorized coding task.
 
 ## Service advisories
 
@@ -187,5 +223,12 @@ doomer review get REVIEW_ID --workspace --format json
 Do not claim completion after a timeout, denial, network failure, or missing
 hooks. Report the blocker and continue authorized local work unless the user
 explicitly required waiting. `npx @doomerlabs/doomer update` updates the CLI and skill and
-repairs configured hooks when requested. `npx @doomerlabs/doomer uninstall`
+repairs configured hooks when requested. For Codex it also inspects the scoped
+reviewer policy and offers a separate decision when missing or outdated. The review
+upload prompt explicitly lists source snapshots, task context, and finding
+decisions with explanations; do not infer authorization from older wording alone.
+Require current CLI consent evidence and the accepted scoped reviewer policy; native hook trust and reviewer-policy installation remain separate.
+An installed policy or a successful config reload does not prove activation.
+Verify an ordinary review and a finding response in the running agent before
+claiming both are authorized. `npx @doomerlabs/doomer uninstall`
 removes the managed hooks, skill, CLI and local installation data when requested.
