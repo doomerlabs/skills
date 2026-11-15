@@ -41,7 +41,7 @@ npx @doomerlabs/doomer onboard
 This installs `~/.local/bin/doomer` and configures the chosen agents. For
 noninteractive setup, use `--agent claude`, `--agent codex`, or
 `--agent claude,codex` only for agents the user selected. Use `--no-hooks` only when the user wants installation without automatic reviews;
-that mode cannot complete agent-driven Quick reviews. This global Node-managed workflow does not require
+that mode does not initiate automatic Quick reviews. This global Node-managed workflow does not require
 committing skill copies or discovery files to a project. Do not apply this
 rule to a separate managed team installation governed by `doomer-review`.
 
@@ -131,9 +131,12 @@ Investigate each finding and submit decisions through
 provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
 `dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
 unresolved finding, with an honest reason. A failed submission is not recorded.
-Verify the response command acknowledges the decision as recorded; then confirm
-it is no longer awaiting a decision in `watch findings ls` or the next report. Do not poll: if the check conflicts with
-the acknowledgement, report that discrepancy and continue the authorized task.
+A successful response command exits zero and returns JSON with `recorded` equal
+to the number of submitted decisions. A missing marker, error, or nonzero exit
+is not confirmation. After that acknowledgement, check once in
+`watch findings ls` or the next report. The recorded acknowledgement governs:
+if a stale listing still shows it pending, disclose the discrepancy once, do
+not resubmit or poll, and continue the authorized task.
 Then run `watch results` again so any resulting edits are reviewed. Deliver and
 acknowledge pending service advisories as described below. Do not claim the
 review is complete while findings, advisories, or errors remain unresolved.
