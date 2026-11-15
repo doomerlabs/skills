@@ -152,7 +152,10 @@ describe an incomplete assessment as a passed review.
 
 Claude's Stop hook delivers its report directly; do not run an extra results
 command when that hook says it is unnecessary. Investigate and respond using the
-commands it supplies. Respect normal host permissions for every command.
+commands it supplies. For scoped Claude permissions, run each supplied Doomer
+command separately using its literal executable path and control key; do not
+replace them with shell variables, aliases, functions, or interpreter wrappers.
+Respect normal host permissions for every command.
 
 Quick reviews use the current coding agent for all generative work. When the
 hook or `watch results` returns an internal hypothesis request, inspect the
