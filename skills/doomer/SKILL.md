@@ -162,17 +162,20 @@ assessment finds no useful concerns; a missing response is not a clean review.
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
 Check the submission acknowledgement before considering the handoff recorded.
-If it fails, refresh the request once through `watch results`, which has a
-55-second timeout. If that refresh times out or fails, report the incomplete
-review and stop; do not loop. Only retry if the refresh explicitly includes a pending hypothesis request for
-the same snapshot_id and diff_hash you assessed. If either differs, discard the
-old assessment and inspect the new snapshot before responding. For the same
-snapshot, retry submission once using that returned request ID. An ID returned by the refresh
-is current even if it equals the previous ID; do not use an older ID absent from
-the refresh.
-If submission fails again or permission is denied, report the incomplete review
-and stop retrying; silence
-applies to routine narration, not failures.
+If it fails, run `watch results` once and wait for the command's own timeout.
+This single recovery read also applies to Claude after a failed handoff, even
+when routine report retrieval was unnecessary. If the read fails, report the
+incomplete review and stop. If it returns a completed review for this snapshot,
+use that result; a lost acknowledgement does not invalidate a recorded result.
+If it returns a pending hypothesis request for the same snapshot_id and
+diff_hash, retry submission once using its returned request ID. If it instead
+returns a different snapshot, discard the old assessment and assess that
+snapshot once before submitting. This uses the same single recovery attempt,
+not a new retry budget. Never attach old hypotheses to a different snapshot.
+If neither a recorded result nor a pending request for the snapshot is returned,
+report its state as unconfirmed and stop. Any second submission failure or
+permission denial ends recovery: report the incomplete review without another
+refresh, retry, or polling loop. Silence applies to routine narration, not failures.
 
 Standalone Quick review without an agent is not supported. Do not fall back to
 `doomer review` or a server-side generative model when the handoff is unavailable.
