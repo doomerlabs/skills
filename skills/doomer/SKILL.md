@@ -27,7 +27,10 @@ checkout, URL, or package.
 ## Setup
 
 Installing this skill through skills.sh does not install the persistent CLI or
-agent hooks. For fresh setup, run `npx @doomerlabs/doomer install`.
+agent hooks. Only perform setup when the user requests or authorizes it, and
+preserve any standing installation or hook decline unless the user explicitly
+changes that decision. For authorized fresh setup, run
+`npx @doomerlabs/doomer install`.
 When this skill is already installed, complete the same setup with:
 
 ```sh
@@ -154,9 +157,12 @@ assessment finds no useful concerns; a missing response is not a clean review.
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
 Check the submission acknowledgement before considering the handoff recorded.
-If it fails, refresh the request through `watch results` and retry once only if
-still valid and permitted. Never reuse a stale request ID. If it fails again or
-permission is denied, report the incomplete review and stop retrying; silence
+If it fails, refresh the request once through `watch results`, which has a
+55-second timeout. If that refresh times out or fails, report the incomplete
+review and stop; do not loop. If it returns a valid, permitted request, retry
+submission once using that returned request ID. Never reuse a stale request ID.
+If submission fails again or permission is denied, report the incomplete review
+and stop retrying; silence
 applies to routine narration, not failures.
 
 Standalone Quick review without an agent is not supported. Do not fall back to
