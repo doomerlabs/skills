@@ -31,7 +31,8 @@ agent hooks. Only perform setup when the user requests or authorizes it, and
 preserve any standing installation or hook decline unless the user explicitly
 changes that decision. For authorized fresh setup, run
 `npx @doomerlabs/doomer install`.
-When this skill is already installed, complete the same setup with:
+When this skill is already installed and setup is authorized under the same
+conditions, complete it with:
 
 ```sh
 npx @doomerlabs/doomer onboard
@@ -131,7 +132,8 @@ provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
 `dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
 unresolved finding, with an honest reason. A failed submission is not recorded.
 Verify the response command acknowledges the decision as recorded; then confirm
-it is no longer awaiting a decision in `watch findings ls` or the next report.
+it is no longer awaiting a decision in `watch findings ls` or the next report. Do not poll: if the check conflicts with
+the acknowledgement, report that discrepancy and continue the authorized task.
 Then run `watch results` again so any resulting edits are reviewed. Deliver and
 acknowledge pending service advisories as described below. Do not claim the
 review is complete while findings, advisories, or errors remain unresolved.
@@ -160,7 +162,9 @@ Check the submission acknowledgement before considering the handoff recorded.
 If it fails, refresh the request once through `watch results`, which has a
 55-second timeout. If that refresh times out or fails, report the incomplete
 review and stop; do not loop. If it returns a valid, permitted request, retry
-submission once using that returned request ID. Never reuse a stale request ID.
+submission once using that returned request ID. An ID returned by the refresh
+is current even if it equals the previous ID; do not use an older ID absent from
+the refresh.
 If submission fails again or permission is denied, report the incomplete review
 and stop retrying; silence
 applies to routine narration, not failures.
