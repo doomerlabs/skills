@@ -63,7 +63,8 @@ jobs:
                 '--description-file',str(description)]
           if os.environ.get('COMPONENT_BASE'): args += ['--base',os.environ['COMPONENT_BASE']]
           if os.environ.get('GITHUB_EVENT_NAME') == 'workflow_dispatch': args.append('--full-suite')
-          args += ['--cli-source',os.environ['CANDIDATE_SOURCE'],'--skills-source',os.environ['COMPONENT_SOURCE']]
+          args += ['--cli-source',os.environ['CANDIDATE_SOURCE'],'--skills-source',os.environ['COMPONENT_SOURCE'],
+                   '--node-ref','7e91218144cc71ddeb5e6bbf78e98652f5a89706']
           raise SystemExit(subprocess.call(args))
           PYTHON
       - name: Validate selected result evidence
