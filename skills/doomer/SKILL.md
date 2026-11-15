@@ -161,8 +161,10 @@ Then read results again and investigate the decision models' selected leads.
 Check the submission acknowledgement before considering the handoff recorded.
 If it fails, refresh the request once through `watch results`, which has a
 55-second timeout. If that refresh times out or fails, report the incomplete
-review and stop; do not loop. If it returns a valid, permitted request, retry
-submission once using that returned request ID. An ID returned by the refresh
+review and stop; do not loop. Only retry if the refresh explicitly includes a pending hypothesis request for
+the same snapshot_id and diff_hash you assessed. If either differs, discard the
+old assessment and inspect the new snapshot before responding. For the same
+snapshot, retry submission once using that returned request ID. An ID returned by the refresh
 is current even if it equals the previous ID; do not use an older ID absent from
 the refresh.
 If submission fails again or permission is denied, report the incomplete review
