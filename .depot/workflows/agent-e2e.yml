@@ -36,13 +36,13 @@ jobs:
         with:
           repository: doomerlabs/agent-e2e
           token: ${{ secrets.AGENT_E2E_READ_TOKEN }}
-          ref: 497384d46e8de6cfe4cec10d4f67b4aea7368378
+          ref: 4fb8c1d1e33ed53be672d602142b59539ee8b98d
           path: e2e-runner
           persist-credentials: false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
           repository: doomerlabs/doomer
-          ref: d5a062128fe2f0d79cfaa6a0c563c298586da330
+          ref: 9dec510b4e91b28709d52c82774033b4dad5ccd7
           path: candidate-cli
           persist-credentials: false
       - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c
