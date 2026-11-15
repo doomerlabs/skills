@@ -36,8 +36,8 @@ npx @doomerlabs/doomer onboard
 
 This installs `~/.local/bin/doomer` and configures the chosen agents. For
 noninteractive setup, use `--agent claude`, `--agent codex`, or
-`--agent claude,codex` only for agents the user selected. Use `--no-hooks` for
-standalone reviews. This global Node-managed workflow does not require
+`--agent claude,codex` only for agents the user selected. Use `--no-hooks` only when the user wants installation without automatic reviews;
+that mode cannot complete agent-driven Quick reviews. This global Node-managed workflow does not require
 committing skill copies or discovery files to a project. Do not apply this
 rule to a separate managed team installation governed by `doomer-review`.
 
@@ -127,14 +127,20 @@ Investigate each finding and submit decisions through
 provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
 `dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
 unresolved finding, with an honest reason. A failed submission is not recorded.
+Verify the response command acknowledges the decision as recorded; then confirm
+it is no longer awaiting a decision in `watch findings ls` or the next report.
 Then run `watch results` again so any resulting edits are reviewed. Deliver and
 acknowledge pending service advisories as described below. Do not claim the
 review is complete while findings, advisories, or errors remain unresolved.
 
-When no review ran because there were no changes, omit review commentary entirely.
+When the watcher confirms no settled changes, or you know this was a read-only
+turn, omit review commentary entirely. Missing, malformed, or timed-out results
+after edits are unknown or failed review coverage, not a no-change result.
 Do not announce that no code changed or nothing was reviewed. Still deliver
 required service advisories and report errors. When a review did run, report its
 assessed outcome once without finding counts or internal workflow reminders.
+Disclose material unresolved or deferred concerns and required advisories; never
+describe an incomplete assessment as a passed review.
 
 Claude's Stop hook delivers its report directly; do not run an extra results
 command when that hook says it is unnecessary. Investigate and respond using the
@@ -147,11 +153,18 @@ narrate this internal handoff. Submit an explicit empty hypotheses array when
 assessment finds no useful concerns; a missing response is not a clean review.
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
+Check the submission acknowledgement before considering the handoff recorded.
+If it fails, refresh the request through `watch results` and retry once only if
+still valid and permitted. Never reuse a stale request ID. If it fails again or
+permission is denied, report the incomplete review and stop retrying; silence
+applies to routine narration, not failures.
 
 Standalone Quick review without an agent is not supported. Do not fall back to
 `doomer review` or a server-side generative model when the handoff is unavailable.
 Report the incomplete review without changing the user's task. Deep review
-behavior is unchanged.
+behavior is unchanged. If the user declined installation, preserve that decline:
+do not install the CLI or hooks or invent an alternative review command. Report
+the blocker and continue the authorized coding task.
 
 ## Service advisories
 
