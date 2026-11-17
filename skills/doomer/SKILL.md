@@ -113,7 +113,11 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. For Codex, before the final answer run:
+Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. If a hook delivers a pending-work report and returns control to you, handle that report even if you made no edits. This applies when the report is received; it does not require anticipating a later Stop-hook report.
+
+The prompt hook supplies the executable and control key for its running watcher. Use the key identified by the latest applicable hook instructions; repeated instructions may supply the same key while that watcher remains active. Never guess a key or substitute one from a different or completed request, session, or agent. If you made edits that have not been confirmed reviewed, or known pending review work cannot be retrieved, and no applicable key is available, report incomplete review coverage. A missing key alone does not require a report on a completed or read-only turn. For failed registration, explain the blocker as described above.
+
+For Codex, the Stop hook checks for pending work. An explicit complete/no-work report needs no fallback results read, even if a separate cleanup error makes the hook exit nonzero; still disclose that error. If a completed Stop-hook attempt fails or gives no report after edits that have not been confirmed reviewed, read results once using that watcher’s supplied key. Exit zero with no report is not confirmation of review completion. Before the Stop hook has run, absence of a report is not itself a hook failure. If this fallback read fails (including a dead watcher or unknown key), report failed review coverage once; do not retry, guess another key, or restart/register a watcher to recover this request. For Claude, follow the separate Stop-hook delivery rules below instead of this Codex fallback. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
 doomer watch results --control CONTROL_KEY
@@ -147,6 +151,12 @@ after edits are unknown or failed review coverage, not a no-change result.
 Do not announce that no code changed or nothing was reviewed. Still deliver
 required service advisories and report errors. When a review did run, report its
 assessed outcome once without finding counts or internal workflow reminders.
+When you agreed with and verified a fix, name the specific problem or affected
+behavior in one short sentence, for example: "Fixed a Doomer finding: demo
+parcels were incorrectly reducing capacity for real assignments." Base this on
+the recorded fixes, not a generic suggested summary. Do not merely say a problem
+was found and fixed. Do not describe dismissed findings as confirmed bugs.
+Avoid a longer explanation unless asked or needed to explain a material limitation.
 Disclose material unresolved or deferred concerns and required advisories; never
 describe an incomplete assessment as a passed review.
 
