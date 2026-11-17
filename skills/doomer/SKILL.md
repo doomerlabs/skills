@@ -22,14 +22,19 @@ check as a prerequisite to handling a review. Do not turn a pending review into
 an installation or readiness check.
 
 Use the exact native executable path and control key supplied by the current
-hook. The hook has already started the watcher; when it reports pending work,
+hook. In examples, HOOK_EXECUTABLE means that exact quoted absolute path; it is
+not a command name to resolve or execute literally. The hook has already started the watcher; when it reports pending work,
 consume that work directly with the supplied native CLI commands. PATH lookup,
 package lookup, and another readiness probe are unnecessary.
 
-If no hook instructions arrived, report that automatic review is unavailable
-for this request and continue the user's coding task. Do not create a substitute
+If this request has unreviewed edits or known pending review work and no hook
+instructions arrived, report that automatic review is unavailable for this
+request and continue the user's coding task. Read-only turns with no pending
+work remain quiet. Do not create a substitute
 watcher, guess a control key, or install anything. If a supplied command fails,
-report its actual error and follow the bounded recovery rules below. Missing
+report its actual error. Apply only the explicit per-command recovery rules
+below; for any other failure, report it once and stop review handling without
+retrying. Missing
 hook output is not permission to invoke an installer or repair configuration.
 The user owns installation, account selection, hook trust, and permission choices.
 Never modify trust records or infer permission from installation alone.
@@ -51,7 +56,7 @@ under that root are already included: do not register nested repositories again.
 Before your first edit in a repository outside that root, run:
 
 ```sh
-doomer watch add /absolute/path/to/repository --control CONTROL_KEY
+HOOK_EXECUTABLE watch add /absolute/path/to/repository --control CONTROL_KEY
 ```
 
 Use the hook's exact executable path and control key. Never guess a key or reuse
@@ -77,18 +82,18 @@ The prompt hook supplies the executable and control key for its running watcher.
 For Codex, the Stop hook checks for pending work. An explicit complete/no-work report needs no fallback results read, even if a separate cleanup error makes the hook exit nonzero; still disclose that error. If a completed Stop-hook attempt fails or gives no report after edits that have not been confirmed reviewed, read results once using that watcher’s supplied key. Exit zero with no report is not confirmation of review completion. Before the Stop hook has run, absence of a report is not itself a hook failure. If this fallback read fails (including a dead watcher or unknown key), report failed review coverage once; do not retry, guess another key, or restart/register a watcher to recover this request. For Claude, follow the separate Stop-hook delivery rules below instead of this Codex fallback. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
-doomer watch results --control CONTROL_KEY
+HOOK_EXECUTABLE watch results --control CONTROL_KEY
 ```
 
 This waits for the current reviews and returns their results. If findings need
 a response, read the details and the exact response command:
 
 ```sh
-doomer watch findings ls --control CONTROL_KEY
+HOOK_EXECUTABLE watch findings ls --control CONTROL_KEY
 ```
 
 Investigate each finding and submit decisions through
-`doomer watch findings respond --control CONTROL_KEY`, using the JSON shape
+`HOOK_EXECUTABLE watch findings respond --control CONTROL_KEY`, using the JSON shape
 provided by the hook. Use `fixed` with `agrees=true` only for a verified fix;
 `dismissed` with `agrees=false` for a disproved finding; or `deferred` for an
 unresolved finding, with an honest reason. A failed submission is not recorded.
@@ -175,8 +180,11 @@ Doomer reviews across repositories and agents. Never supply
 `--approve-upload` or `--approve-uploads` on your own authority. Never bypass
 host denials or upload by an alternate route after a refusal.
 
-This workflow requires the Go CLI with direct `watch agent` support; the
-manager checks that capability. It does not support the old managed CLI output.
+This workflow requires the native hook review protocol. Empty, malformed, or
+unrecognized command output is failed or unknown review coverage, even with
+exit status zero. Only a recognized current-watcher report with complete=true
+and no unresolved findings, advisories, or errors confirms completion. Internal
+hypothesis requests are pending work, not completion.
 Quick readiness is `early_assessment.status: ready` in the Go CLI result (under
 `data` when using its JSON envelope), independent
 of aggregate `status`. Deep is disabled on this path. Read `leads` and review
@@ -184,7 +192,7 @@ again after fixes. No leads means no Quick findings were returned, not that
 the source is proven bug-free. Resume pending results with:
 
 ```sh
-doomer review get REVIEW_ID --workspace --format json
+HOOK_EXECUTABLE review get REVIEW_ID --workspace --format json
 ```
 
 Do not claim completion after a timeout, denial, network failure, or missing
