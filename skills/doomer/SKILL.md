@@ -113,7 +113,11 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. A pending-work report takes precedence even on a read-only turn. The Stop hook checks for pending work. After edits, if the Stop hook fails or does not provide a report, use the current prompt hook’s control key to read results once; if no current control key exists, report incomplete review coverage without guessing one. Never reuse a prior turn’s key. For Codex, when the Stop hook reports pending review work, run:
+Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. A pending-work report takes precedence even on a read-only turn.
+
+The prompt hook supplies the executable and control key for its running watcher. Use the key identified by the latest applicable hook instructions; repeated instructions may supply the same key while that watcher remains active. Never guess a key or substitute one from a different or completed request, session, or agent. If no applicable key is available, report incomplete review coverage.
+
+For Codex, the Stop hook checks for pending work. If it fails or gives no report after edits, read results once using that watcher’s supplied key; an explicit complete/no-work report needs no fallback. For Claude, follow the separate Stop-hook delivery rules below instead of this Codex fallback. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
 doomer watch results --control CONTROL_KEY
