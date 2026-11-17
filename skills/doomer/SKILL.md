@@ -113,7 +113,7 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. For Codex, before the final answer run:
+Follow the current hook's instructions. On a turn with no file changes, answer normally without calling review commands or mentioning Doomer. The Stop hook checks for pending work. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
 doomer watch results --control CONTROL_KEY
@@ -147,6 +147,12 @@ after edits are unknown or failed review coverage, not a no-change result.
 Do not announce that no code changed or nothing was reviewed. Still deliver
 required service advisories and report errors. When a review did run, report its
 assessed outcome once without finding counts or internal workflow reminders.
+When you agreed with and verified a fix, name the specific problem or affected
+behavior in one short sentence, for example: "Fixed a Doomer finding: demo
+parcels were incorrectly reducing capacity for real assignments." Base this on
+the recorded fixes, not a generic suggested summary. Do not merely say a problem
+was found and fixed. Do not describe dismissed findings as confirmed bugs.
+Avoid a longer explanation unless asked or needed to explain a material limitation.
 Disclose material unresolved or deferred concerns and required advisories; never
 describe an incomplete assessment as a passed review.
 
