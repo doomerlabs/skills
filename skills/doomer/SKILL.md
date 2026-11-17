@@ -113,7 +113,7 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. On a turn with no file changes, answer normally without calling review commands or mentioning Doomer. The Stop hook checks for pending work. For Codex, when the Stop hook reports pending review work, run:
+Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. A pending-work report takes precedence even on a read-only turn. The Stop hook checks for pending work. After edits, if the Stop hook fails or does not provide a report, use the current prompt hook’s control key to read results once; if no current control key exists, report incomplete review coverage without guessing one. Never reuse a prior turn’s key. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
 doomer watch results --control CONTROL_KEY
