@@ -113,11 +113,11 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. A pending-work report takes precedence even on a read-only turn.
+Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. If a hook delivers a pending-work report and returns control to you, handle that report even if you made no edits. This applies when the report is received; it does not require anticipating a later Stop-hook report.
 
-The prompt hook supplies the executable and control key for its running watcher. Use the key identified by the latest applicable hook instructions; repeated instructions may supply the same key while that watcher remains active. Never guess a key or substitute one from a different or completed request, session, or agent. If no applicable key is available, report incomplete review coverage.
+The prompt hook supplies the executable and control key for its running watcher. Use the key identified by the latest applicable hook instructions; repeated instructions may supply the same key while that watcher remains active. Never guess a key or substitute one from a different or completed request, session, or agent. If known pending review work cannot be retrieved because no applicable key is available, report incomplete review coverage. A missing key alone does not require a report on a completed or read-only turn. For failed registration, explain the blocker as described above.
 
-For Codex, the Stop hook checks for pending work. If it fails or gives no report after edits, read results once using that watcher’s supplied key; an explicit complete/no-work report needs no fallback. For Claude, follow the separate Stop-hook delivery rules below instead of this Codex fallback. For Codex, when the Stop hook reports pending review work, run:
+For Codex, the Stop hook checks for pending work. If it reports failure or exits nonzero after edits and returns control to you, read results once using that watcher’s supplied key. A successful Stop hook, including silent success, needs no fallback. Do not infer failure merely because no report is visible before the Stop hook runs. If this fallback read fails (including a dead watcher or unknown key), report failed review coverage once; do not retry, guess another key, or restart/register a watcher to recover this request. For Claude, follow the separate Stop-hook delivery rules below instead of this Codex fallback. For Codex, when the Stop hook reports pending review work, run:
 
 ```sh
 doomer watch results --control CONTROL_KEY
