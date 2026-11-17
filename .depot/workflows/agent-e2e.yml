@@ -36,7 +36,7 @@ jobs:
         with:
           repository: doomerlabs/agent-e2e
           token: ${{ secrets.AGENT_E2E_READ_TOKEN }}
-          ref: df7ba199bba8c9b057caf4a768cc9b36af7e52c0
+          ref: 1b642bf32b9cdf4e5a30258780fa9546ff429a98
           path: e2e-runner
           persist-credentials: false
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
