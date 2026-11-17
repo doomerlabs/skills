@@ -1,9 +1,8 @@
 ---
 name: doomer
 description: >-
-  Review code changes with Doomer Quick Look. Use for coding tasks and requested
-  code reviews. Use the Node manager to install the Go CLI and automatic
-  review hooks for Claude Code or Codex when setup is requested.
+  Handle Doomer Quick review requests from installed Claude Code or Codex hooks
+  using the native Doomer CLI. Use for coding tasks and requested code reviews.
 metadata:
   author: doomerlabs
   version: "0.1.1"
@@ -11,73 +10,31 @@ metadata:
 
 # Doomer
 
-Doomer Quick Look reviews source changes. The Node manager package
-`@doomerlabs/doomer` installs and configures the native Go `doomer` executable.
-Node handles setup; Go performs reviews and watches. This skill governs only
-this workflow. The separate managed `doomer-review` skill governs its own
-installation; this skill does not use `prepare`, `task`, or `install.md`.
+Doomer Quick Look reviews source changes through installed agent hooks and the
+native Go CLI. This skill governs review handling only.
 
-Registry commands require the requested Node package version to be available.
-If npm reports it unavailable, report the blocker; do not substitute another
-package or change a live installation. For authorized source testing, use the
-user-provided checkout of `https://github.com/doomerlabs/doomer-node` or a
-tarball built from that reviewed source. Do not substitute a third-party
-checkout, URL, or package.
+## Runtime boundary
 
-## Setup
+The coding agent must not invoke the Node manager, npm, npx, package installation,
+updates, onboarding, hook repair, or manager diagnostics. Those are user-run
+installation and maintenance operations outside this skill. Do not run a doctor
+check as a prerequisite to handling a review. Do not turn a pending review into
+an installation or readiness check.
 
-Installing this skill through skills.sh does not install the persistent CLI or
-agent hooks. Only perform setup when the user requests or authorizes it, and
-preserve any standing installation or hook decline unless the user explicitly
-changes that decision. For authorized fresh setup, run
-`npx @doomerlabs/doomer install`.
-When this skill is already installed and setup is authorized under the same
-conditions, complete it with:
+Use the exact native executable path and control key supplied by the current
+hook. The hook has already started the watcher; when it reports pending work,
+consume that work directly with the supplied native CLI commands. PATH lookup,
+package lookup, and another readiness probe are unnecessary.
 
-```sh
-npx @doomerlabs/doomer onboard
-```
-
-This installs `~/.local/bin/doomer` and configures the chosen agents. For
-noninteractive setup, use `--agent claude`, `--agent codex`, or
-`--agent claude,codex` only for agents the user selected. Use `--no-hooks` only when the user wants installation without automatic reviews;
-that mode does not initiate automatic Quick reviews. This global Node-managed workflow does not require
-committing skill copies or discovery files to a project. Do not apply this
-rule to a separate managed team installation governed by `doomer-review`.
-
-Use `npx @doomerlabs/doomer doctor --json` to check an existing installation without changing
-it. Run this check after setup too and follow its `next` action if incomplete.
-If `doomer` is not on PATH, use the exact absolute `executable` path returned by
-the manager, or have the user add its directory to PATH. Do not rerun installation
-merely to repair PATH. Doctor's `ready` describes installed configuration, not
-native trust or proof that hooks have run.
-
-The user must review/trust hooks through native controls. For Codex, setup's
-`codexReload.reloaded` and `codexReload.restartRequired` report live reload;
-`npx @doomerlabs/doomer refresh-hooks --json` returns top-level `reloaded` and
-`restartRequired`. Identify which command produced the JSON before reading it:
-for setup read `codexReload.restartRequired`; for refresh-hooks read
-`restartRequired`. A missing field is unknown, not false. When that field is
-true, start a new Codex session. For Claude
-Code, start a new session after trusting newly installed hooks if the running
-session has not loaded them. Verify that a permitted coding change actually
-starts a review before claiming automatic reviews are active. A reload response
-alone is insufficient; if no review starts, check trust and start a fresh session.
-Never modify trust records.
-`npx @doomerlabs/doomer install-hooks --agent AGENT` repairs hooks when requested.
-
-Both `install` and `onboard` install the CLI and configure the selected agents.
-`onboard` reuses this skill when already present; `install` refreshes it through
-the official skills CLI.
+If no hook instructions arrived, report that automatic review is unavailable
+for this request and continue the user's coding task. Do not create a substitute
+watcher, guess a control key, or install anything. If a supplied command fails,
+report its actual error and follow the bounded recovery rules below. Missing
+hook output is not permission to invoke an installer or repair configuration.
+The user owns installation, account selection, hook trust, and permission choices.
+Never modify trust records or infer permission from installation alone.
 
 ## Coding tasks and reviews
-
-Before using an existing `doomer` command, check the Node manager's
-`doctor --json` result. Require both `ready: true` and
-`capabilities.watchAgentHook: true`; a legacy executable with the same name is
-not proof of readiness. If either is false or missing, report the installation
-blocker and obtain setup authorization before repairing or replacing it.
-Do not use the legacy binary merely because `ready` is true.
 
 Enabled, trusted hooks call `doomer watch agent`. This is an internal hook
 entry point, not a command the coding agent should invoke to create a substitute
@@ -232,13 +189,8 @@ doomer review get REVIEW_ID --workspace --format json
 
 Do not claim completion after a timeout, denial, network failure, or missing
 hooks. Report the blocker and continue authorized local work unless the user
-explicitly required waiting. `npx @doomerlabs/doomer update` updates the CLI and skill and
-repairs configured hooks when requested. For Codex it also inspects the scoped
-reviewer policy and offers a separate decision when missing or outdated. The review
-upload prompt explicitly lists source snapshots, task context, and finding
-decisions with explanations; do not infer authorization from older wording alone.
-Require current CLI consent evidence and the accepted scoped reviewer policy; native hook trust and reviewer-policy installation remain separate.
-An installed policy or a successful config reload does not prove activation.
-Verify an ordinary review and a finding response in the running agent before
-claiming both are authorized. `npx @doomerlabs/doomer uninstall`
-removes the managed hooks, skill, CLI and local installation data when requested.
+explicitly required waiting. Source-upload consent, reviewer authorization, and
+native hook trust are separate. Use current hook/CLI consent evidence; do not
+invoke manager diagnostics to obtain it. Preserve declines and respect command
+denials. An installed policy or successful config reload does not prove that a
+review completed; the returned review result does.
