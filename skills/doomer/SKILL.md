@@ -135,6 +135,15 @@ hook or `watch results` returns an internal hypothesis request, inspect the
 captured diff and propose concrete concerns using the supplied command. Do not
 narrate this internal handoff. Submit an explicit empty hypotheses array when
 assessment finds no useful concerns; a missing response is not a clean review.
+Large changes can be triaged in overlapping windows. Window boundaries do not
+change original file paths or line numbers and are not evidence of independent
+correctness. Inspect surrounding code and interactions across windows. If the
+hook marks the supplied diff partial, inspect the remaining captured change
+locally before assessing it; if that snapshot is no longer available, report
+an incomplete or superseded assessment. An oversized-line, binary, missing-part,
+or triage-budget error means review is incomplete, never clean. Do not retry
+with a truncated diff, fewer files, or a different snapshot to bypass the error.
+
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
 Check the submission acknowledgement before considering the handoff recorded.
