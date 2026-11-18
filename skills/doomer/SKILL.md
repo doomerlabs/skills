@@ -34,7 +34,10 @@ work remain quiet. Do not create a substitute
 watcher, guess a control key, or install anything. If a supplied command fails,
 report its actual error. Apply only the explicit per-command recovery rules
 below; for any other failure, report it once and stop review handling without
-retrying. Missing
+retrying. Review failures stop review handling, not the user's task. Continue
+authorized work, including edits, commits, and PR creation, with automatic
+review unavailable unless the user explicitly required waiting for review.
+Never claim unreviewed work was reviewed. Missing
 hook output is not permission to invoke an installer or repair configuration.
 The user owns installation, account selection, hook trust, and permission choices.
 Never modify trust records or infer permission from installation alone.
@@ -61,13 +64,20 @@ HOOK_EXECUTABLE watch add /absolute/path/to/repository --control CONTROL_KEY
 ```
 
 Use the hook's exact executable path and control key. Never guess a key or reuse
-one from another request, session, or agent. Wait for success before editing.
+one from another request, session, or agent. Attempt registration before editing.
 Registration establishes the new repository's baseline without uploading source
 or starting a review. Repeating it preserves pending changes and reviews. The
 extra directory belongs only to that running watcher; register it again if a
-later request needs it. Existing source-upload permission still applies. If
-registration is denied or fails, do not bypass it or claim the repository is
-reviewed; explain the blocker.
+later request needs it. Existing source-upload permission still applies.
+If the sandbox blocks the connection, request normal sandbox escalation once.
+Respect permission denials; do not bypass denied commands or upload consent.
+If registration fails because the watcher is unavailable (for example,
+connection refused, a missing socket, or an unknown control key), report the
+error once and continue the user's authorized work with automatic review
+unavailable. A watcher outage is not a permission denial. Do not claim those
+edits were reviewed, start a substitute watcher, guess another key, or require
+the user to restart the chat. Respect any explicit user requirement to wait
+for review.
 
 `watch rm` changes older persistent configuration, not the scope of this running
 watcher. Do not use it to remove a directory from a request. `watch start`,

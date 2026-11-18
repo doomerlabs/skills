@@ -15,6 +15,29 @@ spec.loader.exec_module(installer)
 
 
 class BootstrapTests(unittest.TestCase):
+    def test_watcher_outage_preserves_authorized_work_and_permissions(self):
+        text = ' '.join((ROOT / 'skills/doomer/SKILL.md').read_text(encoding='utf-8').split())
+        registration = text.split('### Editing another repository', 1)[1].split('### Reading and responding to reviews', 1)[0]
+        for requirement in [
+            'Review failures stop review handling, not the user\'s task.',
+            'including edits, commits, and PR creation',
+            'unless the user explicitly required waiting for review',
+        ]:
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, text)
+        for requirement in [
+            'Attempt registration before editing.',
+            'connection refused, a missing socket, or an unknown control key',
+            'continue the user\'s authorized work with automatic review unavailable',
+            'Respect permission denials; do not bypass denied commands or upload consent.',
+            'Do not claim those edits were reviewed',
+            'Respect any explicit user requirement to wait for review.',
+        ]:
+            with self.subTest(requirement=requirement):
+                self.assertIn(requirement, registration)
+        self.assertNotIn('Wait for success before editing.', registration)
+        self.assertNotIn('registration is denied or fails, do not bypass it', registration)
+
     def test_legacy_contract_pins_cli_without_updater_workflow(self):
         text = (ROOT / 'skills/doomer-review/SKILL.md').read_text(encoding='utf-8')
         self.assertIn('doomer-protocol: "2"', text)
