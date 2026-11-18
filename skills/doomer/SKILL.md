@@ -137,12 +137,16 @@ narrate this internal handoff. Submit an explicit empty hypotheses array when
 assessment finds no useful concerns; a missing response is not a clean review.
 Large changes can be triaged in overlapping windows. Window boundaries do not
 change original file paths or line numbers and are not evidence of independent
-correctness. Inspect surrounding code and interactions across windows. If the
-hook marks the supplied diff partial, inspect the remaining captured change
-locally before assessing it; if that snapshot is no longer available, report
-an incomplete or superseded assessment. An oversized-line, binary, missing-part,
-or triage-budget error means review is incomplete, never clean. Do not retry
-with a truncated diff, fewer files, or a different snapshot to bypass the error.
+correctness. Inspect surrounding code and interactions across windows. Follow
+the current hook's instructions to obtain any omitted portion of a partial diff;
+do not guess snapshot locations or assume the current worktree is the captured
+snapshot. If those instructions do not provide a verifiable way to inspect the
+complete captured change, report the assessment as incomplete. A superseded
+snapshot is also incomplete coverage until its replacement is assessed.
+An oversized-line, binary, missing-part, or triage-budget error means review is
+incomplete, never clean. Do not alter, truncate, or replace the snapshot to
+bypass the error. The bounded recovery rules below still apply to retries and
+to a genuinely new snapshot supplied by the hook.
 
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
