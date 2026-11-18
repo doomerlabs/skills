@@ -135,19 +135,17 @@ hook or `watch results` returns an internal hypothesis request, inspect the
 captured diff and propose concrete concerns using the supplied command. Do not
 narrate this internal handoff. Submit an explicit empty hypotheses array when
 assessment finds no useful concerns; a missing response is not a clean review.
-Large changes can be triaged in overlapping windows. Window boundaries do not
-change original file paths or line numbers and are not evidence of independent
-correctness. Inspect surrounding code and interactions across windows. Follow
-the current hook's instructions to obtain any omitted portion of a partial diff;
-do not guess snapshot locations or assume the current worktree is the captured
-snapshot. If those instructions do not provide a verifiable way to inspect the
-complete captured change, report the assessment as incomplete. A superseded
-snapshot is also incomplete coverage until its replacement is assessed.
-An oversized-line, binary, missing-part, or triage-budget error means review is
-incomplete, never clean. Every assessment must cover the complete captured
-change. Do not bypass an error by assessing fewer files, truncating the diff,
-or substituting a snapshot. The bounded recovery rules below still apply to
-retries and to a genuinely new snapshot supplied by the hook.
+Large changes may be triaged in overlapping windows, retaining original file
+paths and line numbers. Follow each hook request's scope and inspect relevant
+surrounding code and interactions across windows. When an excerpt is partial,
+obtain the omitted content for that requested scope from a verifiable captured
+snapshot; do not guess snapshot locations or treat an unverified worktree as
+that snapshot. If you cannot inspect the requested scope, submit an incomplete
+assessment using the hook's response instructions and disclose the coverage gap.
+Never alter the captured snapshot or voluntarily omit requested files or lines
+to bypass an error. Partial work and unresolved triage errors are not a clean
+review. This paragraph adds no retries: use the bounded recovery procedure
+below only when its stated trigger occurs.
 
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
