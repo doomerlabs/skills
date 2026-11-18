@@ -144,9 +144,10 @@ snapshot. If those instructions do not provide a verifiable way to inspect the
 complete captured change, report the assessment as incomplete. A superseded
 snapshot is also incomplete coverage until its replacement is assessed.
 An oversized-line, binary, missing-part, or triage-budget error means review is
-incomplete, never clean. Do not alter, truncate, or replace the snapshot to
-bypass the error. The bounded recovery rules below still apply to retries and
-to a genuinely new snapshot supplied by the hook.
+incomplete, never clean. Every assessment must cover the complete captured
+change. Do not bypass an error by assessing fewer files, truncating the diff,
+or substituting a snapshot. The bounded recovery rules below still apply to
+retries and to a genuinely new snapshot supplied by the hook.
 
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
