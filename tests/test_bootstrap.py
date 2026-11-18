@@ -22,6 +22,7 @@ class BootstrapTests(unittest.TestCase):
             'Review failures stop review handling, not the user\'s task.',
             'including edits, commits, and PR creation',
             'unless the user explicitly required waiting for review',
+            'When delivering work with unreviewed edits, disclose unavailable review coverage in the final answer.',
         ]:
             with self.subTest(requirement=requirement):
                 self.assertIn(requirement, text)

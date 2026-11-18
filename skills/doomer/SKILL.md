@@ -37,7 +37,8 @@ below; for any other failure, report it once and stop review handling without
 retrying. Review failures stop review handling, not the user's task. Continue
 authorized work, including edits, commits, and PR creation, with automatic
 review unavailable unless the user explicitly required waiting for review.
-Never claim unreviewed work was reviewed. Missing
+When delivering work with unreviewed edits, disclose unavailable review coverage
+in the final answer. Never claim unreviewed work was reviewed. Missing
 hook output is not permission to invoke an installer or repair configuration.
 The user owns installation, account selection, hook trust, and permission choices.
 Never modify trust records or infer permission from installation alone.
@@ -71,7 +72,8 @@ extra directory belongs only to that running watcher; register it again if a
 later request needs it. Existing source-upload permission still applies.
 For connection-level failures, including connection refused, request normal
 sandbox escalation once when sandboxing could be responsible, before treating
-the watcher as unavailable. Respect permission denials; do not bypass denied commands or upload consent.
+the watcher as unavailable. Respect permission denials; do not bypass denied
+commands or upload consent.
 If registration fails because the watcher is unavailable (for example,
 connection refused, a missing socket, or an unknown control key), report the
 error once and continue the user's authorized work with automatic review
