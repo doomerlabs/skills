@@ -76,7 +76,8 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. If you edit files, run the hook-supplied
+Follow the current hook's instructions. If you edit files or have known pending
+review work, run the hook-supplied
 `HOOK_EXECUTABLE watch results --control CONTROL_KEY` before your final answer.
 This completes the installed hook workflow; it is not a standalone manual review.
 Handle assessment requests, findings and advisories, then read results again
