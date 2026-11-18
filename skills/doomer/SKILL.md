@@ -142,9 +142,14 @@ obtain the omitted content for that requested scope from a verifiable captured
 snapshot; do not guess snapshot locations or treat an unverified worktree as
 that snapshot. If you cannot inspect the requested scope, submit an incomplete
 assessment using the hook's response instructions and disclose the coverage gap.
-Never alter the captured snapshot or voluntarily omit requested files or lines
-to bypass an error. Partial work and unresolved triage errors are not a clean
-review. This paragraph adds no retries: use the bounded recovery procedure
+Never alter the captured snapshot, substitute another snapshot, or voluntarily
+omit requested files or lines to bypass an error. An oversized-line, binary,
+missing-part, or triage-budget error means incomplete review; inspecting the
+remaining content does not resolve the missing coverage. A scoped response does
+not establish completion of the entire captured change: report completion only
+when the hook confirms all of it has been assessed. If the hook supplies a
+replacement snapshot, the old assessment does not establish coverage of that
+replacement. This paragraph adds no retries: use the bounded recovery procedure
 below only when its stated trigger occurs.
 
 Use the exact request ID so the response applies only to that captured snapshot.
