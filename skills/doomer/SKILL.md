@@ -47,7 +47,8 @@ watcher. The prompt hook starts or reuses a watcher for the current request.
 It discovers all repositories beneath the supplied working directory, including
 nested repositories. Starting a watcher establishes a baseline; it does not
 upload or review pre-existing changes. Later settled file changes trigger reviews.
-The Stop hook checks the latest source and waits for Quick results.
+Before answering after edits, the agent completes the review through `watch results`.
+The Stop hook checks the latest source as a fallback and owns watcher shutdown.
 
 ### Editing another repository
 
@@ -75,7 +76,27 @@ the watcher lifecycle.
 
 ### Reading and responding to reviews
 
-Follow the current hook's instructions. On a turn with no file changes and no known pending review work, answer normally without calling review commands or mentioning Doomer. If a hook delivers a pending-work report and returns control to you, handle that report even if you made no edits. This applies when the report is received; it does not require anticipating a later Stop-hook report.
+Follow the current hook's instructions. If you edit files or have known pending
+review work, run the hook-supplied
+`HOOK_EXECUTABLE watch results --control CONTROL_KEY` before your final answer.
+This completes the installed hook workflow; it is not a standalone manual review.
+Handle assessment requests, findings and advisories, then read results again
+until the report confirms completion. Repeat only for successfully returned
+pending assessment or finding work. If the sandbox prevents connecting to the
+local watcher, request normal sandbox escalation once; if approval is denied,
+stop and report incomplete review coverage. After this approval flow, if the
+command still fails or the report contains errors (including HTTP 409), stop
+this loop, report incomplete review coverage,
+and use only an explicit bounded recovery procedure below when its trigger
+applies. Do not poll or retry just to wait out an error.
+Do not wait for the Stop hook to start review handling. If you edit files after
+a completed review, read results again before finishing so the final edits are
+covered.
+
+On a turn with no file changes and no known pending review work, answer normally
+without calling review commands or mentioning Doomer. If a hook delivers a
+pending-work report and returns control to you, handle that report even if you
+made no edits. The Stop hook remains a fallback for missed or newer changes.
 
 The prompt hook supplies the executable and control key for its running watcher. Use the key identified by the latest applicable hook instructions; repeated instructions may supply the same key while that watcher remains active. Never guess a key or substitute one from a different or completed request, session, or agent. If you made edits that have not been confirmed reviewed, or known pending review work cannot be retrieved, and no applicable key is available, report incomplete review coverage. A missing key alone does not require a report on a completed or read-only turn. For failed registration, explain the blocker as described above.
 
@@ -122,8 +143,9 @@ Avoid a longer explanation unless asked or needed to explain a material limitati
 Disclose material unresolved or deferred concerns and required advisories; never
 describe an incomplete assessment as a passed review.
 
-Claude's Stop hook delivers its report directly; do not run an extra results
-command when that hook says it is unnecessary. Investigate and respond using the
+Claude uses the same pre-answer `watch results` check. If its fallback Stop hook
+delivers a report directly, do not run an extra results command when that hook
+says it is unnecessary. Investigate and respond using the
 commands it supplies. For scoped Claude permissions, run each supplied Doomer
 command separately using its literal executable path and exact supplied arguments; preserve the
 request ID in the JSON response as well as the control key. Do not
