@@ -135,6 +135,27 @@ hook or `watch results` returns an internal hypothesis request, inspect the
 captured diff and propose concrete concerns using the supplied command. Do not
 narrate this internal handoff. Submit an explicit empty hypotheses array when
 assessment finds no useful concerns; a missing response is not a clean review.
+Large changes may be triaged in overlapping windows, retaining original file
+paths and line numbers. Follow each hook request's scope and inspect relevant
+surrounding code and interactions across windows. When an excerpt is partial,
+obtain the omitted content for that requested scope from a verifiable captured
+snapshot; do not guess snapshot locations or treat an unverified worktree as
+that snapshot. If you cannot inspect the requested scope, submit an incomplete
+assessment using the hook's response instructions and disclose the coverage gap.
+Never alter the captured snapshot, substitute another snapshot, or voluntarily
+omit requested files or lines to bypass an error. An oversized-line, binary,
+missing-part, or triage-budget error means incomplete review; inspecting the
+remaining content does not resolve the missing coverage. A scoped response does
+not establish completion of the entire captured change: report completion only
+when the hook confirms all of it has been assessed. If the hook supplies a
+replacement snapshot, the old assessment does not establish coverage of that
+replacement. Treat a replacement supplied as a new hook request as pending work:
+inspect the captured inputs identified by that request and submit using its
+request ID and response instructions. If those inputs cannot be verified,
+report incomplete coverage. This does not authorize polling for replacements or
+retrying failed submissions. Use the bounded recovery procedure below only when
+its stated trigger occurs; a replacement does not reset that retry budget.
+
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
 Check the submission acknowledgement before considering the handoff recorded.
