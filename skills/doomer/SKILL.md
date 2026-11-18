@@ -80,9 +80,14 @@ Follow the current hook's instructions. If you edit files, run the hook-supplied
 `HOOK_EXECUTABLE watch results --control CONTROL_KEY` before your final answer.
 This completes the installed hook workflow; it is not a standalone manual review.
 Handle assessment requests, findings and advisories, then read results again
-until the report confirms completion. Do not wait for the Stop hook to start
-review handling. If you edit files after a completed review, read results again
-before finishing so the final edits are covered.
+until the report confirms completion. Repeat only for successfully returned
+pending assessment or finding work. If a command fails or the report contains
+errors (including HTTP 409), stop this loop, report incomplete review coverage,
+and use only an explicit bounded recovery procedure below when its trigger
+applies. Do not poll or retry just to wait out an error.
+Do not wait for the Stop hook to start review handling. If you edit files after
+a completed review, read results again before finishing so the final edits are
+covered.
 
 On a turn with no file changes and no known pending review work, answer normally
 without calling review commands or mentioning Doomer. If a hook delivers a
