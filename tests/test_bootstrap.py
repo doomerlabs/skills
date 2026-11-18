@@ -27,6 +27,7 @@ class BootstrapTests(unittest.TestCase):
                 self.assertIn(requirement, text)
         for requirement in [
             'Attempt registration before editing.',
+            'For connection-level failures, including connection refused, request normal sandbox escalation once when sandboxing could be responsible, before treating the watcher as unavailable.',
             'connection refused, a missing socket, or an unknown control key',
             'continue the user\'s authorized work with automatic review unavailable',
             'Respect permission denials; do not bypass denied commands or upload consent.',

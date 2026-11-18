@@ -69,8 +69,9 @@ Registration establishes the new repository's baseline without uploading source
 or starting a review. Repeating it preserves pending changes and reviews. The
 extra directory belongs only to that running watcher; register it again if a
 later request needs it. Existing source-upload permission still applies.
-If the sandbox blocks the connection, request normal sandbox escalation once.
-Respect permission denials; do not bypass denied commands or upload consent.
+For connection-level failures, including connection refused, request normal
+sandbox escalation once when sandboxing could be responsible, before treating
+the watcher as unavailable. Respect permission denials; do not bypass denied commands or upload consent.
 If registration fails because the watcher is unavailable (for example,
 connection refused, a missing socket, or an unknown control key), report the
 error once and continue the user's authorized work with automatic review
