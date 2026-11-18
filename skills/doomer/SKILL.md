@@ -149,8 +149,12 @@ remaining content does not resolve the missing coverage. A scoped response does
 not establish completion of the entire captured change: report completion only
 when the hook confirms all of it has been assessed. If the hook supplies a
 replacement snapshot, the old assessment does not establish coverage of that
-replacement. This paragraph adds no retries: use the bounded recovery procedure
-below only when its stated trigger occurs.
+replacement. Treat a replacement supplied as a new hook request as pending work:
+inspect the captured inputs identified by that request and submit using its
+request ID and response instructions. If those inputs cannot be verified,
+report incomplete coverage. This does not authorize polling for replacements or
+retrying failed submissions. Use the bounded recovery procedure below only when
+its stated trigger occurs; a replacement does not reset that retry budget.
 
 Use the exact request ID so the response applies only to that captured snapshot.
 Then read results again and investigate the decision models' selected leads.
