@@ -82,8 +82,11 @@ review work, run the hook-supplied
 This completes the installed hook workflow; it is not a standalone manual review.
 Handle assessment requests, findings and advisories, then read results again
 until the report confirms completion. Repeat only for successfully returned
-pending assessment or finding work. If a command fails or the report contains
-errors (including HTTP 409), stop this loop, report incomplete review coverage,
+pending assessment or finding work. If the sandbox prevents connecting to the
+local watcher, request normal sandbox escalation once; if approval is denied,
+stop and report incomplete review coverage. After this approval flow, if the
+command still fails or the report contains errors (including HTTP 409), stop
+this loop, report incomplete review coverage,
 and use only an explicit bounded recovery procedure below when its trigger
 applies. Do not poll or retry just to wait out an error.
 Do not wait for the Stop hook to start review handling. If you edit files after
