@@ -189,12 +189,15 @@ Never alter the captured snapshot, substitute another snapshot, or voluntarily
 omit requested files or lines to bypass an error. The CLI intentionally excludes
 binary and oversized files, Git-ignored untracked content, and paths matching
 the root `.doomerignore` before generating review inputs. These exclusions do
-not make a review partial. When the CLI confirms there are no eligible changes,
-treat that as no review needed. Report incomplete coverage if a requested,
-eligible input cannot be assessed, including an oversized line, a binary patch
-returned in an assessment request, missing content, or a triage-budget error. A scoped response does
-not establish completion of the entire captured change: report completion only
-when the hook confirms all of it has been assessed. If the hook supplies a
+not make a review partial. A terminal no-work result with no pending hook
+requests needs no review. Answer every hypothesis request with its request ID.
+After assessing the requested scope, submit an explicit empty hypotheses array
+when there are no concerns, including when the eligible scope is empty.
+Report incomplete coverage if a requested, eligible input cannot be assessed,
+including an oversized line, a binary patch returned in an assessment request,
+missing content, or a triage-budget error. A scoped response does not establish
+completion of the entire captured change. Report completion only when the hook
+confirms all of it has been assessed. If the hook supplies a
 replacement snapshot, the old assessment does not establish coverage of that
 replacement. Treat a replacement supplied as a new hook request as pending work:
 inspect the captured inputs identified by that request and submit using its
