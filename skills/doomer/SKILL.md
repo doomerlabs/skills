@@ -170,8 +170,10 @@ commands it supplies. For scoped Claude permissions, run each supplied Doomer
 command separately using its literal executable path and exact supplied arguments.
 For `watch hypotheses` and `watch findings respond`, feed the JSON to stdin
 with a quoted heredoc attached directly to Doomer in a single Bash call. Use
-the template in the handoff when provided. Preserve
-the request ID in the JSON and the exact control key in the command. Do not
+the template in the handoff when provided. Encode the response as one line of
+JSON with escaped newlines in string values. Put the closing delimiter alone
+on the following line. Preserve the request ID in the JSON and the exact
+control key in the command. Do not
 pipe `echo` or `printf` into Doomer or use command substitution, shell variables,
 aliases, functions, or interpreter wrappers. Respect normal host permissions
 for every command.
