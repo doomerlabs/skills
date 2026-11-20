@@ -189,11 +189,11 @@ Never alter the captured snapshot, substitute another snapshot, or voluntarily
 omit requested files or lines to bypass an error. The CLI intentionally excludes
 binary and oversized files, Git-ignored untracked content, and paths matching
 the root `.doomerignore` before generating review inputs. These exclusions do
-not make a review partial. If the CLI explicitly confirms there are no eligible
-changes and no hook requests are pending, no review is needed. Answer every
-hypothesis request with its request ID.
-After assessing the requested scope, submit an explicit empty hypotheses array
-when there are no concerns, including when the eligible scope is empty.
+not make a review partial. Follow the hook report and completion rules above,
+including the existing handling of a no-work report. For every hypothesis
+request, assess its scope and respond with its request ID. Submit an explicit
+empty hypotheses array when there are no concerns, including when the
+requested scope is empty.
 Report incomplete coverage if a requested, eligible input cannot be assessed,
 including an oversized line, a binary patch returned in an assessment request,
 missing content, or a triage-budget error. A scoped response does not establish
