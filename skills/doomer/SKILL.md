@@ -167,10 +167,14 @@ Claude uses the same pre-answer `watch results` check. If its fallback Stop hook
 delivers a report directly, do not run an extra results command when that hook
 says it is unnecessary. Investigate and respond using the
 commands it supplies. For scoped Claude permissions, run each supplied Doomer
-command separately using its literal executable path and exact supplied arguments; preserve the
-request ID in the JSON response as well as the control key. Do not
-replace them with shell variables, aliases, functions, or interpreter wrappers.
-Respect normal host permissions for every command.
+command separately using its literal executable path and exact supplied arguments.
+For `watch hypotheses` and `watch findings respond`, feed the JSON to stdin
+with a quoted heredoc attached directly to Doomer in a single Bash call. Use
+the template in the handoff when provided. Preserve
+the request ID in the JSON and the exact control key in the command. Do not
+pipe `echo` or `printf` into Doomer or use command substitution, shell variables,
+aliases, functions, or interpreter wrappers. Respect normal host permissions
+for every command.
 
 Quick reviews use the current coding agent for all generative work. When the
 hook or `watch results` returns an internal hypothesis request, inspect the
