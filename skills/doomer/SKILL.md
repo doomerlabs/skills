@@ -192,8 +192,8 @@ the root `.doomerignore` before generating review inputs. These exclusions do
 not make a review partial. Follow the hook report and completion rules above,
 including the existing handling of a no-work report. For every hypothesis
 request, assess its scope and respond with its request ID. Submit an explicit
-empty hypotheses array when there are no concerns, including when the
-requested scope is empty.
+empty hypotheses array when there are no concerns, including when
+intentional exclusions leave the eligible scope empty.
 Report incomplete coverage if a requested, eligible input cannot be assessed,
 including an oversized line, a binary patch returned in an assessment request,
 missing content, or a triage-budget error. A scoped response does not establish
