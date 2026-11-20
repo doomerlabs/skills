@@ -186,9 +186,13 @@ snapshot; do not guess snapshot locations or treat an unverified worktree as
 that snapshot. If you cannot inspect the requested scope, submit an incomplete
 assessment using the hook's response instructions and disclose the coverage gap.
 Never alter the captured snapshot, substitute another snapshot, or voluntarily
-omit requested files or lines to bypass an error. An oversized-line, binary,
-missing-part, or triage-budget error means incomplete review; inspecting the
-remaining content does not resolve the missing coverage. A scoped response does
+omit requested files or lines to bypass an error. The CLI intentionally excludes
+binary and oversized files, Git-ignored untracked content, and paths matching
+the root `.doomerignore` before generating review inputs. These exclusions do
+not make a review partial. When the CLI confirms there are no eligible changes,
+treat that as no review needed. Report incomplete coverage if a requested,
+eligible input cannot be assessed, including an oversized line, a binary patch
+returned in an assessment request, missing content, or a triage-budget error. A scoped response does
 not establish completion of the entire captured change: report completion only
 when the hook confirms all of it has been assessed. If the hook supplies a
 replacement snapshot, the old assessment does not establish coverage of that
