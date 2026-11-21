@@ -67,7 +67,7 @@ merge and release them together before distributing this skill change.
 
 ## Legacy installations
 
-The older `doomer-review` skill remains pinned to its compatible Go CLI. Its [legacy installation guide](INSTALL.md) is retained for existing installations; it is not the setup path above. Do not run both sets of automatic review hooks in the same session. Legacy policy, bootstrap and task commands do not apply to the new `doomer` skill.
+For existing installations using the managed Go CLI, see the [legacy installation guide](INSTALL.md).
 
 ## License
 
