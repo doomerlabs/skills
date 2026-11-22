@@ -64,8 +64,9 @@ exercises the real prompt hook. Print the copyable prompt with the affected
 installation's native executable using `doctor --no-upload --test-session`.
 Check `doctor --help` first if support is uncertain. When the affected
 executable is known to lack the flag, use local configuration diagnostics.
-When the executable is missing or unreachable and compatibility is unknown,
-offer the copyable **Test this session** prompt in the
+If you still cannot verify flag support, including a failed or inconclusive
+help command or a missing or unreachable executable, offer the copyable
+**Test this session** prompt in the
 [troubleshooting guide](https://doomer.ai/docs/troubleshooting#no-hook-receipt-for-this-session)
 as a manual option, and continue with local configuration diagnostics.
 
@@ -73,7 +74,9 @@ Say **No hook receipt for this session** only after verifying that the
 compatible prompt was sent as a user message in the affected chat,
 checkout and agent profile, and no result arrived for that turn. For example,
 use the exact current user message together with the verified local checkout,
-agent profile and version-matched prompt. A pasted prompt or a report from
+agent profile and version-matched prompt. The guide's prompt qualifies when
+you independently verify it matches the affected installation's protocol.
+A pasted prompt or a report from
 another chat alone is insufficient. If any prerequisite is unknown, say the
 live test is unverified and continue with local configuration diagnostics.
 Ask the user to verify that the Doomer
