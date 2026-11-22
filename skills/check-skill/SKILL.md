@@ -5,15 +5,13 @@ description: Scan an agent skill with CheckSkill, fix actionable findings, and r
 
 # CheckSkill
 
-Scan the current version of the selected skill at `https://checkskill.ai/api/scan`.
+Scan the selected skill at `https://checkskill.ai/api/scan`. Resolve the directory containing its regular `SKILL.md` and use it as the upload root.
 
-- For just `SKILL.md`, POST its contents as `text/markdown`.
-- For a skill with supporting files, POST JSON as `application/json`. Send a `files` array with one `{ "path": "...", "content": "..." }` object per UTF-8 file in the skill package, including `SKILL.md`. Use paths relative to the upload root.
+- For a single-file scan, POST only the selected `SKILL.md` as `text/markdown`.
+- For a folder scan, include only `SKILL.md` and supporting UTF-8 files that belong to the selected skill package. Include supporting files referenced by relative links that resolve to regular files inside the package. POST `application/json` with a `files` array of `{ "path": "...", "content": "..." }` objects using root-relative paths.
 
-Resolve the directory containing the selected regular `SKILL.md` and use it as the upload root. For a folder scan, walk that directory recursively and skip symlinked files and directories. Before reading each file, verify its resolved path is inside the upload root. Exclude parent and sibling directories, including files linked from the skill.
+Select the package files before reading them. Skip symlinks, paths that resolve outside the root, nested skill packages, version control metadata, installed dependencies, caches, local config such as `.env` and `.env.local`, and unrelated build output. Withhold any file containing live credentials or other secrets.
 
-If a file contains a live secret or cannot be sent, resolve that before uploading it. Report any gap in the files checked.
+Use `findings` and `snykForecast.issues` to fix the causes of errors and warnings. Apply the same file selection after each edit and resubmit the current package files.
 
-Use the returned `findings` and `snykForecast.issues` to locate errors and warnings. Read the cited passages and fix the underlying behavior while preserving the skill's purpose and safeguards. Resubmit the full set after each edit.
-
-A clean scan requires `limited: false`, an empty `snykForecast.issues` array, and no remaining errors or warnings in `findings`. If you cannot reach a clean scan, report the blocker and remaining findings.
+Report a clean scan only if every in-scope file was scanned in full, `limited` is false, `snykForecast.issues` is empty, and `findings` contains no errors or warnings. Report withheld or omitted in-scope files and any unresolved findings.
