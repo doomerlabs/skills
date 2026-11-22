@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "skills": {
+    "check-skill": {
+      "source": "doomerlabs/skills",
+      "commit": "d50cc6e23228d0b1e536ada3e9067926d305c02c",
+      "sourceType": "github",
+      "skillPath": "skills/check-skill/SKILL.md",
+      "computedHash": "918fb80bb794588cf394935b61fdaa7bb4b124220195165a43ba6aa45a3d01e7"
+    }
+  }
+}
