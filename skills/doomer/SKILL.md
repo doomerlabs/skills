@@ -2,7 +2,8 @@
 name: doomer
 description: >-
   Handle Doomer Quick review requests from installed Claude Code or Codex hooks
-  using the native Doomer CLI. Use for coding tasks and requested code reviews.
+  using the native Doomer CLI. Use for coding tasks, requested code reviews,
+  and questions about missing, stuck, or failed Doomer reviews.
 metadata:
   author: doomerlabs
   version: "0.1.1"
@@ -11,7 +12,7 @@ metadata:
 # Doomer
 
 Doomer Quick Look reviews source changes through installed agent hooks and the
-native Go CLI. This skill governs review handling only.
+native Go CLI. It also helps diagnose missing, stuck, or failed Doomer reviews.
 
 ## Runtime boundary
 
@@ -41,6 +42,41 @@ in the final answer. Never claim unreviewed work was reviewed. Missing
 hook output is not permission to invoke an installer or repair configuration.
 The user owns installation, account selection, hook trust, and permission choices.
 Never modify trust records or infer permission from installation alone.
+
+## Troubleshoot a Doomer review
+
+Recognize “Doomer didn’t run,” “I just installed and it doesn’t work,” “the
+review failed,” and “where’s my review?” If reporting a failure in passing,
+give the last verified step and offer one next check. When the user asks for
+diagnosis, run available local checks from the affected checkout on the host
+and agent profile where they expected the review.
+
+Use the installed native Doomer executable with `doctor --no-upload`. The flag
+also keeps older versions local. Use the hook-supplied executable when present,
+or the installed native executable in the affected environment. Check
+`doctor --help` if a version lacks a flag. If you cannot reach the affected
+environment or the binary is missing, tell the user where to run
+`npx @doomerlabs/doomer@beta doctor` themselves. The
+[troubleshooting guide](https://doomer.ai/docs/troubleshooting) has manual checks.
+
+Explain the last confirmed step, one next action and how to verify it. Hook
+entries on disk establish configuration. A recorded hook receipt establishes
+activity only for its reported checkout, session and time. Keep review
+completion and chat delivery separate. Use an existing review ID if available.
+When evidence is missing, say which step is unverified.
+
+When local checks stop short or the user asks for support, offer to prepare a
+private report. Ask for an optional reply email and offer a short editable
+description of what they expected and observed. On versions that support
+`--description`, prepare it with `doctor --no-upload`, using `--email` and
+`--description` for the fields the user supplied. Preview the saved report
+contents and tell the user it includes repository and branch names and
+correlation IDs. Ask for explicit confirmation before sending that exact file
+with `doctor --upload --report PATH`. Use literal arguments or an argument-array
+tool for user values. Keep the local file if sending fails. Give the user the
+report ID if it succeeds. On older versions, offer the local report and manual
+support steps. Consent to review source and consent to share a diagnostic
+report are separate.
 
 ## Coding tasks and reviews
 
