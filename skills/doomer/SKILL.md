@@ -2,24 +2,25 @@
 name: doomer
 description: >-
   Handle Doomer Quick review requests from installed Claude Code or Codex hooks
-  using the native Doomer CLI. Use for coding tasks and requested code reviews.
+  using the native Doomer CLI. Use for coding tasks, requested code reviews,
+  and questions about missing, stuck, or failed Doomer reviews.
 metadata:
   author: doomerlabs
-  version: "0.1.1"
+  version: "0.1.2"
 ---
 
 # Doomer
 
 Doomer Quick Look reviews source changes through installed agent hooks and the
-native Go CLI. This skill governs review handling only.
+native Go CLI. It also helps diagnose missing, stuck, or failed Doomer reviews.
 
 ## Runtime boundary
 
-The coding agent must not invoke the Node manager, npm, npx, package installation,
-updates, onboarding, hook repair, or manager diagnostics. Those are user-run
-installation and maintenance operations outside this skill. Do not run a doctor
-check as a prerequisite to handling a review. Do not turn a pending review into
-an installation or readiness check.
+Installation, updates, onboarding, hook repair, and Node manager diagnostics
+are user-run operations. Never invoke npm or npx to diagnose Doomer on behalf
+of the user. Use the native Doctor commands below for an explicit troubleshooting
+request. Handle pending reviews directly through the hook
+workflow.
 
 Use the exact native executable path and control key supplied by the current
 hook. In examples, HOOK_EXECUTABLE means that exact quoted absolute path; it is
@@ -41,6 +42,89 @@ in the final answer. Never claim unreviewed work was reviewed. Missing
 hook output is not permission to invoke an installer or repair configuration.
 The user owns installation, account selection, hook trust, and permission choices.
 Never modify trust records or infer permission from installation alone.
+
+## Troubleshoot a Doomer review
+
+Recognize “Doomer didn’t run,” “I just installed and it doesn’t work,” “the
+review failed,” and “where’s my review?” If reporting a failure in passing,
+give the last verified step and offer one next check. When the user asks for
+diagnosis, run available local checks from the affected checkout on the host
+and agent profile where they expected the review.
+
+For a missing first review or when the user asks if this chat is wired up,
+offer **Test this session**. Use the live Doctor result only when the current
+local prompt hook produced it for this test turn, checkout and agent profile
+and identified the test as sending no source or report. Verify the scope from
+the hook delivery and any recorded checkout, session and time. If that scope
+is uncertain, say what you cannot verify. Report its reason, last confirmed
+step and next action. Verified watcher startup ends before review submission.
+
+The test has to be submitted as a user message in the affected chat so it
+exercises the real prompt hook. Print the copyable prompt with the affected
+installation's native executable using `doctor --no-upload --test-session`.
+Check `doctor --help` first if support is uncertain. When the affected
+executable is known to lack the flag, use local configuration diagnostics.
+If you still cannot verify flag support, including a failed or inconclusive
+help command or a missing or unreachable executable, offer the copyable
+**Test this session** prompt in the
+[troubleshooting guide](https://doomer.ai/docs/troubleshooting#no-hook-receipt-for-this-session)
+as a manual option, and continue with local configuration diagnostics.
+
+Say **No hook receipt for this session** only after verifying that the
+compatible prompt was sent as a user message in the affected chat,
+checkout and agent profile, and no result arrived for that turn. For example,
+use the exact current user message together with the verified local checkout,
+agent profile and version-matched prompt. The guide's prompt qualifies when
+you independently verify it matches the affected installation's protocol.
+A pasted prompt or a report from
+another chat alone is insufficient. If any prerequisite is unknown, say the
+live test is unverified and continue with local configuration diagnostics.
+Ask the user to verify that the Doomer
+UserPromptSubmit hook is loaded and trusted in this profile, then retry the
+same prompt. Older installed hooks may be unable to answer the live test.
+Use local configuration diagnostics below when the live result is missing or
+the user cannot send another message.
+
+Run the native Doomer executable for the affected installation with
+`doctor --no-upload`. Use the executable recorded by that session or its
+configured hook, if identifiable. Use the native executable installed on that
+host as a fallback and say which installation you inspected. Never reuse a
+control key or treat evidence from a different session as current. Check
+`doctor --help` if the installed version lacks a flag.
+
+Doctor checks both the checkout and the user's agent configuration. Codex hook
+definitions are usually in `$CODEX_HOME/hooks.json` or `~/.codex/hooks.json`.
+Claude Code uses `$CLAUDE_CONFIG_DIR/settings.json` or
+`~/.claude/settings.json`. Check the profile the affected agent actually uses
+and any project or managed settings it loads. Use Doctor's recorded checkout,
+session and time to scope a hook receipt.
+
+If you cannot reach the affected host or the binary is missing, guide the user
+to run `npx @doomerlabs/doomer@beta doctor` on that host. The npm manager command reports setup
+without submitting a support report. When using the native command, always
+include `--no-upload` for diagnosis, including on older versions. The
+[troubleshooting guide](https://doomer.ai/docs/troubleshooting) has manual checks.
+
+Explain the last confirmed step, one next action and how to verify it. Hook
+entries on disk establish configuration. A recorded hook receipt establishes
+activity only for its reported checkout, session and time. Keep review
+completion and chat delivery separate. Use an existing review ID if available.
+When evidence is missing, say which step is unverified.
+
+When local checks stop short or the user asks for support, offer to prepare a
+private report. Ask for an optional reply email and offer a short editable
+description of what they expected and observed. On versions that support
+`--description`, prepare it with `doctor --no-upload`, using `--email` and
+`--description` for the fields the user supplied. Save the file in a private
+temporary directory outside all Git checkouts. Use the path returned by
+Doctor to find and preview the report. Tell the user it includes repository
+and branch names and correlation IDs. Ask for explicit confirmation, then
+pass the identical verified path to `doctor --upload --report PATH`. If the
+report has changed since preview, show the new contents and ask again. Use
+literal arguments or an argument-array tool for user values. Keep the local
+file outside Git if sending fails. Give the user the report ID if it succeeds.
+On older versions, offer the local report and manual support steps. Consent
+to review source and consent to share a diagnostic report are separate.
 
 ## Coding tasks and reviews
 
