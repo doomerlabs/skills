@@ -62,13 +62,16 @@ step and next action. Verified watcher startup ends before review submission.
 The test has to be submitted as a user message in the affected chat so it
 exercises the real prompt hook. Print the copyable prompt with the affected
 installation's native executable using `doctor --no-upload --test-session`.
-Check `doctor --help` first if support is uncertain. If the flag is unavailable,
-use local configuration diagnostics below. A prompt from a newer version may
-be incompatible with an older hook.
+Check `doctor --help` first if support is uncertain. If the executable is
+missing, unreachable, or lacks the flag, direct the user to the copyable
+**Test this session** prompt in the [troubleshooting guide](https://doomer.ai/docs/troubleshooting#no-hook-receipt-for-this-session).
+The guide may describe a newer protocol. If compatibility is unknown, use
+local configuration diagnostics below even if the guide’s prompt gets no reply.
 
-Say **No hook receipt for this session** only when you can confirm that this
-test prompt was submitted in the current chat and profile and no local result
-arrived for that turn. Otherwise say that an in-session test is unverified.
+Say **No hook receipt for this session** only when the exact test prompt is
+the current user message or the user explicitly confirms when they sent it in
+this chat and agent profile, and no local result arrived for that turn.
+Otherwise say that an in-session test is unverified.
 Ask the user to verify that the Doomer
 UserPromptSubmit hook is loaded and trusted in this profile, then retry the
 same prompt. Older installed hooks may be unable to answer the live test.
