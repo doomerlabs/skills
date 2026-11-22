@@ -52,16 +52,24 @@ diagnosis, run available local checks from the affected checkout on the host
 and agent profile where they expected the review.
 
 For a missing first review or when the user asks if this chat is wired up,
-offer **Test this session**. Use the live Doctor result only if the current hook
-supplied one. Report its reason, last confirmed step and next action. A
-verified watcher startup ends before review submission and chat delivery.
+offer **Test this session**. Use the live Doctor result only when the current
+local prompt hook produced it for this test turn, checkout and agent profile
+and identified the test as sending no source or report. Verify the scope from
+the hook delivery and any recorded checkout, session and time. If that scope
+is uncertain, say what you cannot verify. Report its reason, last confirmed
+step and next action. Verified watcher startup ends before review submission.
 
 The test has to be submitted as a user message in the affected chat so it
-exercises the real prompt hook. Provide the copyable prompt from
-`doctor --test-session` or the [troubleshooting guide](https://doomer.ai/docs/troubleshooting).
-The user can also print it with `npx @doomerlabs/doomer@beta doctor --test-session`.
-If the live test prompt was already sent and no result arrived this turn, say
-**No hook receipt for this session**. Ask the user to verify that the Doomer
+exercises the real prompt hook. Print the copyable prompt with the affected
+installation's native executable using `doctor --no-upload --test-session`.
+Check `doctor --help` first if support is uncertain. If the flag is unavailable,
+use local configuration diagnostics below. A prompt from a newer version may
+be incompatible with an older hook.
+
+Say **No hook receipt for this session** only when you can confirm that this
+test prompt was submitted in the current chat and profile and no local result
+arrived for that turn. Otherwise say that an in-session test is unverified.
+Ask the user to verify that the Doomer
 UserPromptSubmit hook is loaded and trusted in this profile, then retry the
 same prompt. Older installed hooks may be unable to answer the live test.
 Use local configuration diagnostics below when the live result is missing or
