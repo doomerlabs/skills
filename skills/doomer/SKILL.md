@@ -16,11 +16,10 @@ native Go CLI. It also helps diagnose missing, stuck, or failed Doomer reviews.
 
 ## Runtime boundary
 
-The coding agent must not invoke the Node manager, npm, npx, package installation,
-updates, onboarding, hook repair, or manager diagnostics. Those are user-run
-installation and maintenance operations outside this skill. Do not run a doctor
-check as a prerequisite to handling a review. Do not turn a pending review into
-an installation or readiness check.
+Installation, updates, onboarding, hook repair, and Node manager diagnostics
+are user-run operations. Use the native Doctor commands below for an explicit
+troubleshooting request. Handle pending reviews directly through the hook
+workflow.
 
 Use the exact native executable path and control key supplied by the current
 hook. In examples, HOOK_EXECUTABLE means that exact quoted absolute path; it is
@@ -51,12 +50,25 @@ give the last verified step and offer one next check. When the user asks for
 diagnosis, run available local checks from the affected checkout on the host
 and agent profile where they expected the review.
 
-Use the installed native Doomer executable with `doctor --no-upload`. The flag
-also keeps older versions local. Use the hook-supplied executable when present,
-or the installed native executable in the affected environment. Check
-`doctor --help` if a version lacks a flag. If you cannot reach the affected
-environment or the binary is missing, tell the user where to run
-`npx @doomerlabs/doomer@beta doctor` themselves. The
+Run the native Doomer executable for the affected installation with
+`doctor --no-upload`. Use the executable recorded by that session or its
+configured hook, if identifiable. Use the native executable installed on that
+host as a fallback and say which installation you inspected. Never reuse a
+control key or treat evidence from a different session as current. Check
+`doctor --help` if the installed version lacks a flag.
+
+Doctor checks both the checkout and the user's agent configuration. Codex hook
+definitions are usually in `$CODEX_HOME/hooks.json` or `~/.codex/hooks.json`.
+Claude Code uses `$CLAUDE_CONFIG_DIR/settings.json` or
+`~/.claude/settings.json`. Check the profile the affected agent actually uses
+and any project or managed settings it loads. Use Doctor's recorded checkout,
+session and time to scope a hook receipt.
+
+If you cannot reach the affected host or the binary is missing, guide the user
+to the npm manager's setup check on that host. Use
+`npx @doomerlabs/doomer@beta doctor`. The npm manager command reports setup
+without submitting a support report. When using the native command, always
+include `--no-upload` for diagnosis, including on older versions. The
 [troubleshooting guide](https://doomer.ai/docs/troubleshooting) has manual checks.
 
 Explain the last confirmed step, one next action and how to verify it. Hook
@@ -69,14 +81,16 @@ When local checks stop short or the user asks for support, offer to prepare a
 private report. Ask for an optional reply email and offer a short editable
 description of what they expected and observed. On versions that support
 `--description`, prepare it with `doctor --no-upload`, using `--email` and
-`--description` for the fields the user supplied. Preview the saved report
-contents and tell the user it includes repository and branch names and
-correlation IDs. Ask for explicit confirmation before sending that exact file
-with `doctor --upload --report PATH`. Use literal arguments or an argument-array
-tool for user values. Keep the local file if sending fails. Give the user the
-report ID if it succeeds. On older versions, offer the local report and manual
-support steps. Consent to review source and consent to share a diagnostic
-report are separate.
+`--description` for the fields the user supplied. Save the file in a private
+temporary directory outside all Git checkouts. Use the path returned by
+Doctor to find and preview the report. Tell the user it includes repository
+and branch names and correlation IDs. Ask for explicit confirmation, then
+pass the identical verified path to `doctor --upload --report PATH`. If the
+report has changed since preview, show the new contents and ask again. Use
+literal arguments or an argument-array tool for user values. Keep the local
+file outside Git if sending fails. Give the user the report ID if it succeeds.
+On older versions, offer the local report and manual support steps. Consent
+to review source and consent to share a diagnostic report are separate.
 
 ## Coding tasks and reviews
 
