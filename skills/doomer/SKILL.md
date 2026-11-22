@@ -17,8 +17,9 @@ native Go CLI. It also helps diagnose missing, stuck, or failed Doomer reviews.
 ## Runtime boundary
 
 Installation, updates, onboarding, hook repair, and Node manager diagnostics
-are user-run operations. Use the native Doctor commands below for an explicit
-troubleshooting request. Handle pending reviews directly through the hook
+are user-run operations. Never invoke npm or npx to diagnose Doomer on behalf
+of the user. Use the native Doctor commands below for an explicit troubleshooting
+request. Handle pending reviews directly through the hook
 workflow.
 
 Use the exact native executable path and control key supplied by the current
@@ -81,8 +82,7 @@ and any project or managed settings it loads. Use Doctor's recorded checkout,
 session and time to scope a hook receipt.
 
 If you cannot reach the affected host or the binary is missing, guide the user
-to the npm manager's setup check on that host. Use
-`npx @doomerlabs/doomer@beta doctor`. The npm manager command reports setup
+to run `npx @doomerlabs/doomer@beta doctor` on that host. The npm manager command reports setup
 without submitting a support report. When using the native command, always
 include `--no-upload` for diagnosis, including on older versions. The
 [troubleshooting guide](https://doomer.ai/docs/troubleshooting) has manual checks.
