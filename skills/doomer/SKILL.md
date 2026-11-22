@@ -62,16 +62,20 @@ step and next action. Verified watcher startup ends before review submission.
 The test has to be submitted as a user message in the affected chat so it
 exercises the real prompt hook. Print the copyable prompt with the affected
 installation's native executable using `doctor --no-upload --test-session`.
-Check `doctor --help` first if support is uncertain. If the executable is
-missing, unreachable, or lacks the flag, direct the user to the copyable
-**Test this session** prompt in the [troubleshooting guide](https://doomer.ai/docs/troubleshooting#no-hook-receipt-for-this-session).
-The guide may describe a newer protocol. If compatibility is unknown, use
-local configuration diagnostics below even if the guide’s prompt gets no reply.
+Check `doctor --help` first if support is uncertain. When the affected
+executable is known to lack the flag, use local configuration diagnostics.
+When the executable is missing or unreachable and compatibility is unknown,
+offer the copyable **Test this session** prompt in the
+[troubleshooting guide](https://doomer.ai/docs/troubleshooting#no-hook-receipt-for-this-session)
+as a manual option, and continue with local configuration diagnostics.
 
-Say **No hook receipt for this session** only when the exact test prompt is
-the current user message or the user explicitly confirms when they sent it in
-this chat and agent profile, and no local result arrived for that turn.
-Otherwise say that an in-session test is unverified.
+Say **No hook receipt for this session** only after verifying that the
+compatible prompt was sent as a user message in the affected chat,
+checkout and agent profile, and no result arrived for that turn. For example,
+use the exact current user message together with the verified local checkout,
+agent profile and version-matched prompt. A pasted prompt or a report from
+another chat alone is insufficient. If any prerequisite is unknown, say the
+live test is unverified and continue with local configuration diagnostics.
 Ask the user to verify that the Doomer
 UserPromptSubmit hook is loaded and trusted in this profile, then retry the
 same prompt. Older installed hooks may be unable to answer the live test.
