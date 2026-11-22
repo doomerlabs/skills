@@ -6,7 +6,7 @@ description: >-
   and questions about missing, stuck, or failed Doomer reviews.
 metadata:
   author: doomerlabs
-  version: "0.1.1"
+  version: "0.1.2"
 ---
 
 # Doomer
@@ -49,6 +49,22 @@ review failed,” and “where’s my review?” If reporting a failure in passi
 give the last verified step and offer one next check. When the user asks for
 diagnosis, run available local checks from the affected checkout on the host
 and agent profile where they expected the review.
+
+For a missing first review or when the user asks if this chat is wired up,
+offer **Test this session**. Use the live Doctor result only if the current hook
+supplied one. Report its reason, last confirmed step and next action. A
+verified watcher startup ends before review submission and chat delivery.
+
+The test has to be submitted as a user message in the affected chat so it
+exercises the real prompt hook. Provide the copyable prompt from
+`doctor --test-session` or the [troubleshooting guide](https://doomer.ai/docs/troubleshooting).
+The user can also print it with `npx @doomerlabs/doomer@beta doctor --test-session`.
+If the live test prompt was already sent and no result arrived this turn, say
+**No hook receipt for this session**. Ask the user to verify that the Doomer
+UserPromptSubmit hook is loaded and trusted in this profile, then retry the
+same prompt. Older installed hooks may be unable to answer the live test.
+Use local configuration diagnostics below when the live result is missing or
+the user cannot send another message.
 
 Run the native Doomer executable for the affected installation with
 `doctor --no-upload`. Use the executable recorded by that session or its
