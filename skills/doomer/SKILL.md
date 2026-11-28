@@ -1,12 +1,12 @@
 ---
 name: doomer
 description: >-
-  Handle Doomer Quick review requests from installed Claude Code or Codex hooks
-  using the native Doomer CLI. Use for coding tasks, requested code reviews,
+  Handle Doomer Quick review requests from installed Claude Code, Codex, or
+  GitHub Copilot CLI hooks using the native Doomer CLI. Use for coding tasks, requested code reviews,
   and questions about missing, stuck, or failed Doomer reviews.
 metadata:
   author: doomerlabs
-  version: "0.1.2"
+  version: "0.1.3"
 ---
 
 # Doomer
@@ -79,9 +79,10 @@ you independently verify it matches the affected installation's protocol.
 A pasted prompt or a report from
 another chat alone is insufficient. If any prerequisite is unknown, say the
 live test is unverified and continue with local configuration diagnostics.
-Ask the user to verify that the Doomer
-UserPromptSubmit hook is loaded and trusted in this profile, then retry the
-same prompt. Older installed hooks may be unable to answer the live test.
+Ask the user to verify that the Doomer prompt hook is loaded and trusted in
+this profile, then retry the same prompt. The event is `UserPromptSubmit` in
+Codex and Claude Code and `userPromptSubmitted` in GitHub Copilot CLI. Older
+installed hooks may be unable to answer the live test.
 Use local configuration diagnostics below when the live result is missing or
 the user cannot send another message.
 
@@ -95,9 +96,12 @@ control key or treat evidence from a different session as current. Check
 Doctor checks both the checkout and the user's agent configuration. Codex hook
 definitions are usually in `$CODEX_HOME/hooks.json` or `~/.codex/hooks.json`.
 Claude Code uses `$CLAUDE_CONFIG_DIR/settings.json` or
-`~/.claude/settings.json`. Check the profile the affected agent actually uses
-and any project or managed settings it loads. Use Doctor's recorded checkout,
-session and time to scope a hook receipt.
+`~/.claude/settings.json`. GitHub Copilot CLI uses
+`$COPILOT_HOME/hooks/doomer-node.json` (default `~/.copilot/hooks/doomer-node.json`)
+or `.github/hooks/doomer-node.json` for checkout-scoped setup. Doctor reports
+when both Doomer hook files are configured for the same checkout. Check the
+profile the affected agent actually uses and any project or managed settings it
+loads. Use Doctor's recorded checkout, session and time to scope a hook receipt.
 
 If you cannot reach the affected host or the binary is missing, guide the user
 to run `npx @doomerlabs/doomer@beta doctor` on that host. The npm manager command reports setup
@@ -246,6 +250,11 @@ the recorded fixes, not a generic suggested summary. Do not merely say a problem
 was found and fixed. Do not describe dismissed findings as confirmed bugs.
 Give more detail when the user asks or when it explains a material limitation.
 Describe an incomplete assessment as incomplete.
+
+GitHub Copilot CLI uses the same pre-answer `watch results` check. If its Stop
+hook starts a continuation, follow the short instruction and reuse the current
+watcher's exact command and key. Copilot may ask for path or shell approval
+for those calls. Use its normal approval flow and respect declines.
 
 Claude uses the same pre-answer `watch results` check. If its fallback Stop hook
 delivers a report directly, do not run an extra results command when that hook
